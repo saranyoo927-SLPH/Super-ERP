@@ -62,23 +62,32 @@ body {
   background: var(--gray-50);
   color: var(--gray-700);
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: var(--sidebar-w) 1fr;
-  grid-template-rows: var(--header-h) 1fr;
   overflow-x: hidden;
+}
+
+/* ═══ WRAPPER LAYOUT ═══ */
+.app-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+.app-main {
+  flex: 1;
+  margin-left: var(--sidebar-w);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 /* ═══ SIDEBAR ═══ */
 .sidebar {
-  grid-row: 1 / -1;
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: var(--sidebar-w);
   background: linear-gradient(195deg, var(--blue-950) 0%, var(--blue-900) 50%, var(--blue-800) 100%);
   color: var(--white);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  position: sticky;
-  top: 0;
-  height: 100vh;
   z-index: 40;
 }
 .sidebar-brand {
@@ -215,8 +224,7 @@ body {
 /* ═══ MAIN CONTENT ═══ */
 .main {
   padding: 1.75rem 2rem;
-  overflow-y: auto;
-  min-height: calc(100vh - var(--header-h));
+  flex: 1;
 }
 
 /* ═══ STAT CARDS — 3D EFFECT ═══ */
@@ -487,9 +495,8 @@ table.data-table {
 
 /* ═══ RESPONSIVE ═══ */
 @media (max-width: 1024px) {
-  body { grid-template-columns: 1fr; }
   .sidebar {
-    position: fixed; left: -280px;
+    left: -280px;
     transition: left 0.35s cubic-bezier(0.23,1,0.32,1);
     box-shadow: none;
   }
@@ -498,7 +505,8 @@ table.data-table {
     display: none; position: fixed; inset: 0;
     background: rgba(0,0,0,0.4); z-index: 35;
   }
-  .sidebar.open + .sidebar-overlay { display: block; }
+  .sidebar.open ~ .sidebar-overlay { display: block; }
+  .app-main { margin-left: 0; }
   .menu-toggle { display: block; }
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
   .content-grid { grid-template-columns: 1fr; }
@@ -548,6 +556,9 @@ table.data-table {
   </div>
 </aside>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ═══ APP MAIN (Header + Content) ═══ -->
+<div class="app-main">
 
 <!-- ═══ HEADER ═══ -->
 <header class="header">
@@ -720,6 +731,7 @@ table.data-table {
   </div>
 
 </main>
+</div><!-- /app-main -->
 
 <script>
 // Sidebar toggle
