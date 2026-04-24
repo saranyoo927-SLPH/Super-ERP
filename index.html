@@ -4284,15 +4284,9 @@ async function loadPlanFinFromGS() {
             var moLabels = ['ต.ค.68','พ.ย.68','ธ.ค.68','ม.ค.69','ก.พ.69','มี.ค.69'];
             var revPlanMonthly = revPlanYear > 0 ? revPlanYear / 12 : (revPlanTotal / numMonths);
             var expPlanMonthly = expPlanYear > 0 ? expPlanYear / 12 : (expPlanTotal / numMonths);
-            var rpc = [], epc = [];
-            for (var m = 1; m <= numMonths; m++) { rpc.push(+((revPlanMonthly * m) / 1e6).toFixed(2)); epc.push(+((expPlanMonthly * m) / 1e6).toFixed(2)); }
-            var rac = [], eac = [];
-            var revActMonthly = revActTotal / numMonths, expActMonthly = expActTotal / numMonths;
-            for (var m2 = 1; m2 <= numMonths; m2++) { rac.push(+((revActMonthly * m2) / 1e6).toFixed(2)); eac.push(+((expActMonthly * m2) / 1e6).toFixed(2)); }
-            renderPfTrendChart(moLabels, rpc, rac, epc, eac);
 
-            // อัปเดต ERP Overview card PlanFin
-            updatePlanFinOverviewCard({
+            // ★ อัปเดต KPI cards + ERP Overview card ก่อนกราฟ (เพื่อให้ค่าตรงแม้กราฟ crash)
+            var pfInfo = {
                 revActM: +(revActTotal / 1e6).toFixed(2),
                 revPlanMonthM: +(revPlanTotal / 1e6).toFixed(2),
                 revPlanYearM: +(revPlanYear / 1e6).toFixed(2),
@@ -4304,9 +4298,22 @@ async function loadPlanFinFromGS() {
                 lastMonthLabel: moLabels[numMonths - 1],
                 revPct: revPlanTotal > 0 ? +((revActTotal - revPlanTotal) / revPlanTotal * 100).toFixed(2) : 0,
                 expPct: expPlanTotal > 0 ? +((expActTotal - expPlanTotal) / expPlanTotal * 100).toFixed(2) : 0
-            });
+            };
+            updatePlanFinOverviewCard(pfInfo);
+            console.log('✅ PlanFin KPI cards อัปเดตสำเร็จ');
 
-            console.log('✅ PlanFin gviz loaded:', numMonths, 'เดือน');
+            // กราฟ trend (อาจ crash ถ้า canvas ซ้ำ — แต่ KPIs อัปเดตแล้ว)
+            try {
+                var rpc = [], epc = [];
+                for (var m = 1; m <= numMonths; m++) { rpc.push(+((revPlanMonthly * m) / 1e6).toFixed(2)); epc.push(+((expPlanMonthly * m) / 1e6).toFixed(2)); }
+                var rac = [], eac = [];
+                var revActMonthly = revActTotal / numMonths, expActMonthly = expActTotal / numMonths;
+                for (var m2 = 1; m2 <= numMonths; m2++) { rac.push(+((revActMonthly * m2) / 1e6).toFixed(2)); eac.push(+((expActMonthly * m2) / 1e6).toFixed(2)); }
+                renderPfTrendChart(moLabels, rpc, rac, epc, eac);
+                console.log('✅ PlanFin gviz loaded:', numMonths, 'เดือน');
+            } catch (chartErr) {
+                console.log('⚠ PlanFin trend chart error:', chartErr.message);
+            }
         }
     } catch (e) {
         console.log('PlanFin load error (ใช้ hardcoded):', e.message || e);
