@@ -1060,14 +1060,14 @@ body{background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 28%,#f0fdfa 55%,#e8fdf
     </div>
     <div id="pf-ov" class="sub-panel active">
  <div class="nt-kpi-row">
- <div class="nt-kpi c-cyan"><div class="nt-lbl">รายได้สะสม</div><div class="nt-val">182.02 <small>ลบ.</small></div><div class="nt-foot">แผน 186.80 ลบ.</div><span class="nt-pill warn">▼ -2.56%</span></div>
- <div class="nt-kpi c-green"><div class="nt-lbl">ค่าใช้จ่ายสะสม</div><div class="nt-val">170.90 <small>ลบ.</small></div><div class="nt-foot">แผน 177.22 ลบ.</div><span class="nt-pill good">▼ ประหยัด -3.57%</span></div>
- <div class="nt-kpi c-purple"><div class="nt-lbl">กำไรสุทธิ (NI)</div><div class="nt-val">11.13 <small>ลบ.</small></div><div class="nt-foot">แผน 9.58 ลบ.</div><span class="nt-pill good">▲ +16.1% ดีกว่าแผน</span></div>
- <div class="nt-kpi c-amber"><div class="nt-lbl">EBITDA</div><div class="nt-val">12.25 <small>ลบ.</small></div><div class="nt-foot">แผน 0.96 ลบ.</div><span class="nt-pill good">▲ +1,177%</span></div>
- <div class="nt-kpi c-blue"><div class="nt-lbl">ผลประเมิน PlanFin</div><div class="nt-val" style="font-size:18px">ผ่าน 3/5</div><div class="nt-foot">ไม่ผ่าน: ต.ค.+พ.ย.68</div><span class="nt-pill warn">ธ.ค.-ก.พ. ผ่านต่อเนื่อง</span></div>
- <div class="nt-kpi c-amber"><div class="nt-lbl">NI Margin</div><div class="nt-val">6.1 <small>%</small></div><div class="nt-foot">NI 11.13 / รายได้ 182.02</div><span class="nt-pill info">กำไรสุทธิ/รายได้</span></div>
+ <div class="nt-kpi c-cyan"><div class="nt-lbl">รายได้สะสม</div><div class="nt-val" id="pfOvRevVal">182.02 <small>ลบ.</small></div><div class="nt-foot" id="pfOvRevPlan">แผน 186.80 ลบ.</div><span class="nt-pill warn" id="pfOvRevPct">▼ -2.56%</span></div>
+ <div class="nt-kpi c-green"><div class="nt-lbl">ค่าใช้จ่ายสะสม</div><div class="nt-val" id="pfOvExpVal">170.90 <small>ลบ.</small></div><div class="nt-foot" id="pfOvExpPlan">แผน 177.22 ลบ.</div><span class="nt-pill good" id="pfOvExpPct">▼ ประหยัด -3.57%</span></div>
+ <div class="nt-kpi c-purple"><div class="nt-lbl">กำไรสุทธิ (NI)</div><div class="nt-val" id="pfOvNIVal">11.13 <small>ลบ.</small></div><div class="nt-foot" id="pfOvNIPlan">แผน 9.58 ลบ.</div><span class="nt-pill good" id="pfOvNIPct">▲ +16.1% ดีกว่าแผน</span></div>
+ <div class="nt-kpi c-amber"><div class="nt-lbl">EBITDA</div><div class="nt-val" id="pfOvEBITDA">12.25 <small>ลบ.</small></div><div class="nt-foot" id="pfOvEBITDAPlan">แผน 0.96 ลบ.</div><span class="nt-pill good" id="pfOvEBITDAPct">▲ +1,177%</span></div>
+ <div class="nt-kpi c-blue"><div class="nt-lbl">ผลประเมิน PlanFin</div><div class="nt-val" style="font-size:18px" id="pfOvAssess">ผ่าน 3/5</div><div class="nt-foot" id="pfOvAssessFoot">ไม่ผ่าน: ต.ค.+พ.ย.68</div><span class="nt-pill warn" id="pfOvAssessPill">ธ.ค.-ก.พ. ผ่านต่อเนื่อง</span></div>
+ <div class="nt-kpi c-amber"><div class="nt-lbl">NI Margin</div><div class="nt-val" id="pfOvNIMargin">6.1 <small>%</small></div><div class="nt-foot" id="pfOvNIMarginFoot">NI 11.13 / รายได้ 182.02</div><span class="nt-pill info">กำไรสุทธิ/รายได้</span></div>
  </div>
- <div class="nt-insight good"><strong>NI สะสม 11.13 ล้านบาท ดีกว่าแผน 16.1%</strong> ค่าใช้จ่ายประหยัด 6.32 ลบ. | NI รายเดือนสูง 11–23 ลบ. (รวมงบลงทุน)</div>
+ <div class="nt-insight good" id="pfOvInsight"><strong>NI สะสม 11.13 ล้านบาท ดีกว่าแผน 16.1%</strong> ค่าใช้จ่ายประหยัด 6.32 ลบ. | NI รายเดือนสูง 11–23 ลบ. (รวมงบลงทุน)</div>
  <div class="erp-charts-grid">
  <div class="erp-card"><div class="erp-card-head"><div class="erp-card-title">แนวโน้มรายได้ vs ค่าใช้จ่าย (สะสม)</div></div><div class="erp-card-body"><div style="height:260px"><canvas id="pf_trend"></canvas></div></div></div>
  <div class="erp-card"><div class="erp-card-head"><div class="erp-card-title">กำไรสุทธิรายเดือน</div></div><div class="erp-card-body"><div style="height:260px"><canvas id="pf_ni"></canvas></div></div></div>
@@ -4162,7 +4162,7 @@ function renderRiskCharts(){
 }
 // ==================== PLANFIN CHARTS ====================
 const PLANFIN_SHEET_ID = '1BtXlMS0BKnwqcb0R_bx0-4I8vcckvvrrvt399U61I5M';
-const PF_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbywLGBE2v02nuWqk9r2-SGUlsAtzkwu1zgtob0d4SEYiMf3rB6shsL5rt-O1OS5b-Fy/exec'; // ★ ใส่ URL ของ PlanFin GAS Web App หลัง deploy
+const PF_WEBAPP_URL = ''; // ★ ใส่ URL ของ PlanFin GAS Web App หลัง deploy
 
 function renderPlanFinCharts(){
     const mo=['ต.ค.68','พ.ย.68','ธ.ค.68','ม.ค.69','ก.พ.69'];
@@ -4456,6 +4456,67 @@ function updatePlanFinOverviewCard(info) {
     var ab1 = el('erpPfBadge'); if (ab1 && info.assessment) ab1.textContent = info.assessment;
     // Period
     var pr1 = el('erpPfPeriod'); if (pr1) pr1.textContent = info.monthCount + ' เดือน (ต.ค.68–' + (info.lastMonthLabel || '') + ')';
+
+    // ★ อัปเดต KPI cards ใน pf-ov ด้วย (ให้ตรงกับวิเคราะห์รายได้)
+    updatePfOvKPIs(info);
+}
+
+// ★ อัปเดต KPI cards ใน sub-tab ภาพรวม PlanFin (pf-ov)
+function updatePfOvKPIs(info) {
+    if (!info) return;
+    var fmt = function(n) { return n !== null && n !== undefined ? Number(n).toFixed(2) : '-'; };
+    var el = function(id) { return document.getElementById(id); };
+
+    // รายได้สะสม
+    var rv = el('pfOvRevVal'); if (rv) rv.innerHTML = fmt(info.revActM) + ' <small>ลบ.</small>';
+    var rp = el('pfOvRevPlan'); if (rp) rp.textContent = 'แผน ' + fmt(info.revPlanMonthM) + ' ลบ. | ปี ' + fmt(info.revPlanYearM) + ' ลบ.';
+    var rpct = el('pfOvRevPct'); if (rpct) {
+        var rv_pct = info.revPct || 0;
+        rpct.textContent = (rv_pct >= 0 ? '▲ +' : '▼ ') + fmt(rv_pct) + '% vs แผน';
+        rpct.className = 'nt-pill ' + (rv_pct >= -5 ? 'good' : 'warn');
+    }
+
+    // ค่าใช้จ่ายสะสม
+    var ev = el('pfOvExpVal'); if (ev) ev.innerHTML = fmt(info.expActM) + ' <small>ลบ.</small>';
+    var ep = el('pfOvExpPlan'); if (ep) ep.textContent = 'แผน ' + fmt(info.expPlanMonthM) + ' ลบ.';
+    var epct = el('pfOvExpPct'); if (epct) {
+        var ev_pct = info.expPct || 0;
+        epct.textContent = (ev_pct <= 0 ? '▼ ประหยัด ' : '▲ เกิน +') + fmt(ev_pct) + '%';
+        epct.className = 'nt-pill ' + (ev_pct <= 5 ? 'good' : 'bad');
+    }
+
+    // กำไรสุทธิ
+    var ni = el('pfOvNIVal'); if (ni) ni.innerHTML = fmt(info.niM) + ' <small>ลบ.</small>';
+    var nip = el('pfOvNIPlan');
+    var nipct = el('pfOvNIPct');
+    if (nip && info.revPlanMonthM && info.expPlanMonthM) {
+        var niPlan = +(info.revPlanMonthM - info.expPlanMonthM).toFixed(2);
+        nip.textContent = 'แผน ' + niPlan + ' ลบ.';
+        if (nipct && niPlan !== 0) {
+            var niDiffPct = +((info.niM - niPlan) / Math.abs(niPlan) * 100).toFixed(1);
+            nipct.textContent = (niDiffPct >= 0 ? '▲ +' : '▼ ') + niDiffPct + '% vs แผน';
+            nipct.className = 'nt-pill ' + (niDiffPct >= 0 ? 'good' : 'warn');
+        }
+    }
+
+    // EBITDA
+    var eb = el('pfOvEBITDA'); if (eb && info.ebitdaM !== null && info.ebitdaM !== undefined) eb.innerHTML = fmt(info.ebitdaM) + ' <small>ลบ.</small>';
+
+    // NI Margin
+    var nm = el('pfOvNIMargin');
+    if (nm && info.revActM > 0) {
+        var margin = info.niMargin !== null && info.niMargin !== undefined ? info.niMargin : +(info.niM / info.revActM * 100).toFixed(1);
+        nm.innerHTML = margin + ' <small>%</small>';
+        var nmf = el('pfOvNIMarginFoot'); if (nmf) nmf.textContent = 'NI ' + fmt(info.niM) + ' / รายได้ ' + fmt(info.revActM);
+    }
+
+    // Insight
+    var ins = el('pfOvInsight');
+    if (ins && info.niM !== null) {
+        var expSaved = info.expPlanMonthM ? +(info.expPlanMonthM - info.expActM).toFixed(2) : 0;
+        ins.innerHTML = '<strong>NI สะสม ' + fmt(info.niM) + ' ล้านบาท</strong> ค่าใช้จ่าย' + (expSaved >= 0 ? 'ประหยัด ' + fmt(expSaved) : 'เกิน ' + fmt(Math.abs(expSaved))) + ' ลบ.';
+        ins.className = 'nt-insight ' + (info.niM >= 0 ? 'good' : 'warn');
+    }
 }
 // ==================== FINANCE CHARTS ====================
 
