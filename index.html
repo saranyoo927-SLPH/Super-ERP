@@ -1,122 +1,878 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hospital ERP - Executive Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; }
-        .sidebar { background-color: #ffffff; border-right: 1px solid #e2e8f0; }
-        .medical-blue { color: #2563eb; }
-        .bg-medical-blue { background-color: #2563eb; }
-        .stat-card { transition: transform 0.2s; border: none; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); }
-        .stat-card:hover { transform: translateY(-5px); }
-    </style>
-</head>
-<body class="flex min-h-screen">
+<!doctype html>
+<html lang="th" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+*{font-family:'Sarabun', 'DM Sans', sans-serif;} .card-glow{box-shadow:0 0 0 1px rgba(99,102,241,0.05), 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(99,102,241,0.06);}
+.stat-card{transition:transform 0.2s ease, box-shadow 0.2s ease;} .stat-card:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(99,102,241,0.12);}
+.fade-in{animation:fadeIn 0.5s ease forwards;opacity:0;} @keyframes fadeIn{to{opacity:1;}}
+.progress-bar{transition:width 0.8s cubic-bezier(0.4,0,0.2,1);} ::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:#f1f5f9;} ::-webkit-scrollbar-thumb{background:#c7d2fe;border-radius:3px;}
+.tab-active{border-bottom:3px solid #6366f1;color:#4338ca;font-weight:600;} .upload-zone{border:2px dashed #c7d2fe;transition:all 0.3s ease;}
+.upload-zone:hover{border-color:#818cf8;background:#eef2ff;} .upload-zone.dragover{border-color:#6366f1;background:#e0e7ff;}
+.badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:9999px;font-size:0.75rem;font-weight:500;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.5);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(4px);} .modal-overlay.active{display:flex;}
+.modal-box{background:#fff;border-radius:16px;width:95%;max-width:680px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,0.15);animation:modalIn 0.25s ease;}
+@keyframes modalIn{from{opacity:0;transform:scale(0.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-header{padding:20px 24px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;} .modal-header h3{font-size:16px;font-weight:700;color:#1e293b;}
+.modal-close{width:32px;height:32px;border:none;background:#f1f5f9;border-radius:8px;cursor:pointer;font-size:18px;color:#64748b;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.modal-close:hover{background:#e2e8f0;color:#1e293b;} .modal-body{padding:24px;}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;} .detail-item{padding:12px 16px;background:#f8fafc;border-radius:10px;border:1px solid #f1f5f9;}
+.detail-item .label{font-size:11px;color:#94a3b8;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;} .detail-item .value{font-size:15px;font-weight:600;color:#1e293b;}
+.detail-item.full{grid-column:1/-1;} .detail-progress{margin-top:16px;}
+.detail-progress .bar-bg{height:12px;background:#f1f5f9;border-radius:6px;overflow:hidden;}
+.detail-progress .bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#6366f1,#8b5cf6);transition:width 0.5s;} .detail-monthly{margin-top:20px;}
+.detail-monthly table{width:100%;border-collapse:collapse;} .detail-monthly th{padding:8px 10px;font-size:11px;color:#6366f1;font-weight:600;text-align:right;border-bottom:2px solid #f1f5f9;}
+.detail-monthly th:first-child{text-align:left;} .detail-monthly td{padding:8px 10px;font-size:13px;text-align:right;border-bottom:1px solid #f8fafc;}
+.detail-monthly td:first-child{text-align:left;color:#64748b;} .detail-monthly td.has-val{color:#6366f1;font-weight:600;}
+tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2ff !important;}
+.erp-section{display:none;} .erp-section.active{display:block;}
+.erp-stats-row{display:grid;gap:16px;margin-bottom:24px;} .erp-stats-row.col4{grid-template-columns:repeat(4, 1fr);}
+.erp-stats-row.col5{grid-template-columns:repeat(5, 1fr);} .erp-stats-row.col3{grid-template-columns:repeat(3, 1fr);}
+.erp-stat-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;position:relative;overflow:hidden;transition:all 0.3s;}
+.erp-stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;} .erp-stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(99,102,241,0.1);}
+.erp-stat-card .s-icon{font-size:24px;margin-bottom:6px;} .erp-stat-card .s-val{font-family:'Sarabun';font-size:26px;font-weight:700;margin-bottom:2px;}
+.erp-stat-card .s-label{font-size:13px;color:#64748b;} .erp-stat-card .s-sub{font-size:11px;color:#94a3b8;margin-top:4px;}
+.erp-stat-card.blue::before{background:#6366f1}.erp-stat-card.blue .s-val{color:#6366f1} .erp-stat-card.green::before{background:#10b981}.erp-stat-card.green .s-val{color:#10b981}
+.erp-stat-card.purple::before{background:#8b5cf6}.erp-stat-card.purple .s-val{color:#8b5cf6} .erp-stat-card.amber::before{background:#f59e0b}.erp-stat-card.amber .s-val{color:#f59e0b}
+.erp-stat-card.rose::before{background:#f43f5e}.erp-stat-card.rose .s-val{color:#f43f5e} .erp-stat-card.cyan::before{background:#06b6d4}.erp-stat-card.cyan .s-val{color:#06b6d4}
+.erp-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;transition:all 0.3s;} .erp-card:hover{border-color:#c7d2fe;}
+.erp-card .erp-card-body{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent;}
+.erp-card .erp-card-body::-webkit-scrollbar{height:6px;}.erp-card .erp-card-body::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px;}
+.erp-card-head{padding:14px 20px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;}
+.erp-card-title{font-weight:600;font-size:14px;color:#334155;display:flex;align-items:center;gap:8px;} .erp-card-body{padding:20px;}
+.erp-charts-grid{display:grid;grid-template-columns:repeat(2, 1fr);gap:16px;margin-bottom:20px;} .erp-section-head{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.erp-section-head h3{font-weight:700;font-size:18px;color:#1e293b;} .erp-section-head .line{flex:1;height:1px;background:linear-gradient(90deg, #e2e8f0, transparent);}
+.erp-tbl-wrap{overflow-x:auto;} .erp-tbl-wrap table{width:100%;border-collapse:collapse;}
+.erp-tbl-wrap thead{background:#f8fafc;}
+.erp-tbl-wrap th{padding:10px 12px;text-align:left;font-size:11px;font-weight:600;color:#6366f1;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #e2e8f0;white-space:nowrap;}
+.erp-tbl-wrap td{padding:8px 12px;font-size:13px;color:#334155;border-bottom:1px solid #f1f5f9;} .erp-tbl-wrap tr:hover td{background:rgba(99,102,241,0.03);}
+.erp-tbl-wrap .text-right{text-align:right;} .erp-tbl-wrap .text-center{text-align:center;}
+.erp-tbl-wrap .amt{font-weight:500;text-align:right;} .erp-tbl-wrap .amt.blue{color:#6366f1;}
+.erp-tbl-wrap .amt.green{color:#10b981;} .erp-tbl-wrap .amt.purple{color:#8b5cf6;}
+.erp-tbl-wrap .amt.amber{color:#f59e0b;} .erp-tbl-wrap .amt.rose{color:#f43f5e;}
+.erp-tbl-wrap tr.total-row td{background:#f8fafc;font-weight:700;} .erp-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;}
+.erp-badge.pass{background:#ecfdf5;color:#10b981;border:1px solid #a7f3d0;} .erp-badge.fail{background:#fef2f2;color:#f43f5e;border:1px solid #fecaca;}
+.erp-badge.wait{background:#f8fafc;color:#94a3b8;border:1px solid #e2e8f0;} .erp-controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+.erp-controls select, .erp-controls input[type=text]{padding:8px 14px;background:#fff;border:1px solid #e2e8f0;color:#334155;border-radius:8px;font-family:inherit;font-size:13px;}
+.erp-controls select:focus, .erp-controls input:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.1);}
+.erp-prog-bar{height:8px;background:#f1f5f9;border-radius:4px;overflow:hidden;} .erp-prog-fill{height:100%;border-radius:4px;transition:width 0.6s ease;}
+.erp-fund-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;margin-bottom:20px;}
+.erp-fund-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px 12px;text-align:center;transition:all 0.3s;position:relative;overflow:hidden;}
+.erp-fund-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;} .erp-fund-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(99,102,241,0.1);}
+.erp-fund-code{font-size:14px;font-weight:700;margin-bottom:4px;} .erp-fund-name{font-size:11px;color:#94a3b8;margin-bottom:8px;}
+.erp-fund-val{font-size:16px;font-weight:600;color:#1e293b;margin-bottom:2px;} .erp-fund-pct{font-size:11px;color:#94a3b8;}
+.erp-budget-summary{display:grid;grid-template-columns:repeat(3, 1fr);gap:16px;margin-bottom:20px;}
+.erp-budget-big-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;text-align:center;} .erp-budget-big-card .b-icon{font-size:32px;margin-bottom:6px;}
+.erp-budget-big-card .b-val{font-size:28px;font-weight:700;margin-bottom:4px;} .erp-budget-big-card .b-label{font-size:13px;color:#64748b;}
+.erp-budget-big-card .b-sub{font-size:11px;color:#94a3b8;margin-top:4px;} .erp-strat-list{display:grid;gap:8px;}
+.erp-strat-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#f8fafc;border-radius:10px;border-left:4px solid;}
+.erp-strat-item .s-info{display:flex;align-items:center;gap:10px;} .erp-strat-item .s-name{font-weight:600;font-size:13px;}
+.erp-strat-item .s-count{font-size:11px;color:#94a3b8;} .erp-strat-item .s-score{font-size:20px;font-weight:700;}
+.erp-budget-tbl{table-layout:fixed;width:100%;}
+.erp-budget-tbl th{padding:12px 10px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#6366f1;border-bottom:2px solid rgba(99,102,241,0.15);background:rgba(99,102,241,0.03);}
+.erp-budget-tbl td{padding:12px 10px;vertical-align:middle;border-bottom:1px solid #f1f5f9;} .erp-budget-tbl tbody tr:hover td{background:rgba(99,102,241,0.02);}
+.erp-budget-tbl .total-row td{background:#f8fafc;border-top:2px solid #e2e8f0;}
+@media(max-width:900px){
+.erp-charts-grid{grid-template-columns:1fr;} .erp-stats-row.col4,.erp-stats-row.col5{grid-template-columns:repeat(2, 1fr);}
+.erp-budget-summary{grid-template-columns:1fr;} .erp-fund-grid{grid-template-columns:repeat(2, 1fr);}
+} @media(max-width:600px){.erp-stats-row.col4,.erp-stats-row.col5,.erp-stats-row.col3{grid-template-columns:1fr;}.erp-fund-grid{grid-template-columns:1fr;}}
+.ov-label{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px;display:flex;align-items:center;gap:8px}.ov-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#e2e8f0,transparent)}
+.ov-g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px} .ov-g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.ov-sc{background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;transition:all .3s}
+.ov-sc:hover{border-color:#c7d2fe;box-shadow:0 8px 24px rgba(99,102,241,.07);transform:translateY(-2px)} .ov-sc .sh{padding:14px 18px 10px;display:flex;align-items:center;gap:10px}
+.ov-sc .si{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0} .ov-sc .st{font-size:13px;font-weight:700;color:#1e293b}
+.ov-sc .ss{font-size:10px;color:#94a3b8} .ov-sc .sb{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:auto}
+.ov-sc .sd{padding:0 18px 16px} .ov-r{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid #f8fafc}.ov-r:last-child{border-bottom:none}
+.ov-r .rl{font-size:11px;color:#64748b}.ov-r .rv{font-size:13px;font-weight:700}.ov-r .rs{font-size:10px;color:#94a3b8;margin-left:5px}
+.ov-df{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:12px}
+.ov-df.up{background:rgba(16,185,129,.1);color:#10b981}.ov-df.dn{background:rgba(244,63,94,.1);color:#f43f5e}.ov-df.wn{background:rgba(245,158,11,.1);color:#f59e0b}
+.ov-ring{display:inline-flex;align-items:center;justify-content:center;width:68px;height:68px;border-radius:50%;box-shadow:inset 0 0 0 11px #fff}
+.ov-brow{display:flex;align-items:center;gap:8px;margin-bottom:5px} .ov-brow .bl{font-size:10px;color:#64748b;width:52px;text-align:right;flex-shrink:0}
+.ov-brow .bt{flex:1;height:7px;background:#f1f5f9;border-radius:4px;overflow:hidden} .ov-brow .bf{height:100%;border-radius:4px}
+.ov-brow .bv{font-size:10px;font-weight:700;width:38px;text-align:right;flex-shrink:0} @media(max-width:1000px){.ov-g4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.ov-g4,.ov-g2{grid-template-columns:1fr}} .hero-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:1.25rem;margin-bottom:2rem;}
+.hero-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);transition:all 0.3s;}
+.hero-card:hover{box-shadow:0 4px 6px rgba(0,0,0,0.1);transform:translateY(-2px);} .hero-card.featured{background:linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);color:white;}
+.hero-card.metric-card{text-align:center;} .hero-label{font-size:0.875rem;font-weight:500;margin-bottom:0.75rem;opacity:0.9;}
+.hero-value{font-size:2rem;font-weight:700;margin-bottom:0.75rem;line-height:1.2;} .hero-value .unit{font-size:0.875rem;font-weight:400;opacity:0.8;}
+.hero-stats{display:flex;gap:1rem;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.2);} .hero-stat{text-align:center;flex:1;}
+.hero-stat-value{font-size:1.25rem;font-weight:700;} .hero-stat-label{font-size:0.75rem;opacity:0.8;}
+.metric-icon{font-size:2rem;margin-bottom:0.5rem;} .metric-value{font-size:1.75rem;font-weight:700;margin-bottom:0.25rem;}
+.metric-label{font-size:0.875rem;color:#475569;margin-bottom:0.25rem;} .metric-pct{font-size:0.8rem;color:#94a3b8;}
+.section-title{font-size:1.125rem;font-weight:700;color:#0f172a;margin:2rem 0 1.25rem;display:flex;align-items:center;gap:0.5rem;padding-bottom:0.75rem;border-bottom:2px solid #e2e8f0;position:relative;}
+.section-title::after{content:'';position:absolute;bottom:-2px;left:0;width:50px;height:2px;background:#3b82f6;}
+.fund-grid{display:grid !important;grid-template-columns:repeat(6, 1fr);gap:1rem;margin-bottom:1.5rem;}
+.fund-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1.25rem 1rem;text-align:center;position:relative;overflow:hidden;transition:all 0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+.fund-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;} .fund-card:hover{transform:translateY(-3px);box-shadow:0 4px 12px rgba(0,0,0,0.1);}
+.fund-card.op::before{background:#10b981}.fund-card.ip::before{background:#3b82f6}.fund-card.pp::before{background:#8b5cf6}
+.fund-card.cr::before{background:#f43f5e}.fund-card.lgo::before{background:#f59e0b}.fund-card.kd::before{background:#06b6d4}
+.fund-card.ttm::before{background:#14b8a6}.fund-card.rh::before{background:#ec4899}.fund-card.dm::before{background:#f97316}
+.fund-card.ph::before{background:#84cc16}.fund-card.hiv::before{background:#f43f5e}.fund-card.other::before{background:#94a3b8}
+.fund-code{font-size:0.95rem;font-weight:700;color:#3b82f6;margin-bottom:0.25rem;} .fund-name{font-size:0.75rem;color:#94a3b8;margin-bottom:0.5rem;}
+.fund-value{font-size:1.125rem;font-weight:600;color:#0f172a;margin-bottom:0.25rem;} .fund-pct{font-size:0.75rem;color:#94a3b8;}
+.compact-grid{display:grid !important;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:1rem;margin-bottom:1.5rem;}
+.compact-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1.25rem 1rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.04);transition:all 0.25s;position:relative;overflow:hidden;}
+.compact-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:12px 0 0 12px;background:currentColor;opacity:0.6;} .compact-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.08);transform:translateY(-2px);}
+.compact-icon{font-size:1.5rem;margin-bottom:0.5rem;} .compact-value{font-size:1.5rem;font-weight:700;margin-bottom:0.35rem;font-variant-numeric:tabular-nums;}
+.compact-label{font-size:0.82rem;color:#475569;margin-bottom:0.2rem;font-weight:500;} .compact-sub{font-size:0.72rem;color:#94a3b8;}
+.table-card{background:#fff !important;border:1px solid #e2e8f0 !important;border-radius:16px !important;padding:1.5rem !important;box-shadow:0 1px 3px rgba(0,0,0,0.04);margin-bottom:1.5rem !important;overflow:hidden;}
+.table-card .table-wrapper,.table-card>div[style*="overflow"]{overflow-x:auto !important;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent;}
+.table-card .table-wrapper::-webkit-scrollbar{height:6px;}.table-card .table-wrapper::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px;}
+.table-card table{width:100% !important;border-collapse:collapse !important;}
+.table-card:hover{box-shadow:0 4px 6px rgba(0,0,0,0.1);}
+.table-title{font-size:1rem !important;font-weight:600 !important;color:#0f172a !important;margin-bottom:1.25rem !important;display:flex;align-items:center;gap:0.5rem;}
+.table-wrapper{overflow-x:auto;} .table-card table{width:100% !important;border-collapse:collapse !important;}
+.table-card table thead{background:linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.08)) !important;}
+.table-card table th{padding:0.85rem 1rem !important;text-align:left !important;font-size:0.82rem !important;font-weight:600 !important;color:#3b82f6 !important;border-bottom:2px solid #93c5fd !important;text-transform:uppercase;letter-spacing:0.3px;white-space:nowrap;}
+.table-card table td{padding:0.75rem 1rem !important;font-size:0.88rem !important;color:#475569 !important;border-bottom:1px solid #f1f5f9 !important;}
+.table-card table tr:hover td{background:rgba(99,102,241,0.04) !important;} .table-card table tr:last-child td{border-bottom:none !important;}
+.table-card .amount-cell, .table-card .num{font-weight:500 !important;text-align:right !important;color:#0f172a !important;} .table-card .center{text-align:center !important;}
+.billing-row-table table thead{background:linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.08)) !important;}
+.billing-row-table{width:100% !important;border-collapse:collapse !important;table-layout:auto;}
+.billing-row-table thead{background:linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.08)) !important;}
+.billing-row-table th{padding:0.7rem 0.85rem !important;font-size:0.75rem !important;font-weight:700 !important;color:#3b82f6 !important;border-bottom:2px solid #60a5fa !important;text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap;background:#f8fafc !important;}
+.billing-row-table td{padding:0.65rem 0.85rem !important;font-size:0.84rem !important;color:#334155 !important;border-bottom:1px solid #e2e8f0 !important;white-space:nowrap;}
+.billing-row-table tbody tr:nth-child(even) td{background:rgba(241,245,249,0.5) !important;}
+.billing-row-table tbody tr:hover td{background:rgba(59,130,246,0.06) !important;}
+.billing-row-table tr:last-child td{border-bottom:none !important;}
+.billing-row-table tr.total-row td{background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(99,102,241,0.06)) !important;font-weight:700 !important;color:#1e293b !important;border-top:2px solid #3b82f6 !important;font-size:0.88rem !important;}
+.billing-row-table tr.total-row td.num{color:#3b82f6 !important;font-weight:800 !important;}
+.billing-row-table tr.subtotal-row td{background:rgba(16,185,129,0.06) !important;font-weight:600 !important;color:#10b981 !important;}
+.billing-row-table .num{text-align:right !important;font-variant-numeric:tabular-nums !important;font-feature-settings:'tnum' !important;}
+.billing-row-table .center{text-align:center !important;}
 
-    <aside class="sidebar w-64 hidden md:flex flex-col sticky top-0 h-screen">
-        <div class="p-6">
-            <h1 class="text-2xl font-bold bg-medical-blue text-white p-2 rounded-lg text-center">ERP SYSTEM</h1>
-        </div>
-        <nav class="flex-1 px-4 space-y-2">
-            <a href="#" class="block p-3 rounded-lg bg-blue-50 text-blue-700 font-medium">Dashboard</a>
-            <a href="#" class="block p-3 rounded-lg text-gray-600 hover:bg-gray-100">KPI Performance</a>
-            <a href="#" class="block p-3 rounded-lg text-gray-600 hover:bg-gray-100">Budget Plan</a>
-            <a href="#" class="block p-3 rounded-lg text-gray-600 hover:bg-gray-100">Unit Cost</a>
-            <a href="#" class="block p-3 rounded-lg text-gray-600 hover:bg-gray-100">Risk Score</a>
-            <a href="#" class="block p-3 rounded-lg text-gray-600 hover:bg-gray-100">HRD Management</a>
-        </nav>
-        <div class="p-4 text-xs text-gray-400 border-t">Hospital Strategic Dept.</div>
-    </aside>
+/* KTP-Claim / MOPH-Claim — คอลัมน์ "รายการ" ให้ตัดบรรทัดพอดีจอ */
+#nhso-ktp-table td:nth-child(2),
+#nhso-moph-table td:nth-child(2),
+#nhso-ktp-table th:nth-child(2),
+#nhso-moph-table th:nth-child(2){
+  white-space:normal !important;
+  word-break:break-word !important;
+  min-width:200px;
+  max-width:500px;
+  line-height:1.5;
+}
+/* บังคับ KTP/MOPH ไม่ให้มี scroll bar */
+#nhso-ktp-table,#nhso-moph-table{table-layout:fixed !important;width:100% !important;}
+#nhso-ktp-table th:nth-child(1),#nhso-moph-table th:nth-child(1){width:80px;}
+#nhso-ktp-table th:nth-child(3),#nhso-moph-table th:nth-child(3){width:80px;}
+#nhso-ktp-table th:nth-child(4),#nhso-moph-table th:nth-child(4){width:120px;}
 
-    <main class="flex-1 p-6 md:p-10">
-        <header class="flex justify-between items-center mb-10">
-            <div>
-                <h2 class="text-3xl font-semibold text-gray-800">Hospital Strategic Dashboard</h2>
-                <p class="text-gray-500">ยินดีต้อนรับ, ข้อมูลอัปเดตล่าสุดวันนี้</p>
-            </div>
-            <div class="flex items-center space-x-4">
-                <span id="status" class="flex h-3 w-3 bg-green-500 rounded-full"></span>
-                <span class="text-sm font-medium text-gray-600">Live Data</span>
-            </div>
-        </header>
+/* ตาราง billing ในทุก table-card / erp-card — บังคับ width 100% */
+.table-card .billing-row-table,
+.erp-card .billing-row-table,
+.erp-card-body .billing-row-table,
+#tab-erp-billing .billing-row-table{
+  width:100% !important;min-width:100% !important;
+}
+/* table-card ที่มี billing-row-table ต้อง overflow-x auto */
+.table-card{overflow:visible !important;}
+.table-card>.billing-row-table,
+.table-card>div>.billing-row-table{width:100% !important;}
+.erp-card-body{overflow-x:auto !important;}
+/* บังคับทุกตารางใน billing section ขยายเต็มความกว้าง */
+#tab-erp-billing table{width:100% !important;border-collapse:collapse !important;}
+#tab-erp-billing .erp-card-body table{min-width:100% !important;}
+#tab-erp-billing .table-card table{min-width:100% !important;} .service-grid{display:grid !important;grid-template-columns:repeat(2, 1fr);gap:1.5rem;margin-bottom:2rem;}
+.service-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:1.75rem;box-shadow:0 1px 3px rgba(0,0,0,0.06);transition:all 0.3s;}
+.service-card:hover{box-shadow:0 4px 6px rgba(0,0,0,0.1);transform:translateY(-2px);}
+.service-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid #f1f5f9;}
+.service-title{font-size:1.125rem;font-weight:600;color:#0f172a;} .service-total{font-size:1.5rem;font-weight:700;color:#3b82f6;}
+.service-stats{display:grid !important;grid-template-columns:repeat(3, 1fr);gap:1rem;}
+.service-stat{text-align:center;padding:1rem;background:rgba(99,102,241,0.04);border:1px solid #f1f5f9;border-radius:12px;transition:all 0.3s;}
+.service-stat:hover{background:rgba(99,102,241,0.08);border-color:#c7d2fe;} .service-stat-value{font-size:1.25rem;font-weight:600;color:#6366f1;margin-bottom:0.25rem;}
+.service-stat-label{font-size:0.75rem;color:#64748b;} .billing-hero{display:grid !important;grid-template-columns:repeat(4, 1fr);gap:1.25rem;margin-bottom:1.5rem;}
+.billing-kpi{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:1.5rem 1.25rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.06);transition:all 0.3s;position:relative;overflow:hidden;}
+.billing-kpi::after{content:"";position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--kpi-color, #6366f1);border-radius:0 0 14px 14px;}
+.billing-kpi:hover{box-shadow:0 4px 12px rgba(0,0,0,0.1);transform:translateY(-3px);} .billing-kpi-icon{font-size:1.8rem;margin-bottom:0.5rem;}
+.billing-kpi-value{font-size:1.6rem;font-weight:700;color:var(--kpi-color, #6366f1);margin-bottom:0.25rem;} .billing-kpi-label{font-size:0.8rem;color:#475569;margin-bottom:0.2rem;font-weight:500;}
+.billing-kpi-sub{font-size:0.72rem;color:#94a3b8;}
+.pill{display:inline-block !important;padding:0.2rem 0.6rem !important;border-radius:20px !important;font-size:0.72rem !important;font-weight:600 !important;}
+.pill-green{background:rgba(16,185,129,0.12) !important;color:#10b981 !important;} .pill-blue{background:rgba(99,102,241,0.12) !important;color:#6366f1 !important;}
+.pill-red{background:rgba(244,63,94,0.12) !important;color:#f43f5e !important;} .pill-gray{background:rgba(148,163,184,0.15) !important;color:#94a3b8 !important;}
+.pill-amber{background:rgba(245,158,11,0.12) !important;color:#f59e0b !important;} .color-emerald{color:#10b981 !important;}
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div class="stat-card bg-white p-6 rounded-2xl">
-                <p class="text-sm text-gray-500 mb-1">งบประมาณคงเหลือ</p>
-                <h3 id="budget-value" class="text-2xl font-bold text-gray-800">฿ 0.00</h3>
-                <div class="mt-2 text-xs text-blue-500 font-semibold">+2.5% vs Last month</div>
-            </div>
-            <div class="stat-card bg-white p-6 rounded-2xl">
-                <p class="text-sm text-gray-500 mb-1">KPI ผ่านเกณฑ์</p>
-                <h3 id="kpi-count" class="text-2xl font-bold text-gray-800">0 / 69</h3>
-                <div class="mt-2 text-xs text-green-500 font-semibold">Good Standing</div>
-            </div>
-            <div class="stat-card bg-white p-6 rounded-2xl">
-                <p class="text-sm text-gray-500 mb-1">Risk Score (เฉลี่ย)</p>
-                <h3 id="risk-avg" class="text-2xl font-bold text-gray-800">0.0</h3>
-                <div class="mt-2 text-xs text-orange-500 font-semibold">Monitoring Required</div>
-            </div>
-            <div class="stat-card bg-white p-6 rounded-2xl">
-                <p class="text-sm text-gray-500 mb-1">HRD Development</p>
-                <h3 id="hrd-percent" class="text-2xl font-bold text-gray-800">0%</h3>
-                <div class="mt-2 text-xs text-purple-500 font-semibold">Training hours</div>
-            </div>
-        </div>
+/* PlanFin Fund Cards */
+.pf-fund-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1rem 1.1rem;position:relative;overflow:hidden;transition:box-shadow 0.2s,transform 0.2s;}
+.pf-fund-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.08);transform:translateY(-2px);}
+.pf-fund-card .pf-fc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem;}
+.pf-fund-card .pf-fc-name{font-weight:600;font-size:0.82rem;color:#334155;line-height:1.3;max-width:70%;}
+.pf-fund-card .pf-fc-pct{font-weight:700;font-size:0.85rem;padding:0.15rem 0.5rem;border-radius:6px;white-space:nowrap;}
+.pf-fc-pct.up{background:rgba(16,185,129,0.1);color:#059669;}
+.pf-fc-pct.down{background:rgba(239,68,68,0.1);color:#dc2626;}
+.pf-fc-pct.warn{background:rgba(245,158,11,0.1);color:#d97706;}
+.pf-fund-card .pf-fc-vals{display:flex;gap:1.5rem;margin-bottom:0.6rem;font-size:0.78rem;color:#64748b;}
+.pf-fc-vals strong{color:#1e293b;font-size:0.92rem;}
+.pf-fund-card .pf-fc-bar{height:8px;border-radius:4px;background:#f1f5f9;overflow:hidden;position:relative;}
+.pf-fc-bar-fill{height:100%;border-radius:4px;transition:width 0.8s ease;}
+.pf-fund-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:12px 0 0 12px;}
+.color-blue{color:#3b82f6 !important;} .color-purple{color:#8b5cf6 !important;}
+.color-rose{color:#f43f5e !important;} .color-amber{color:#f59e0b !important;}
+.color-cyan{color:#06b6d4 !important;} .color-pink{color:#ec4899 !important;}
+.color-muted{color:#94a3b8 !important;} .mb-1{margin-bottom:0.5rem}.mb-2{margin-bottom:1rem}.mb-3{margin-bottom:1.5rem}.mb-4{margin-bottom:2rem}
+.footer{text-align:center;padding:2rem 1rem;color:#94a3b8;font-size:0.8rem;border-top:1px solid #e2e8f0;margin-top:2rem;}
+@media(max-width:1200px){.fund-grid{grid-template-columns:repeat(3,1fr) !important}.hero-grid{grid-template-columns:repeat(2,1fr) !important}}
+@media(max-width:900px){.compact-grid,.billing-hero{grid-template-columns:repeat(2,1fr) !important}.service-grid{grid-template-columns:1fr !important}.service-stats{grid-template-columns:repeat(2,1fr) !important}.hero-grid{grid-template-columns:1fr !important}}
+@media(max-width:600px){.compact-grid,.billing-hero{grid-template-columns:1fr !important}.fund-grid{grid-template-columns:repeat(2,1fr) !important}}
+.sub-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+.sub-nav-btn{padding:8px 16px;border:1px solid #e2e8f0;background:#fff;border-radius:8px;font-size:12px;font-weight:500;color:#64748b;cursor:pointer;transition:all 0.2s;font-family:inherit;}
+.sub-nav-btn:hover{border-color:#c7d2fe;color:#6366f1;background:#eef2ff;} .sub-nav-btn.active{background:#6366f1;color:#fff;border-color:#6366f1;font-weight:600;}
+.sub-panel{display:none;animation:fadeIn 0.3s ease;} .sub-panel.active{display:block;}
+.nt-kpi-row{display:grid;grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));gap:12px;margin-bottom:20px;}
+.nt-kpi{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;position:relative;overflow:hidden;transition:all 0.3s;}
+.nt-kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;} .nt-kpi:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(99,102,241,0.1);}
+.nt-kpi.c-blue::before{background:#6366f1}.nt-kpi.c-blue .nt-val{color:#6366f1} .nt-kpi.c-green::before{background:#10b981}.nt-kpi.c-green .nt-val{color:#10b981}
+.nt-kpi.c-amber::before{background:#f59e0b}.nt-kpi.c-amber .nt-val{color:#f59e0b} .nt-kpi.c-red::before{background:#f43f5e}.nt-kpi.c-red .nt-val{color:#f43f5e}
+.nt-kpi.c-cyan::before{background:#06b6d4}.nt-kpi.c-cyan .nt-val{color:#06b6d4} .nt-kpi.c-purple::before{background:#8b5cf6}.nt-kpi.c-purple .nt-val{color:#8b5cf6}
+.nt-kpi.c-orange::before{background:#f97316}.nt-kpi.c-orange .nt-val{color:#f97316}
+.nt-lbl{font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;}
+.nt-val{font-size:24px;font-weight:700;color:#1e293b;font-family:'Sarabun', sans-serif;line-height:1.1;} .nt-val small{font-size:11px;font-weight:400;color:#94a3b8;}
+.nt-foot{font-size:10px;color:#94a3b8;margin-top:4px;} .nt-pill{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-top:6px;}
+.nt-pill.good{background:rgba(16,185,129,0.1);color:#10b981;} .nt-pill.warn{background:rgba(245,158,11,0.1);color:#f59e0b;}
+.nt-pill.bad{background:rgba(244,63,94,0.1);color:#f43f5e;} .nt-pill.info{background:rgba(99,102,241,0.1);color:#6366f1;}
+.nt-pill.gray{background:rgba(148,163,184,0.1);color:#94a3b8;} .nt-insight{border-radius:8px;padding:12px 16px;font-size:12px;line-height:1.7;margin-bottom:16px;border:1px solid;position:relative;}
+.nt-insight::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
+.nt-insight.warn{background:rgba(245,158,11,0.06);border-color:rgba(245,158,11,0.2);color:#92400e;} .nt-insight.warn::before{background:#f59e0b;}
+.nt-insight.good{background:rgba(16,185,129,0.06);border-color:rgba(16,185,129,0.2);color:#065f46;} .nt-insight.good::before{background:#10b981;}
+.nt-insight.info{background:rgba(99,102,241,0.06);border-color:rgba(99,102,241,0.2);color:#3730a3;} .nt-insight.info::before{background:#6366f1;}
+.nt-insight.danger{background:rgba(244,63,94,0.06);border-color:rgba(244,63,94,0.2);color:#9f1239;} .nt-insight.danger::before{background:#f43f5e;}
+.nt-insight strong{font-weight:700;color:#1e293b;}
+.nt-grade{display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(245,158,11,0.08);border:2px solid rgba(245,158,11,0.25);border-radius:12px;padding:20px;text-align:center;}
+.nt-grade .letter{font-size:56px;font-weight:800;color:#f59e0b;line-height:1;} .nt-grade .label{font-size:16px;font-weight:600;color:#92400e;margin-top:6px;}
+.nt-grade .score{font-size:13px;color:#64748b;margin-top:4px;} .nt-score-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.nt-score-lbl{width:180px;font-size:11px;color:#64748b;text-align:right;flex-shrink:0;} .nt-score-lbl b{color:#1e293b;}
+.nt-score-track{flex:1;height:24px;background:#f1f5f9;border-radius:6px;overflow:hidden;}
+.nt-score-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 8px;font-size:10px;font-weight:700;color:#fff;transition:width 0.8s ease;}
+.nt-score-fill.full{background:linear-gradient(90deg, #10b981, #34d399);} .nt-score-fill.part{background:linear-gradient(90deg, #f59e0b, #fbbf24);}
+.nt-score-fill.zero{background:rgba(244,63,94,0.5);min-width:35px;} .nt-score-max{font-size:10px;color:#94a3b8;width:35px;text-align:right;}
+.nt-rs{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700;}
+.nt-rs::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;} .nt-rs.r1{background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.2);}
+.nt-rs.r2{background:rgba(132,204,22,0.1);color:#84cc16;border:1px solid rgba(132,204,22,0.2);} .nt-rs.r3{background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.2);}
+.nt-rs.r4{background:rgba(249,115,22,0.1);color:#f97316;border:1px solid rgba(249,115,22,0.2);} .nt-rs.r5{background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);}
+.nt-rs.r6{background:rgba(124,58,237,0.1);color:#7c3aed;border:1px solid rgba(124,58,237,0.2);}
+.nt-pf{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;}
+.nt-pf::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;} .nt-pf.pass{background:rgba(16,185,129,0.1);color:#10b981;}
+.nt-pf.fail{background:rgba(244,63,94,0.1);color:#f43f5e;} .nt-assess-row{display:grid;grid-template-columns:repeat(5, 1fr);gap:10px;margin-bottom:20px;}
+.nt-assess-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 10px;text-align:center;position:relative;overflow:hidden;}
+.nt-assess-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;} .nt-assess-card.pass::before{background:#10b981;}
+.nt-assess-card.fail::before{background:#f43f5e;} .nt-assess-card .am{font-size:11px;color:#64748b;font-weight:500;}
+.nt-assess-card .ast{font-size:16px;font-weight:800;margin:6px 0 4px;} .nt-assess-card.pass .ast{color:#10b981;}
+.nt-assess-card.fail .ast{color:#f43f5e;} .nt-assess-card .apct{font-size:9px;color:#94a3b8;}
+.nt-bm-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;} .nt-bm-lbl{width:140px;font-size:11px;color:#64748b;text-align:right;flex-shrink:0;}
+.nt-bm-lbl b{color:#1e293b;} .nt-bm-lbl.sel b{color:#6366f1;}
+.nt-bm-track{flex:1;height:24px;background:#f1f5f9;border-radius:6px;overflow:visible;position:relative;}
+.nt-bm-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 8px;font-size:10px;font-weight:600;color:#fff;transition:width 0.8s ease;}
+.nt-bm-bench{position:absolute;top:-3px;bottom:-3px;width:2px;background:#f59e0b;border-radius:2px;z-index:3;}
+@media(max-width:900px){
+.nt-kpi-row{grid-template-columns:repeat(2, 1fr);} .nt-assess-row{grid-template-columns:repeat(3, 1fr);}
+}
+@media(max-width:600px){
+.nt-kpi-row{grid-template-columns:1fr;} .nt-assess-row{grid-template-columns:repeat(2, 1fr);}
+}
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h4 class="font-bold text-gray-700 mb-4">การเรียกเก็บและแผนเงินบำรุง</h4>
-                <canvas id="mainChart" height="250"></canvas>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h4 class="font-bold text-gray-700 mb-4">สัดส่วน Unit Cost รายแผนก</h4>
-                <canvas id="pieChart" height="250"></canvas>
-            </div>
-        </div>
-    </main>
+/* ===== AI ANALYSIS & SETTINGS ===== */
+.ai-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;text-decoration:none;}
+.ai-btn-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;box-shadow:0 2px 8px rgba(99,102,241,0.3);}
+.ai-btn-primary:hover{box-shadow:0 4px 16px rgba(99,102,241,0.45);transform:translateY(-1px);}
+.ai-btn-secondary{background:#f8fafc;color:#475569;border:1px solid #e2e8f0;}
+.ai-btn-secondary:hover{background:#eef2ff;border-color:#c7d2fe;color:#6366f1;}
+.ai-btn-icon{width:36px;height:36px;padding:0;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;}
+.ai-modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.ai-modal-overlay.active{display:flex;}
+.ai-modal-box{background:#fff;border-radius:18px;width:95%;max-height:90vh;overflow-y:auto;box-shadow:0 30px 60px rgba(0,0,0,0.18);animation:aiModalIn 0.25s cubic-bezier(0.34,1.56,0.64,1);}
+.ai-modal-box.settings-box{max-width:520px;}
+.ai-modal-box.result-box{max-width:860px;}
+@keyframes aiModalIn{from{opacity:0;transform:scale(0.9) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.ai-modal-head{padding:18px 24px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1;border-radius:18px 18px 0 0;}
+.ai-modal-head h3{font-size:16px;font-weight:700;color:#1e293b;display:flex;align-items:center;gap:8px;}
+.ai-modal-close{width:32px;height:32px;border:none;background:#f1f5f9;border-radius:8px;cursor:pointer;font-size:16px;color:#64748b;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.ai-modal-close:hover{background:#fee2e2;color:#f43f5e;}
+.ai-modal-body{padding:24px;}
+.ai-form-group{margin-bottom:18px;}
+.ai-label{font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;display:block;letter-spacing:0.02em;}
+.ai-input{width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-family:inherit;font-size:13px;color:#334155;background:#fff;transition:all 0.2s;box-sizing:border-box;}
+.ai-input:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.1);}
+.ai-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;cursor:pointer;}
+.ai-section-hd{font-size:12px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:0.06em;padding-bottom:8px;border-bottom:2px solid #eef2ff;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.exec-summary-box{background:linear-gradient(135deg,#f0f4ff 0%,#fdf4ff 100%);border:1px solid #c7d2fe;border-radius:14px;padding:20px;margin-bottom:20px;position:relative;overflow:hidden;}
+.exec-summary-box::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;background:radial-gradient(circle,rgba(99,102,241,0.12),transparent);border-radius:50%;}
+.exec-summary-title{font-size:15px;font-weight:700;color:#1e293b;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.exec-status-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;}
+.anomaly-item{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;margin-bottom:10px;border-left:4px solid;transition:box-shadow 0.2s;}
+.anomaly-item:hover{box-shadow:0 4px 12px rgba(0,0,0,0.07);}
+.anomaly-item.high{border-left-color:#f43f5e;}
+.anomaly-item.medium{border-left-color:#f59e0b;}
+.anomaly-item.low{border-left-color:#10b981;}
+.anomaly-item.info{border-left-color:#6366f1;}
+.anomaly-severity{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;}
+.anomaly-severity.high{background:rgba(244,63,94,0.1);color:#e11d48;}
+.anomaly-severity.medium{background:rgba(245,158,11,0.1);color:#d97706;}
+.anomaly-severity.low{background:rgba(16,185,129,0.1);color:#059669;}
+.anomaly-severity.info{background:rgba(99,102,241,0.1);color:#4f46e5;}
+.ai-spinner{width:48px;height:48px;border:4px solid #e2e8f0;border-top-color:#6366f1;border-radius:50%;animation:aiSpin 0.8s linear infinite;}
+@keyframes aiSpin{to{transform:rotate(360deg)}}
+.ai-loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 20px;gap:16px;}
+.ai-error-box{background:rgba(244,63,94,0.05);border:1px solid rgba(244,63,94,0.2);border-radius:12px;padding:18px;color:#9f1239;font-size:13px;line-height:1.7;}
+.model-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:rgba(99,102,241,0.08);color:#4f46e5;border-radius:6px;font-size:10px;font-weight:700;border:1px solid rgba(99,102,241,0.15);}
+.test-connection-result{padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;display:none;line-height:1.6;}
+.test-connection-result.ok{background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);color:#065f46;}
+.test-connection-result.err{background:rgba(244,63,94,0.07);border:1px solid rgba(244,63,94,0.2);color:#9f1239;}
+.ai-key-wrap{position:relative;}
+.ai-key-wrap input{padding-right:40px;}
+.ai-key-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:4px;line-height:1;font-size:16px;}
+.ai-key-toggle:hover{color:#6366f1;}
+.rec-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9;align-items:flex-start;}
+.rec-item:last-child{border-bottom:none;}
+.rec-num{min-width:22px;height:22px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px;}
+.ai-toast{position:fixed;bottom:24px;right:24px;background:#1e293b;color:#fff;padding:10px 18px;border-radius:12px;font-size:13px;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.2);animation:aiToastIn 0.3s ease;}
+@keyframes aiToastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.header-divider{width:1px;height:28px;background:rgba(99,102,241,0.2);margin:0 4px;}
 
-    <script>
-        // Setup Chart.js with Pastel Colors
-        const ctx = document.getElementById('mainChart').getContext('2d');
-        const mainChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-                datasets: [{
-                    label: 'การเรียกเก็บ',
-                    data: [12, 19, 15, 25, 22],
-                    backgroundColor: 'rgba(37, 99, 235, 0.2)',
-                    borderColor: '#2563eb',
-                    borderWidth: 2,
-                    borderRadius: 8
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    tooltip: { backgroundColor: '#1e293b', padding: 12, bodyFont: { family: 'Sarabun' } }
-                }
-            }
-        });
+/* ============================================================
+   VIBRANT DASHBOARD THEME
+   ============================================================ */
 
-        // ฟังก์ชันดึงข้อมูลจาก GAS (ตัวอย่างดึงข้อมูลเรียกเก็บ)
-        function loadData() {
-            const url = 'YOUR_GAS_URL_HERE'; // นำ URL จากข้อ 1 มาใส่
-            fetch(url)
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('budget-value').innerText = data.totalBudget;
-                    // Update Charts...
-                });
-        }
-    </script>
-</body>
-</html>
+/* Page background — subtle animated gradient */
+body{
+  background:linear-gradient(135deg,#eef2ff 0%,#f5f0ff 25%,#fdf0fb 50%,#f0fdf9 75%,#eff6ff 100%) !important;
+  background-attachment:fixed !important;
+  min-height:100vh;
+}
+
+/* Floating glow blobs (decorative) */
+#app::before{
+  content:'';position:fixed;top:-15%;left:-8%;width:55%;height:55%;
+  background:radial-gradient(ellipse,rgba(99,102,241,0.07) 0%,transparent 68%);
+  pointer-events:none;z-index:0;
+  animation:vBlob1 18s ease-in-out infinite alternate;
+}
+#app::after{
+  content:'';position:fixed;bottom:-8%;right:-4%;width:48%;height:48%;
+  background:radial-gradient(ellipse,rgba(167,139,250,0.06) 0%,transparent 68%);
+  pointer-events:none;z-index:0;
+  animation:vBlob2 22s ease-in-out infinite alternate-reverse;
+}
+@keyframes vBlob1{0%{transform:translate(0,0)}100%{transform:translate(25px,18px)}}
+@keyframes vBlob2{0%{transform:translate(0,0)}100%{transform:translate(-20px,-15px)}}
+#content,#tabBar,#header{position:relative;z-index:1;}
+
+/* ── Header glassmorphism ─────────────────────────────── */
+#header{
+  background:rgba(255,255,255,0.88) !important;
+  backdrop-filter:blur(22px) !important;
+  -webkit-backdrop-filter:blur(22px) !important;
+  border-bottom:1px solid rgba(99,102,241,0.13) !important;
+  box-shadow:0 2px 32px rgba(99,102,241,0.09),0 1px 0 rgba(255,255,255,0.9) !important;
+}
+
+/* Logo icon gradient + glow */
+#header .bg-indigo-600,
+#header [class*="bg-indigo-600"]{
+  background:linear-gradient(135deg,#6366f1,#8b5cf6) !important;
+  box-shadow:0 4px 14px rgba(99,102,241,0.38) !important;
+}
+
+/* Title gradient */
+#mainTitle{
+  color:#14532d !important;
+  -webkit-text-fill-color:#14532d !important;
+  background:none !important;
+  background-clip:unset !important;
+  font-weight:800 !important;
+  text-shadow:0 1px 2px rgba(0,0,0,0.06);
+}
+
+/* Upload button */
+#uploadBtn{
+  background:linear-gradient(135deg,#6366f1,#8b5cf6) !important;
+  box-shadow:0 4px 14px rgba(99,102,241,0.32) !important;
+  border-radius:12px !important;transition:all 0.2s !important;
+}
+#uploadBtn:hover{
+  box-shadow:0 6px 22px rgba(99,102,241,0.45) !important;
+  transform:translateY(-1px);
+}
+
+/* ── Tab bar — vibrant pill style ────────────────────── */
+#tabBar{
+  background:linear-gradient(to bottom,#ffffff 0%,#f0f0ff 100%) !important;
+  border-bottom:2px solid rgba(99,102,241,0.14) !important;
+  backdrop-filter:none !important;
+  box-shadow:0 4px 20px rgba(99,102,241,0.08) !important;
+  padding:0 !important;
+  overflow:visible !important;
+}
+.tab-pill-track{
+  display:flex;align-items:center;gap:5px;
+  padding:10px 0 11px;overflow-x:auto;
+  scrollbar-width:none;-ms-overflow-style:none;
+}
+.tab-pill-track::-webkit-scrollbar{display:none;}
+.tab-btn{
+  display:inline-flex !important;align-items:center !important;gap:5px !important;
+  padding:7px 15px !important;border-radius:24px !important;
+  font-size:12.5px !important;font-weight:600 !important;
+  color:#64748b !important;background:rgba(99,102,241,0.05) !important;
+  border:1.5px solid rgba(99,102,241,0.12) !important;
+  white-space:nowrap;cursor:pointer;outline:none;
+  transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1) !important;
+  line-height:1.3 !important;
+}
+.tab-btn:hover{transform:translateY(-2px) !important;}
+/* Active states — unique gradient per tab */
+[data-tab="erp-overview"].tab-active{background:linear-gradient(135deg,#6366f1,#8b5cf6) !important;color:#fff !important;border-color:transparent !important;box-shadow:0 6px 20px rgba(99,102,241,0.42),0 2px 6px rgba(99,102,241,0.18) !important;transform:translateY(-2px) !important;}
+[data-tab="erp-billing"].tab-active {background:linear-gradient(135deg,#0ea5e9,#3b82f6) !important;color:#fff !important;border-color:transparent !important;box-shadow:0 6px 20px rgba(14,165,233,0.42) !important;transform:translateY(-2px) !important;}
+[data-tab="erp-kpi"].tab-active     {background:linear-gradient(135deg,#8b5cf6,#a855f7) !important;color:#fff !important;border-color:transparent !important;box-shadow:0 6px 20px rgba(139,92,246,0.42) !important;transform:translateY(-2px) !important;}
+[data-tab="overview"].tab-active    {background:linear-gradient(135deg,#10b981,#059669) !important;color:#fff !important;border-color:transparent !important;box-shadow:0 6px 20px rgba(16,185,129,0.42) !important;transform:translateY(-2px) !important;}
+[data-tab="tps-score"].tab-active   {background:linear-gradient(135deg,#f59e0b,#f97316) !important;color:#fff !important;border-color:transparent !important;box-shadow:0 6px 20px rgba(245,158,11,0.42) !important;transform:translateY(-2px) !important;}
+[data-tab="risk-score"].tab-active  {background:linear-gradient(135deg,#f43f5e,#e11d48) !important;color:#fff !important;border-color:transparent !important;box-shadow:0 6px 20px rgba(244,63,94,0.42) !important;transform:translateY(-2px) !important;}
+[data-tab="planfin"].tab-active     {background:linear-gradient(135deg,#06b6d4,#0284c7) !important;color:#fff !important;border-color:transparent !important;box-shadow:0 6px 20px rgba(6,182,212,0.42) !important;transform:translateY(-2px) !important;}
+[data-tab="finance"].tab-active     {background:linear-gradient(135deg,#14b8a6,#0d9488) !important;color:#fff !important;border-color:transparent !important;box-shadow:0 6px 20px rgba(20,184,166,0.42) !important;transform:translateY(-2px) !important;}
+[data-tab="unitcost"].tab-active    {background:linear-gradient(135deg,#64748b,#334155) !important;color:#fff !important;border-color:transparent !important;box-shadow:0 6px 20px rgba(71,85,105,0.42) !important;transform:translateY(-2px) !important;}
+/* Hover color hints per tab */
+[data-tab="erp-overview"]:hover:not(.tab-active){color:#6366f1 !important;border-color:rgba(99,102,241,0.3) !important;background:rgba(99,102,241,0.08) !important;box-shadow:0 3px 10px rgba(99,102,241,0.15) !important;}
+[data-tab="erp-billing"]:hover:not(.tab-active) {color:#0ea5e9 !important;border-color:rgba(14,165,233,0.3) !important;background:rgba(14,165,233,0.08) !important;box-shadow:0 3px 10px rgba(14,165,233,0.15) !important;}
+[data-tab="erp-kpi"]:hover:not(.tab-active)     {color:#8b5cf6 !important;border-color:rgba(139,92,246,0.3) !important;background:rgba(139,92,246,0.08) !important;box-shadow:0 3px 10px rgba(139,92,246,0.15) !important;}
+[data-tab="overview"]:hover:not(.tab-active)    {color:#10b981 !important;border-color:rgba(16,185,129,0.3) !important;background:rgba(16,185,129,0.08) !important;box-shadow:0 3px 10px rgba(16,185,129,0.15) !important;}
+[data-tab="tps-score"]:hover:not(.tab-active)   {color:#f59e0b !important;border-color:rgba(245,158,11,0.3) !important;background:rgba(245,158,11,0.08) !important;box-shadow:0 3px 10px rgba(245,158,11,0.15) !important;}
+[data-tab="risk-score"]:hover:not(.tab-active)  {color:#f43f5e !important;border-color:rgba(244,63,94,0.3) !important;background:rgba(244,63,94,0.08) !important;box-shadow:0 3px 10px rgba(244,63,94,0.15) !important;}
+[data-tab="planfin"]:hover:not(.tab-active)     {color:#06b6d4 !important;border-color:rgba(6,182,212,0.3) !important;background:rgba(6,182,212,0.08) !important;box-shadow:0 3px 10px rgba(6,182,212,0.15) !important;}
+[data-tab="finance"]:hover:not(.tab-active)     {color:#14b8a6 !important;border-color:rgba(20,184,166,0.3) !important;background:rgba(20,184,166,0.08) !important;box-shadow:0 3px 10px rgba(20,184,166,0.15) !important;}
+[data-tab="unitcost"]:hover:not(.tab-active)    {color:#475569 !important;border-color:rgba(71,85,105,0.3) !important;background:rgba(71,85,105,0.08) !important;box-shadow:0 3px 10px rgba(71,85,105,0.15) !important;}
+
+/* ── Stat cards (budget overview) ─────────────────────── */
+.stat-card{
+  background:linear-gradient(145deg,#fff 0%,#f8f7ff 100%) !important;
+  border:1px solid rgba(99,102,241,0.1) !important;
+  box-shadow:0 2px 12px rgba(99,102,241,0.07),0 1px 3px rgba(0,0,0,0.04) !important;
+  position:relative;overflow:hidden;
+}
+.stat-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,#6366f1,#8b5cf6,#a78bfa);
+  border-radius:12px 12px 0 0;
+}
+.stat-card:hover{
+  box-shadow:0 10px 36px rgba(99,102,241,0.18) !important;
+  transform:translateY(-3px) !important;
+}
+
+/* ── ERP Stat cards ───────────────────────────────────── */
+.erp-stat-card{
+  box-shadow:0 2px 14px rgba(0,0,0,0.06) !important;
+  border:1px solid rgba(255,255,255,0.9) !important;
+}
+.erp-stat-card:hover{
+  box-shadow:0 8px 28px rgba(0,0,0,0.1) !important;
+  transform:translateY(-2px) !important;
+}
+.erp-stat-card.blue{background:linear-gradient(145deg,#fff 55%,#eef2ff) !important;}
+.erp-stat-card.green{background:linear-gradient(145deg,#fff 55%,#ecfdf5) !important;}
+.erp-stat-card.purple{background:linear-gradient(145deg,#fff 55%,#f5f3ff) !important;}
+.erp-stat-card.amber{background:linear-gradient(145deg,#fff 55%,#fffbeb) !important;}
+.erp-stat-card.rose{background:linear-gradient(145deg,#fff 55%,#fff1f2) !important;}
+.erp-stat-card.cyan{background:linear-gradient(145deg,#fff 55%,#ecfeff) !important;}
+
+/* ── KPI cards (nt-kpi) ───────────────────────────────── */
+.nt-kpi{
+  background:linear-gradient(145deg,#fff,#fafbff) !important;
+  border:1px solid rgba(99,102,241,0.1) !important;
+  box-shadow:0 2px 10px rgba(0,0,0,0.04) !important;
+}
+.nt-kpi:hover{box-shadow:0 8px 24px rgba(99,102,241,0.14) !important;}
+.nt-kpi.c-blue{background:linear-gradient(145deg,#fff 55%,#eef2ff) !important;}
+.nt-kpi.c-green{background:linear-gradient(145deg,#fff 55%,#ecfdf5) !important;}
+.nt-kpi.c-amber{background:linear-gradient(145deg,#fff 55%,#fffbeb) !important;}
+.nt-kpi.c-red{background:linear-gradient(145deg,#fff 55%,#fff1f2) !important;}
+.nt-kpi.c-cyan{background:linear-gradient(145deg,#fff 55%,#ecfeff) !important;}
+.nt-kpi.c-purple{background:linear-gradient(145deg,#fff 55%,#f5f3ff) !important;}
+.nt-kpi.c-orange{background:linear-gradient(145deg,#fff 55%,#fff7ed) !important;}
+
+/* ── Billing KPI ──────────────────────────────────────── */
+.billing-kpi{
+  background:linear-gradient(145deg,#fff 60%,#f8f7ff) !important;
+  box-shadow:0 2px 14px rgba(0,0,0,0.06) !important;
+  border:1px solid rgba(99,102,241,0.09) !important;
+}
+.billing-kpi:hover{
+  box-shadow:0 8px 28px rgba(99,102,241,0.15) !important;
+  transform:translateY(-3px) !important;
+}
+
+/* ── Hero cards ───────────────────────────────────────── */
+.hero-card{
+  background:linear-gradient(145deg,#fff,#f8f7ff) !important;
+  border:1px solid rgba(99,102,241,0.1) !important;
+  box-shadow:0 2px 12px rgba(99,102,241,0.07) !important;
+}
+.hero-card:hover{
+  box-shadow:0 8px 28px rgba(99,102,241,0.14) !important;
+  transform:translateY(-3px) !important;
+}
+.hero-card.featured{
+  background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 60%,#6d28d9 100%) !important;
+  box-shadow:0 8px 32px rgba(79,70,229,0.38) !important;
+  border:none !important;
+}
+
+/* ── Overview section cards (ov-sc) ───────────────────── */
+.ov-sc{
+  background:linear-gradient(145deg,#fff,#fafbff) !important;
+  box-shadow:0 2px 14px rgba(0,0,0,0.06) !important;
+  border:1px solid rgba(99,102,241,0.09) !important;
+}
+.ov-sc:hover{
+  box-shadow:0 8px 28px rgba(99,102,241,0.14) !important;
+  transform:translateY(-2px) !important;
+  border-color:rgba(99,102,241,0.2) !important;
+}
+
+/* ── ERP card ─────────────────────────────────────────── */
+.erp-card{
+  border:1px solid rgba(99,102,241,0.1) !important;
+  box-shadow:0 2px 12px rgba(0,0,0,0.05) !important;
+  background:#fff !important;
+}
+.erp-card:hover{border-color:rgba(99,102,241,0.25) !important;}
+
+/* ── Table cards ──────────────────────────────────────── */
+.table-card{
+  background:linear-gradient(145deg,#fff,#fafbff) !important;
+  box-shadow:0 2px 16px rgba(99,102,241,0.08) !important;
+  border:1px solid rgba(99,102,241,0.09) !important;
+}
+.table-card:hover{
+  box-shadow:0 6px 24px rgba(99,102,241,0.13) !important;
+}
+
+/* ── Service cards ────────────────────────────────────── */
+.service-card{
+  background:linear-gradient(145deg,#fff,#fafbff) !important;
+  box-shadow:0 2px 14px rgba(99,102,241,0.08) !important;
+  border:1px solid rgba(99,102,241,0.09) !important;
+}
+
+/* ── Fund cards ───────────────────────────────────────── */
+.fund-card,.pf-fund-card,.erp-fund-card{
+  box-shadow:0 2px 10px rgba(0,0,0,0.05) !important;
+  border:1px solid rgba(0,0,0,0.06) !important;
+}
+.fund-card:hover,.pf-fund-card:hover,.erp-fund-card:hover{
+  box-shadow:0 6px 20px rgba(99,102,241,0.14) !important;
+}
+
+/* ── Compact cards ────────────────────────────────────── */
+.compact-card{
+  background:linear-gradient(145deg,#fff,#fafbff) !important;
+  box-shadow:0 2px 10px rgba(0,0,0,0.05) !important;
+  border:1px solid rgba(99,102,241,0.09) !important;
+}
+
+/* ── Section headings — gradient text ─────────────────── */
+.erp-section-head h3,.section-title{
+  color:#15803d !important;
+  -webkit-text-fill-color:#15803d !important;
+  background:none !important;
+  background-clip:unset !important;
+}
+.ov-label{color:#6366f1 !important;font-weight:700 !important;}
+
+/* ── Progress bars — vibrant gradient ─────────────────── */
+.erp-prog-fill,.detail-progress .bar-fill,.nt-score-fill.full{
+  background:linear-gradient(90deg,#6366f1,#8b5cf6,#a78bfa) !important;
+}
+.progress-bar{background:linear-gradient(90deg,#6366f1,#8b5cf6) !important;}
+
+/* ── Budget summary big cards ─────────────────────────── */
+.erp-budget-big-card{
+  background:linear-gradient(145deg,#fff,#fafbff) !important;
+  border:1px solid rgba(99,102,241,0.1) !important;
+  box-shadow:0 2px 14px rgba(0,0,0,0.05) !important;
+}
+
+/* ── Scrollbar vibrant ────────────────────────────────── */
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#a5b4fc,#c4b5fd) !important;border-radius:4px !important;}
+::-webkit-scrollbar-track{background:#f1f5f9 !important;}
+
+/* ── Budget badge cards ───────────────────────────────── */
+.billing-kpi::after{
+  background:var(--kpi-color,linear-gradient(90deg,#6366f1,#8b5cf6)) !important;
+}
+
+/* ── erp-budget-summary cards ─────────────────────────── */
+.erp-strat-item{
+  background:linear-gradient(145deg,#f8fafc,#f1f5ff) !important;
+  border-left-width:4px !important;
+}
+
+/* ── insight boxes ────────────────────────────────────── */
+.nt-insight.info{background:rgba(99,102,241,0.04) !important;border-color:rgba(99,102,241,0.18) !important;}
+.nt-insight.good{background:rgba(16,185,129,0.04) !important;}
+.nt-insight.warn{background:rgba(245,158,11,0.04) !important;}
+.nt-insight.danger{background:rgba(244,63,94,0.04) !important;}
+
+/* ── AI modal glass ───────────────────────────────────── */
+.ai-modal-box{
+  box-shadow:0 32px 64px rgba(0,0,0,0.2),0 0 0 1px rgba(255,255,255,0.7) !important;
+  background:rgba(255,255,255,0.97) !important;
+  backdrop-filter:blur(10px) !important;
+}
+.ai-modal-head{
+  background:linear-gradient(135deg,rgba(238,242,255,0.9),rgba(245,240,255,0.9)) !important;
+  border-bottom:1px solid rgba(99,102,241,0.12) !important;
+}
+.exec-summary-box{
+  background:linear-gradient(135deg,#f0f4ff,#f8f0ff,#fff0f8) !important;
+}
+
+/* ── Budget overview section ──────────────────────────── */
+#tab-overview .bg-white,#tab-erp-overview .bg-white{
+  background:linear-gradient(145deg,#fff,#fafbff) !important;
+}
+
+/* ============================================================
+   GREEN PASTEL THEME — กระทรวงสาธารณสุข
+   ============================================================ */
+:root{
+  --g1:#16a34a;--g2:#059669;--g3:#0d9488;
+  --gp1:rgba(22,163,74,0.07);--gp2:rgba(13,148,136,0.06);
+  --gb:rgba(22,163,74,0.14);
+}
+/* Page background */
+body{background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 28%,#f0fdfa 55%,#e8fdf5 80%,#f0fdf4 100%) !important;background-attachment:fixed !important;}
+/* Blobs */
+#app::before{background:radial-gradient(ellipse,var(--gp1) 0%,transparent 68%) !important;}
+#app::after{background:radial-gradient(ellipse,var(--gp2) 0%,transparent 68%) !important;}
+/* Header */
+#header{border-bottom:1px solid rgba(22,163,74,0.15) !important;box-shadow:0 2px 32px rgba(22,163,74,0.08),0 1px 0 rgba(255,255,255,0.9) !important;}
+/* Logo */
+#header .bg-indigo-600,#header [class*="bg-indigo-600"]{background:linear-gradient(135deg,#16a34a,#059669) !important;box-shadow:0 4px 14px rgba(22,163,74,0.38) !important;}
+/* Title */
+#mainTitle{color:#14532d !important;-webkit-text-fill-color:#14532d !important;background:none !important;background-clip:unset !important;}
+/* Upload button */
+#uploadBtn{background:linear-gradient(135deg,#16a34a,#059669) !important;box-shadow:0 4px 14px rgba(22,163,74,0.32) !important;}
+#uploadBtn:hover{box-shadow:0 6px 22px rgba(22,163,74,0.45) !important;}
+/* AI buttons */
+.ai-btn-primary{background:linear-gradient(135deg,#16a34a,#0d9488) !important;box-shadow:0 2px 8px rgba(22,163,74,0.3) !important;}
+.ai-btn-primary:hover{box-shadow:0 4px 16px rgba(22,163,74,0.45) !important;}
+/* Tab bar */
+#tabBar{background:linear-gradient(to bottom,#ffffff 0%,#f0fdf4 100%) !important;border-bottom:2px solid rgba(22,163,74,0.14) !important;box-shadow:0 4px 20px rgba(22,163,74,0.08) !important;}
+/* Tab btn default */
+.tab-btn{background:rgba(22,163,74,0.05) !important;border:1.5px solid rgba(22,163,74,0.12) !important;}
+/* ภาพรวม ERP tab — green */
+[data-tab="erp-overview"].tab-active{background:linear-gradient(135deg,#16a34a,#059669) !important;box-shadow:0 6px 20px rgba(22,163,74,0.45),0 2px 6px rgba(22,163,74,0.2) !important;}
+[data-tab="erp-overview"]:hover:not(.tab-active){color:#16a34a !important;border-color:rgba(22,163,74,0.3) !important;background:rgba(22,163,74,0.08) !important;box-shadow:0 3px 10px rgba(22,163,74,0.15) !important;}
+/* Stat cards — green top strip & glow */
+.stat-card{border:1px solid rgba(22,163,74,0.1) !important;box-shadow:0 2px 12px rgba(22,163,74,0.07),0 1px 3px rgba(0,0,0,0.04) !important;}
+.stat-card::after{background:linear-gradient(90deg,#16a34a,#059669,#14b8a6) !important;}
+.stat-card:hover{box-shadow:0 10px 36px rgba(22,163,74,0.18) !important;}
+/* KPI/ERP cards hover — green glow */
+.nt-kpi:hover,.erp-stat-card:hover,.billing-kpi:hover,.ov-sc:hover,.hero-card:hover,.fund-card:hover,.pf-fund-card:hover,.compact-card:hover,.table-card:hover,.service-card:hover{box-shadow:0 8px 28px rgba(22,163,74,0.14) !important;}
+/* Section title */
+.erp-section-head h3,.section-title{color:#15803d !important;-webkit-text-fill-color:#15803d !important;background:none !important;background-clip:unset !important;}
+.ov-label{color:#16a34a !important;}
+/* Progress bars */
+.erp-prog-fill,.detail-progress .bar-fill,.nt-score-fill.full,.progress-bar{background:linear-gradient(90deg,#16a34a,#059669,#14b8a6) !important;}
+/* Table headers */
+.erp-tbl-wrap th,.erp-budget-tbl th{color:#16a34a !important;}
+.table-card table th{color:#16a34a !important;border-bottom-color:rgba(22,163,74,0.3) !important;}
+.billing-row-table th{color:#16a34a !important;border-bottom-color:rgba(22,163,74,0.4) !important;}
+.table-card table thead,.erp-tbl-wrap thead,.billing-row-table thead{background:linear-gradient(135deg,rgba(22,163,74,0.06),rgba(13,148,136,0.04)) !important;}
+/* Scrollbar */
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#86efac,#6ee7b7) !important;}
+/* Section accent labels */
+.erp-card-title,.ai-section-hd{color:#16a34a !important;}
+/* Header divider */
+.header-divider{background:rgba(22,163,74,0.2) !important;}
+/* AI modal */
+.ai-modal-head{background:linear-gradient(135deg,rgba(240,253,244,0.95),rgba(240,253,250,0.95)) !important;border-bottom:1px solid rgba(22,163,74,0.12) !important;}
+.exec-summary-box{background:linear-gradient(135deg,#f0fdf4,#ecfdf5,#f0fdfa) !important;border:1px solid rgba(22,163,74,0.2) !important;}
+/* model chip */
+.model-chip{background:rgba(22,163,74,0.08) !important;color:#15803d !important;border:1px solid rgba(22,163,74,0.15) !important;}
+/* NHSO/ERP amount highlight */
+.erp-tbl-wrap .amt.blue{color:#16a34a !important;}
+/* ERP stat card color bars */
+.erp-stat-card.blue::before{background:#16a34a !important;}
+.erp-stat-card.blue .s-val{color:#16a34a !important;}
+/* Sub nav active button */
+.sub-nav-btn.active{background:#16a34a !important;border-color:#16a34a !important;}
+.sub-nav-btn:hover{border-color:rgba(22,163,74,0.3) !important;color:#16a34a !important;background:rgba(22,163,74,0.06) !important;}
+/* fund card hover border */
+.erp-card:hover{border-color:rgba(22,163,74,0.25) !important;}
+/* insight info */
+.nt-insight.info{border-color:rgba(22,163,74,0.2) !important;color:#14532d !important;}
+.nt-insight.info::before{background:#16a34a !important;}
+/* erp-badge pass */
+.erp-badge.pass{background:#dcfce7 !important;color:#16a34a !important;border:1px solid #86efac !important;}
+/* tab-active indicator (fallback border for non-color tabs) */
+.tab-active{border-bottom:none !important;}
+</style>
+ </head>
+ <body class="h-full bg-slate-50">
+  <div id="app" class="h-full w-full overflow-auto">
+   <!-- Header -->
+   <header id="header" class="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+ <div class="flex items-center gap-3">
+ <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
+ <i data-lucide="layers" class="w-5 h-5 text-white"></i>
+ </div>
+ <div>
+ <h1 id="mainTitle" class="text-lg font-bold text-slate-800">ระบบสารสนเทศเพื่อการบริหารทรัพยากรแบบบูรณาการ โรงพยาบาลเสลภูมิ</h1>
+ <p class="text-xs text-slate-400">SELAPHUM HOSPITAL SMART ERP</p>
+ </div>
+ </div>
+ <div class="flex items-center gap-2">
+ <label id="uploadBtn" class="cursor-pointer flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition"> <i data-lucide="upload" class="w-4 h-4"></i> <span>อัปโหลด CSV</span> <input type="file" accept=".csv" class="hidden" id="csvInput"> </label>
+ <div class="header-divider"></div>
+ <button class="ai-btn ai-btn-primary" id="aiAnalysisBtn" onclick="openAIAnalysis()" title="AI วิเคราะห์ข้อมูลและตรวจสอบความผิดปกติ">
+   <i data-lucide="sparkles" class="w-4 h-4"></i>
+   <span>AI วิเคราะห์</span>
+ </button>
+ <button class="ai-btn ai-btn-secondary ai-btn-icon" id="settingsBtn" onclick="openAISettings()" title="ตั้งค่า Gemini API">
+   <i data-lucide="settings" class="w-4 h-4"></i>
+ </button>
+ </div>
+    </div>
+   </header><!-- Upload Zone (shown when no data) -->
+   <div id="uploadZone" class="hidden max-w-2xl mx-auto mt-16 px-4">
+    <div class="upload-zone rounded-2xl p-12 text-center cursor-pointer" id="dropZone">
+ <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-indigo-100 flex items-center justify-center">
+ <i data-lucide="file-text" class="w-8 h-8 text-indigo-500"></i>
+ </div>
+ <h3 class="text-lg font-semibold text-slate-700 mb-1">ลากไฟล์ CSV มาวางที่นี่</h3>
+ <p class="text-sm text-slate-400">หรือคลิกเพื่อเลือกไฟล์</p>
+    </div>
+   </div><!-- Tabs -->
+   <nav id="tabBar" class="max-w-7xl mx-auto px-4">
+    <div class="tab-pill-track">
+     <button class="tab-btn tab-active" data-tab="erp-overview">🏥 ภาพรวม ERP</button>
+     <button class="tab-btn" data-tab="erp-billing">💰 การเรียกเก็บ</button>
+     <button class="tab-btn" data-tab="erp-kpi">🎯 KPI ยุทธศาสตร์</button>
+     <button class="tab-btn" data-tab="overview">📊 แผนงบประมาณ</button>
+     <button class="tab-btn" data-tab="tps-score">⭐ TPS Score</button>
+     <button class="tab-btn" data-tab="risk-score">⚠️ Risk Score</button>
+     <button class="tab-btn" data-tab="planfin">📋 PlanFin</button>
+     <button class="tab-btn" data-tab="finance">💎 แผนเงินบำรุง</button>
+     <button class="tab-btn" data-tab="unitcost">📈 Unit Cost</button>
+    </div>
+   </nav><!-- Content Area -->
+   <main id="content" class="max-w-7xl mx-auto px-4 py-6 block">
+    <!-- OVERVIEW TAB -->
+    <section id="tab-overview" class="tab-content hidden fade-in">
+ <!-- Summary Cards -->
+ <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+ <div class="stat-card bg-white rounded-xl p-4 card-glow">
+ <div class="flex items-center gap-2 mb-2">
+ <div class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center"><i data-lucide="layers" class="w-4 h-4 text-indigo-600"></i>
+ </div><span class="text-xs text-slate-400 font-medium">โครงการทั้งหมด</span>
+ </div>
+ <p id="totalProjects" class="text-2xl font-bold text-slate-800">0</p>
+ </div>
+ <div class="stat-card bg-white rounded-xl p-4 card-glow">
+ <div class="flex items-center gap-2 mb-2">
+ <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center"><i data-lucide="dollar-sign" class="w-4 h-4 text-emerald-600"></i>
+ </div><span class="text-xs text-slate-400 font-medium">งบประมาณรวม</span>
+ </div>
+ <p id="totalBudget" class="text-2xl font-bold text-slate-800">0</p>
+ <p class="text-xs text-slate-400">บาท</p>
+ </div>
+ <div class="stat-card bg-white rounded-xl p-4 card-glow">
+ <div class="flex items-center gap-2 mb-2">
+ <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="trending-up" class="w-4 h-4 text-amber-600"></i>
+ </div><span class="text-xs text-slate-400 font-medium">เบิกจ่ายแล้ว</span>
+ </div>
+ <p id="totalSpent" class="text-2xl font-bold text-slate-800">0</p>
+ <p class="text-xs text-slate-400">บาท</p>
+ </div>
+ <div class="stat-card bg-white rounded-xl p-4 card-glow">
+ <div class="flex items-center gap-2 mb-2">
+ <div class="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center"><i data-lucide="wallet" class="w-4 h-4 text-rose-600"></i>
+ </div><span class="text-xs text-slate-400 font-medium">คงเหลือ</span>
+ </div>
+ <p id="totalRemaining" class="text-2xl font-bold text-slate-800">0</p>
+ <p class="text-xs text-slate-400">บาท</p>
+ </div>
+ </div><!-- Progress + Status -->
+ <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+ <div class="lg:col-span-2 bg-white rounded-xl p-5 card-glow">
+ <h3 class="font-semibold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="activity" class="w-4 h-4 text-indigo-500"></i>อัตราการเบิกจ่าย</h3>
+ <div class="mb-3">
+ <div class="flex justify-between text-sm mb-1">
+ <span class="text-slate-500">เบิกจ่ายแล้ว</span> <span id="spentPercent" class="font-semibold text-indigo-600">0%</span>
+ </div>
+ <div class="w-full bg-slate-100 rounded-full h-4 overflow-hidden">
+ <div id="spentBar" class="progress-bar h-4 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500" style="width:0%"></div>
+ </div>
+ </div>
+ <div id="planTypeBreakdown" class="mt-4 grid grid-cols-2 gap-3"></div>
+ </div>
+ <div class="bg-white rounded-xl p-5 card-glow">
+ <h3 class="font-semibold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>สถานะโครงการ</h3>
+ <div id="statusList" class="space-y-3"></div>
+ </div>
+ </div><!-- Charts -->
+ <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+ <div class="bg-white rounded-xl p-5 card-glow">
+ <h3 class="font-semibold text-slate-700 mb-4">งบประมาณตามยุทธศาสตร์</h3>
+ <div style="position:relative;height:260px;width:100%"><canvas id="chartStrategy"></canvas></div>
+ </div>
+ <div class="bg-white rounded-xl p-5 card-glow">
+ <h3 class="font-semibold text-slate-700 mb-4">งบเบิกจ่ายสะสมรายเดือน (ในแผน/นอกแผน)</h3>
+ <div style="position:relative;height:260px;width:100%"><canvas id="chartPlanType"></canvas></div>
+ </div>
+ </div>
+<!-- รายการโครงการ (รวมจากแท็บโครงการ) -->
+ <div class="bg-white rounded-xl card-glow overflow-hidden mt-6">
+ <div class="p-4 border-b border-slate-100">
+ <h3 class="font-semibold text-slate-700 mb-3 flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-indigo-500"></i>รายการโครงการ</h3>
+ <div class="flex flex-wrap gap-2 items-center">
+ <div class="relative flex-1 min-w-[200px]">
+ <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i> <input id="searchInput" type="text" placeholder="ค้นหาโครงการ..." class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+ </div><select id="filterStatus" class="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"> <option value="">ทุกสถานะ</option> </select> <select id="filterStrategy" class="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"> <option value="">ทุกยุทธศาสตร์</option> </select>
+ </div>
+ </div>
+ <div class="overflow-x-auto">
+<table class="w-full text-sm">
+<thead class="bg-slate-50 text-slate-500 text-xs uppercase">
+<tr>
+<th class="px-4 py-3 text-left">#</th>
+<th class="px-4 py-3 text-left">โครงการ</th>
+<th class="px-4 py-3 text-left">ยุทธศาสตร์</th>
+<th class="px-4 py-3 text-left">ผู้รับผิดชอบ</th>
+<th class="px-4 py-3 text-right">งบประมาณ</th>
+<th class="px-4 py-3 text-right">เบิกจ่าย</th>
+<th class="px-4 py-3 text-center">สถานะ</th>
+</tr>
+</thead>
+<tbody id="projectTableBody" class="divide-y divide-slate-100"></tbody>
+</table>
+ </div>
+ <div id="projectPagination" class="p-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500"></div>
+ </div>
+<!-- ไทม์ไลน์การเบิกจ่าย (รวมจากแท็บไทม์ไลน์) -->
+ <div class="bg-white rounded-xl p-5 card-glow mt-6">
+ <h3 class="font-semibold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-indigo-500"></i>การเบิกจ่ายรายเดือน</h3>
+ <div style="position:relative;height:300px;width:100%"><canvas id="chartTimeline"></canvas></div>
+ </div>
+ <div class="bg-white rounded-xl p-5 card-glow mt-4">
+ <h3 class="font-semibold text-slate-700 mb-4">รายละเอียดรายเดือน</h3>
+ <div class="overflow-x-auto">
+<table class="w-full text-sm">
+<thead class="bg-slate-50 text-slate-500 text-xs">
+<tr id="timelineHeader"></tr>
+</thead>
+<tbody id="timelineBody"></tbody>
+</table>
+ </div>
+ </div>
+    </section>
 <!-- TAB: TPS SCORE -->
 <div class="tab-content hidden fade-in" id="tab-tps-score">
     <div class="erp-section-head"><h3>📊 Total Performance Score • รพ.เสลภูมิ Q1/2569</h3><div class="line"></div></div>
@@ -487,16 +1243,16 @@
 <div class="ov-label">สรุปผู้บริหาร — PLANFIN • เงินบำรุง • TPS • RISK SCORE</div>
 <div class="ov-g4">
 <!-- CARD: PlanFin -->
-<div class="ov-sc"><div class="sh"><div class="si" style="background:rgba(139,92,246,.08)">📋</div><div><div class="st">PlanFin</div><div class="ss">5 เดือน (ต.ค.68–ก.พ.69)</div></div><div class="sb" style="background:rgba(245,158,11,.1);color:#f59e0b">ผ่าน 3/5</div></div>
+<div class="ov-sc"><div class="sh"><div class="si" style="background:rgba(139,92,246,.08)">📋</div><div><div class="st">PlanFin</div><div class="ss" id="erpPfPeriod">5 เดือน (ต.ค.68–ก.พ.69)</div></div><div class="sb" id="erpPfBadge" style="background:rgba(245,158,11,.1);color:#f59e0b">ผ่าน 3/5</div></div>
 <div class="sd">
-    <div class="ov-r"><span class="rl">รายได้สะสม</span><span><span class="rv" style="color:#0ea5e9">182.02</span><span class="rs">ลบ.</span></span></div>
-    <div class="ov-r"><span class="rl">　vs แผน 186.80</span><span class="ov-df dn">▼ −2.56%</span></div>
-    <div class="ov-r"><span class="rl">ค่าใช้จ่ายสะสม</span><span><span class="rv" style="color:#f59e0b">170.90</span><span class="rs">ลบ.</span></span></div>
-    <div class="ov-r"><span class="rl">　vs แผน 177.22</span><span class="ov-df up">▼ ประหยัด −3.57%</span></div>
+    <div class="ov-r"><span class="rl">รายได้สะสม</span><span><span class="rv" style="color:#0ea5e9" id="erpPfRevAct">182.02</span><span class="rs">ลบ.</span></span></div>
+    <div class="ov-r"><span class="rl" id="erpPfRevPlan">　vs แผน 186.80</span><span class="ov-df dn" id="erpPfRevPct">▼ −2.56%</span></div>
+    <div class="ov-r"><span class="rl">ค่าใช้จ่ายสะสม</span><span><span class="rv" style="color:#f59e0b" id="erpPfExpAct">170.90</span><span class="rs">ลบ.</span></span></div>
+    <div class="ov-r"><span class="rl" id="erpPfExpPlan">　vs แผน 177.22</span><span class="ov-df up" id="erpPfExpPct">▼ ประหยัด −3.57%</span></div>
     <div style="border-top:2px solid #f1f5f9;margin-top:4px;padding-top:6px">
- <div class="ov-r"><span class="rl" style="font-weight:700;color:#1e293b">กำไรสุทธิ (NI)</span><span><span class="rv" style="color:#10b981;font-size:16px">+11.13</span><span class="rs">ลบ.</span><span class="ov-df up">+16.1%</span></span></div>
- <div class="ov-r"><span class="rl">EBITDA</span><span><span class="rv" style="color:#8b5cf6">12.25</span><span class="rs">ลบ.</span></span></div>
- <div class="ov-r"><span class="rl">NI Margin</span><span class="rv" style="color:#6366f1">6.1%</span></div>
+ <div class="ov-r"><span class="rl" style="font-weight:700;color:#1e293b">กำไรสุทธิ (NI)</span><span><span class="rv" style="color:#10b981;font-size:16px" id="erpPfNI">+11.13</span><span class="rs">ลบ.</span></span></div>
+ <div class="ov-r"><span class="rl">EBITDA</span><span><span class="rv" style="color:#8b5cf6" id="erpPfEBITDA">12.25</span><span class="rs">ลบ.</span></span></div>
+ <div class="ov-r"><span class="rl">NI Margin</span><span class="rv" style="color:#6366f1" id="erpPfNIMargin">6.1%</span></div>
     </div>
 </div></div>
 <!-- CARD: แผนเงินบำรุง -->
@@ -3406,6 +4162,7 @@ function renderRiskCharts(){
 }
 // ==================== PLANFIN CHARTS ====================
 const PLANFIN_SHEET_ID = '1BtXlMS0BKnwqcb0R_bx0-4I8vcckvvrrvt399U61I5M';
+const PF_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbywLGBE2v02nuWqk9r2-SGUlsAtzkwu1zgtob0d4SEYiMf3rB6shsL5rt-O1OS5b-Fy/exec'; // ★ ใส่ URL ของ PlanFin GAS Web App หลัง deploy
 
 function renderPlanFinCharts(){
     const mo=['ต.ค.68','พ.ย.68','ธ.ค.68','ม.ค.69','ก.พ.69'];
@@ -3452,31 +4209,41 @@ function renderPfTrendChart(labels, revPlan, revActual, expPlan, expActual) {
 
 // ★ ดึงข้อมูลจาก PlanFin Google Sheet → อัปเดตกราฟ trend
 async function loadPlanFinFromGS() {
+    // ── Layer 1: GAS Web App (primary — มี detail ครบ) ──
+    if (PF_WEBAPP_URL) {
+        try {
+            console.log('🔄 PlanFin: โหลดจาก GAS Web App...');
+            var res = await fetch(PF_WEBAPP_URL, { redirect: 'follow' });
+            var d = await res.json();
+            if (d && d.status === 'ok') {
+                console.log('✅ PlanFin GAS Web App loaded:', d.monthCount, 'เดือน');
+                applyPlanFinGASData(d);
+                return;
+            }
+        } catch (e1) {
+            console.log('⚠ PlanFin GAS Web App failed:', e1.message, '→ ลอง gviz...');
+        }
+    }
+
+    // ── Layer 2: gviz (fallback) ──
     try {
+        console.log('🔄 PlanFin: โหลดจาก gviz...');
         var url = 'https://docs.google.com/spreadsheets/d/' + PLANFIN_SHEET_ID + '/gviz/tq?tqx=out:json&sheet=' + encodeURIComponent('สรุปPlanfin');
         var resp = await fetch(url);
         var text = await resp.text();
         var json = JSON.parse(text.substring(47).slice(0,-2));
         var rows = json.table.rows;
-        if (!rows || rows.length < 30) { console.log('PlanFin: ไม่พอข้อมูล'); return; }
+        if (!rows || rows.length < 30) { console.log('PlanFin gviz: ไม่พอข้อมูล'); return; }
 
-        // Helper: อ่านค่าจาก cell
         function cv(row, col) {
             if (!rows[row] || !rows[row].c || !rows[row].c[col]) return 0;
             return rows[row].c[col].v || 0;
         }
 
-        // Row 14 (index 14) = "รวมรายได้"
-        // gviz: cells[0]=รายการ, cells[1]=แผนปีงบ(B), cells[2]=แผนรายเดือน(C), cells[3]=ผลงาน(D)
-        // แต่จาก console เห็นว่า cells อาจไม่มี index 2 (C ถูกข้าม)
-        // ต้องหาแถว "รวมรายได้" และ "รวมค่าใช้จ่าย" dynamically
-
         var revPlanTotal = 0, revActTotal = 0, expPlanTotal = 0, expActTotal = 0;
         var revPlanYear = 0, expPlanYear = 0;
-        // ★ เก็บข้อมูลรายกองทุน
-        var revItems = []; // [{name, planYear, planMonth, actual, diff, pct}]
-        var expItems = [];
-        var section = ''; // 'rev' หรือ 'exp'
+        var revItems = [], expItems = [];
+        var section = '';
 
         for (var i = 0; i < rows.length; i++) {
             var label = cv(i, 0);
@@ -3499,69 +4266,196 @@ async function loadPlanFinFromGS() {
             } else if (label.indexOf('รายการ') !== -1 && label.indexOf('แผน') === -1) {
                 section = 'header';
             } else if (label.indexOf('รายได้') !== -1 && section !== 'rev_done' && section !== 'exp_done') {
-                // รายการรายได้
-                var planY = cv(i, 1) || 0;
-                var planM = cv(i, 2) || 0;
-                var actual = cv(i, 3) || 0;
-                var diff = cv(i, 4) || 0;
-                var pctVal = cv(i, 5) || 0;
-                if (planY > 0 || actual > 0) {
-                    revItems.push({ name: label, planYear: planY, planMonth: planM, actual: actual, diff: diff, pct: pctVal });
-                }
+                var planY = cv(i, 1) || 0; var planM = cv(i, 2) || 0; var actual = cv(i, 3) || 0;
+                var diff = cv(i, 4) || 0; var pctVal = cv(i, 5) || 0;
+                if (planY > 0 || actual > 0) revItems.push({ name: label, planYear: planY, planMonth: planM, actual: actual, diff: diff, pct: pctVal });
             } else if (section === 'rev_done' && label.indexOf('รวม') === -1 && label.indexOf('รายงาน') === -1 && label.indexOf('EBITDA') === -1 && label.indexOf('ส่วนต่าง') === -1 && label.indexOf('ลงชื่อ') === -1) {
-                // รายการค่าใช้จ่าย
-                var planY2 = cv(i, 1) || 0;
-                var planM2 = cv(i, 2) || 0;
-                var actual2 = cv(i, 3) || 0;
-                var diff2 = cv(i, 4) || 0;
-                var pctVal2 = cv(i, 5) || 0;
-                if (planY2 > 0 || actual2 > 0) {
-                    expItems.push({ name: label, planYear: planY2, planMonth: planM2, actual: actual2, diff: diff2, pct: pctVal2 });
-                }
+                var planY2 = cv(i, 1) || 0; var planM2 = cv(i, 2) || 0; var actual2 = cv(i, 3) || 0;
+                var diff2 = cv(i, 4) || 0; var pctVal2 = cv(i, 5) || 0;
+                if (planY2 > 0 || actual2 > 0) expItems.push({ name: label, planYear: planY2, planMonth: planM2, actual: actual2, diff: diff2, pct: pctVal2 });
             }
         }
 
         console.log('PlanFin revItems:', revItems.length, 'expItems:', expItems.length);
-
-        // ★ Render ตาราง + กราฟ + KPI cards สำหรับรายได้
         renderPfRevenueDetail(revItems, revPlanTotal, revActTotal, revPlanYear);
 
-        // ★ Render กราฟ trend
         if (revActTotal > 0 || expActTotal > 0) {
-            // ข้อมูลเป็นยอดสะสมถึงเดือนปัจจุบัน → แปลงเป็น ลบ.
-            var numMonths = 5; // ต.ค.-ก.พ. = 5 เดือน
-            var moLabels = ['ต.ค.68','พ.ย.68','ธ.ค.68','ม.ค.69','ก.พ.69'];
-
-            // คำนวณแผนสะสมรายเดือน (เฉลี่ยต่อเดือน × จำนวนเดือน)
+            var numMonths = 6;
+            var moLabels = ['ต.ค.68','พ.ย.68','ธ.ค.68','ม.ค.69','ก.พ.69','มี.ค.69'];
             var revPlanMonthly = revPlanYear > 0 ? revPlanYear / 12 : (revPlanTotal / numMonths);
             var expPlanMonthly = expPlanYear > 0 ? expPlanYear / 12 : (expPlanTotal / numMonths);
-
-            // สร้าง array สะสมรายเดือน (แผน = เส้นตรง, ผล = interpolate)
             var rpc = [], epc = [];
-            for (var m = 1; m <= numMonths; m++) {
-                rpc.push(+((revPlanMonthly * m) / 1000000).toFixed(2));
-                epc.push(+((expPlanMonthly * m) / 1000000).toFixed(2));
-            }
-
-            // ผลดำเนินงาน → ถ้ามีแค่ยอดสะสมรวม ให้ interpolate เป็นเส้นตรง
-            // (ถ้ามีรายเดือนแยก จะดีกว่า — แต่ตอนนี้ใช้ interpolation ก่อน)
+            for (var m = 1; m <= numMonths; m++) { rpc.push(+((revPlanMonthly * m) / 1e6).toFixed(2)); epc.push(+((expPlanMonthly * m) / 1e6).toFixed(2)); }
             var rac = [], eac = [];
-            var revActMonthly = revActTotal / numMonths;
-            var expActMonthly = expActTotal / numMonths;
-            for (var m2 = 1; m2 <= numMonths; m2++) {
-                rac.push(+((revActMonthly * m2) / 1000000).toFixed(2));
-                eac.push(+((expActMonthly * m2) / 1000000).toFixed(2));
-            }
-
-            // Re-render กราฟ trend ด้วยข้อมูลจริง
+            var revActMonthly = revActTotal / numMonths, expActMonthly = expActTotal / numMonths;
+            for (var m2 = 1; m2 <= numMonths; m2++) { rac.push(+((revActMonthly * m2) / 1e6).toFixed(2)); eac.push(+((expActMonthly * m2) / 1e6).toFixed(2)); }
             renderPfTrendChart(moLabels, rpc, rac, epc, eac);
-            console.log('✅ PlanFin trend chart อัปเดตจาก Google Sheet สำเร็จ');
-            console.log('  รายได้: แผน=' + rpc[numMonths-1] + 'M, ผล=' + rac[numMonths-1] + 'M');
-            console.log('  คชจ.: แผน=' + epc[numMonths-1] + 'M, ผล=' + eac[numMonths-1] + 'M');
+
+            // อัปเดต ERP Overview card PlanFin
+            updatePlanFinOverviewCard({
+                revActM: +(revActTotal / 1e6).toFixed(2),
+                revPlanMonthM: +(revPlanTotal / 1e6).toFixed(2),
+                revPlanYearM: +(revPlanYear / 1e6).toFixed(2),
+                expActM: +(expActTotal / 1e6).toFixed(2),
+                expPlanMonthM: +(expPlanTotal / 1e6).toFixed(2),
+                expPlanYearM: +(expPlanYear / 1e6).toFixed(2),
+                niM: +((revActTotal - expActTotal) / 1e6).toFixed(2),
+                monthCount: numMonths,
+                lastMonthLabel: moLabels[numMonths - 1],
+                revPct: revPlanTotal > 0 ? +((revActTotal - revPlanTotal) / revPlanTotal * 100).toFixed(2) : 0,
+                expPct: expPlanTotal > 0 ? +((expActTotal - expPlanTotal) / expPlanTotal * 100).toFixed(2) : 0
+            });
+
+            console.log('✅ PlanFin gviz loaded:', numMonths, 'เดือน');
         }
     } catch (e) {
-        console.log('PlanFin GS load error (ใช้ hardcoded):', e.message || e);
+        console.log('PlanFin load error (ใช้ hardcoded):', e.message || e);
     }
+}
+
+// ★ Apply PlanFin GAS Web App data ทั้ง tab PlanFin + ERP Overview card
+function applyPlanFinGASData(d) {
+    if (!d) return;
+    var mc = d.monthCount || 6;
+    var ml = d.monthLabels || [];
+
+    // 1) Revenue detail
+    if (d.revItems && d.revItems.length > 0) {
+        var revItemsForDetail = d.revItems.map(function(r) {
+            return { name: r.name, planYear: r.planYear, planMonth: r.planMonth, actual: r.actual, diff: r.diff, pct: r.pct };
+        });
+        var planTotal = d.revenue ? d.revenue.planMonth : 0;
+        var actTotal = d.revenue ? d.revenue.actual : 0;
+        var planYear = d.revenue ? d.revenue.planYear : 0;
+        renderPfRevenueDetail(revItemsForDetail, planTotal, actTotal, planYear);
+    }
+
+    // 2) Trend chart
+    if (d.trend) {
+        renderPfTrendChart(ml, d.trend.revPlan, d.trend.revAct, d.trend.expPlan, d.trend.expAct);
+    }
+
+    // 3) NI chart
+    if (d.trend && d.trend.ni) {
+        if (chartInstances && chartInstances['pf_ni']) chartInstances['pf_ni'].destroy();
+        var niData = [];
+        for (var i = 0; i < mc; i++) {
+            niData.push(i < d.trend.ni.length ? d.trend.ni[i] : 0);
+        }
+        // คำนวณ NI รายเดือน (ไม่ใช่สะสม)
+        var niMonthly = [niData[0]];
+        for (var j = 1; j < niData.length; j++) { niMonthly.push(+(niData[j] - niData[j-1]).toFixed(2)); }
+        ltChart('pf_ni','bar',{labels:ml,datasets:[{label:'NI',data:niMonthly,backgroundColor:niMonthly.map(function(v){return v>=0?'rgba(16,185,129,0.8)':'rgba(239,68,68,0.8)';}),borderRadius:8,barPercentage:0.55}]},{leg:false});
+    }
+
+    // 4) Pie chart (revenue breakdown)
+    if (d.revItems && d.revItems.length > 0) {
+        var pieEl = document.getElementById('pf_pie');
+        if (pieEl) {
+            if (chartInstances && chartInstances['pf_pie']) chartInstances['pf_pie'].destroy();
+            var pieColors = ['#6366f1','#8b5cf6','#10b981','#f59e0b','#94a3b8','#06b6d4','#ec4899','#84cc16','#14b8a6'];
+            chartInstances['pf_pie'] = new Chart(pieEl.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: d.revItems.map(function(r) { return r.name.replace(/รายได้/g,'').trim() || r.name; }),
+                    datasets: [{ data: d.revItems.map(function(r) { return r.actualM || +(r.actual/1e6).toFixed(2); }),
+                        backgroundColor: pieColors.slice(0, d.revItems.length), borderWidth: 0, hoverOffset: 8 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '55%',
+                    plugins: { legend: { position: 'right', labels: { font: { size: 11 }, color: '#64748b', padding: 12, boxWidth: 12 } }, tooltip: LT_TT } }
+            });
+        }
+    }
+
+    // 5) Expense chart
+    if (d.expItems && d.expItems.length > 0) {
+        if (chartInstances && chartInstances['pf_exp']) chartInstances['pf_exp'].destroy();
+        var expLabels = d.expItems.map(function(r) { return r.name.substring(0, 15); });
+        var expPlan = d.expItems.map(function(r) { return r.planMonth ? +(r.planMonth / 1e6).toFixed(2) : (r.planYearM || 0); });
+        var expAct = d.expItems.map(function(r) { return r.actualM || +(r.actual / 1e6).toFixed(2); });
+        ltChart('pf_exp','bar',{labels:expLabels,datasets:[
+            {label:'แผนสะสม',data:expPlan,backgroundColor:'rgba(99,102,241,0.15)',borderRadius:4,barPercentage:0.4},
+            {label:'ผลสะสม',data:expAct,backgroundColor:expAct.map(function(v,i){return v>expPlan[i]?'rgba(244,63,94,0.65)':'rgba(16,185,129,0.6)';}),borderRadius:4,barPercentage:0.4}
+        ]});
+    }
+
+    // 6) % diff charts
+    if (d.pctDiff) {
+        if (d.pctDiff.rev) {
+            if (chartInstances && chartInstances['pf_revpct']) chartInstances['pf_revpct'].destroy();
+            var baselineNeg = []; for (var k1=0;k1<mc;k1++) baselineNeg.push(-5);
+            ltChart('pf_revpct','line',{labels:ml,datasets:[
+                {label:'% รายได้ vs แผน',data:d.pctDiff.rev,borderColor:'#6366f1',borderWidth:2.5,pointRadius:6,pointBackgroundColor:'#6366f1',fill:false,tension:0.3},
+                {label:'เกณฑ์ -5%',data:baselineNeg,borderColor:'#ef4444',borderDash:[4,4],borderWidth:1.5,pointRadius:0,fill:false}
+            ]},{ytick:{callback:function(v){return v+'%';}}});
+        }
+        if (d.pctDiff.exp) {
+            if (chartInstances && chartInstances['pf_exppct']) chartInstances['pf_exppct'].destroy();
+            var baselinePos = []; for (var k2=0;k2<mc;k2++) baselinePos.push(5);
+            ltChart('pf_exppct','line',{labels:ml,datasets:[
+                {label:'% คชจ. vs แผน',data:d.pctDiff.exp,borderColor:'#f59e0b',borderWidth:2.5,pointRadius:6,pointBackgroundColor:'#f59e0b',fill:false,tension:0.3},
+                {label:'เกณฑ์ +5%',data:baselinePos,borderColor:'#ef4444',borderDash:[4,4],borderWidth:1.5,pointRadius:0,fill:false}
+            ]},{ytick:{callback:function(v){return v+'%';}}});
+        }
+    }
+
+    // 7) อัปเดต ERP Overview card PlanFin
+    updatePlanFinOverviewCard({
+        revActM: d.revenue ? d.revenue.actualM : 0,
+        revPlanMonthM: d.revenue ? d.revenue.planMonthM : 0,
+        revPlanYearM: d.revenue ? d.revenue.planYearM : 0,
+        expActM: d.expense ? d.expense.actualM : 0,
+        expPlanMonthM: d.expense ? d.expense.planMonthM : 0,
+        expPlanYearM: d.expense ? d.expense.planYearM : 0,
+        niM: d.netIncome ? d.netIncome.actualM : 0,
+        ebitdaM: d.ebitda ? d.ebitda.actualM : null,
+        niMargin: d.niMargin,
+        monthCount: mc,
+        lastMonthLabel: d.lastMonthLabel || '',
+        assessment: d.assessment ? d.assessment.label : '',
+        revPct: d.revenue ? (d.revenue.planMonth > 0 ? +((d.revenue.actual - d.revenue.planMonth) / d.revenue.planMonth * 100).toFixed(2) : 0) : 0,
+        expPct: d.expense ? (d.expense.planMonth > 0 ? +((d.expense.actual - d.expense.planMonth) / d.expense.planMonth * 100).toFixed(2) : 0) : 0
+    });
+
+    console.log('✅ PlanFin tab อัปเดตสำเร็จ');
+    console.log('✅ ERP Overview card PlanFin อัปเดตจาก GAS สำเร็จ');
+}
+
+// ★ อัปเดต ERP Overview card PlanFin
+function updatePlanFinOverviewCard(info) {
+    if (!info) return;
+    var fmt = function(n) { return n !== null && n !== undefined ? Number(n).toFixed(2) : '-'; };
+    // อัปเดต card elements ผ่าน IDs
+    var el = function(id) { return document.getElementById(id); };
+
+    // รายได้สะสม
+    var rv1 = el('erpPfRevAct'); if (rv1) rv1.textContent = fmt(info.revActM);
+    var rv2 = el('erpPfRevPlan'); if (rv2) rv2.textContent = '　vs แผน ' + fmt(info.revPlanMonthM);
+    var rv3 = el('erpPfRevPct'); if (rv3) {
+        var rpct = info.revPct || 0;
+        rv3.textContent = (rpct >= 0 ? '▲ +' : '▼ ') + fmt(rpct) + '%';
+        rv3.className = 'ov-df ' + (rpct >= 0 ? 'up' : 'dn');
+    }
+    // ค่าใช้จ่ายสะสม
+    var ev1 = el('erpPfExpAct'); if (ev1) ev1.textContent = fmt(info.expActM);
+    var ev2 = el('erpPfExpPlan'); if (ev2) ev2.textContent = '　vs แผน ' + fmt(info.expPlanMonthM);
+    var ev3 = el('erpPfExpPct'); if (ev3) {
+        var epct = info.expPct || 0;
+        var expLabel = epct <= 0 ? '▼ ประหยัด ' + fmt(epct) + '%' : '▲ เกิน +' + fmt(epct) + '%';
+        rv3.textContent = expLabel; // fix: should be ev3
+        ev3.textContent = expLabel;
+        ev3.className = 'ov-df ' + (epct <= 0 ? 'up' : 'dn');
+    }
+    // กำไรสุทธิ
+    var ni1 = el('erpPfNI'); if (ni1) ni1.textContent = fmt(info.niM);
+    // EBITDA
+    var eb1 = el('erpPfEBITDA'); if (eb1 && info.ebitdaM !== null && info.ebitdaM !== undefined) eb1.textContent = fmt(info.ebitdaM);
+    // NI Margin
+    var nm1 = el('erpPfNIMargin'); if (nm1 && info.niMargin !== null && info.niMargin !== undefined) nm1.textContent = fmt(info.niMargin) + '%';
+    // Assessment badge
+    var ab1 = el('erpPfBadge'); if (ab1 && info.assessment) ab1.textContent = info.assessment;
+    // Period
+    var pr1 = el('erpPfPeriod'); if (pr1) pr1.textContent = info.monthCount + ' เดือน (ต.ค.68–' + (info.lastMonthLabel || '') + ')';
 }
 // ==================== FINANCE CHARTS ====================
 
@@ -3729,35 +4623,19 @@ function renderFinanceCharts(){
 // ★★★ วาง Web App URL แผนเงินบำรุง ตรงนี้ (ลงท้ายด้วย /exec) ★★★
 const FIN_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxbeytZWxq5Twiw-UEXaoIv4-Z5lW0-U8rHM16w2QKk5_BNRxIPsIifowUH4xQK-FxX/exec';
 const FIN_SHEET_ID = '1v9ge051-cxMt2-ofZvtqchreVqR0oH-1kpzSDuLLK5Y';
-const FIN_SHEET_NAME = 'ชีต1'; // ★ ชื่อชีทจริงใน Google Sheet
+const FIN_SHEET_NAME = 'แผนเงินบำรุง';
 
-// ★ ดึงข้อมูลจาก Finance → Layer 1: GAS Web App → Layer 2: gviz fallback
+// ★ ดึงข้อมูลจาก Finance → Layer 1: gviz (primary, no CORS) → Layer 2: GAS Web App (fallback)
 async function loadFinanceFromGAS() {
-    // ── Layer 1: ลอง GAS Web App ──
-    if (FIN_WEBAPP_URL) {
-        try {
-            console.log('🔄 Finance: ลองโหลดจาก GAS Web App...');
-            var res = await fetch(FIN_WEBAPP_URL, { redirect: 'follow' });
-            var d = await res.json();
-            if (d && d.status === 'ok') {
-                console.log('✅ Finance GAS Web App loaded:', d.monthCount, 'เดือน');
-                applyFinanceLiveData(d);
-                return;
-            }
-        } catch (e1) {
-            console.log('⚠ Finance GAS Web App failed (CORS?):', e1.message);
-        }
-    }
-
-    // ── Layer 2: Fallback gviz (ไม่มี CORS) ──
+    // ── Layer 1: gviz (ไม่มี CORS, มี detail ครบ) ──
     try {
-        console.log('🔄 Finance: fallback gviz จาก Google Sheet...');
+        console.log('🔄 Finance: โหลดจาก gviz...');
         var url = 'https://docs.google.com/spreadsheets/d/' + FIN_SHEET_ID + '/gviz/tq?tqx=out:json&sheet=' + encodeURIComponent(FIN_SHEET_NAME);
         var resp = await fetch(url);
         var text = await resp.text();
         var json = JSON.parse(text.substring(47).slice(0, -2));
         var rows = json.table.rows;
-        if (!rows || rows.length < 20) { console.log('Finance gviz: ข้อมูลไม่พอ'); return; }
+        if (!rows || rows.length < 20) throw new Error('ข้อมูลไม่พอ (' + (rows ? rows.length : 0) + ' rows)');
 
         // Helper: อ่านค่าจาก cell (0-indexed row, 0-indexed col)
         function cv(r, c) {
@@ -3781,38 +4659,76 @@ async function loadFinanceFromGAS() {
         // ─── ค้นหาแถวสำคัญ dynamically (0-indexed) ───
         var rowIncTotal = -1, rowExpTotal = -1, rowNetBalance = -1;
         var rowCashTotal = -1, rowCashSavings = -1, rowCashTreasury = -1, rowObligation = -1;
-        // รายรับย่อย
-        var incSubRows = [];
-        var expSubRows = [];
-        var inIncomeSection = false, inExpenseSection = false;
+        var incOpsSubRows = [], incOthSubRows = [];
+        var expPersSubRows = [], expOpsSubRows = [], expInvestSubRows = [], expOtherSubRows = [];
+        var allIncSubRows = [], allExpSubRows = [];
 
+        // Pass 1: หา totals ก่อน
         for (var i = 0; i < rows.length; i++) {
-            // ตรวจจาก col A(0), B(1), C(2)
-            var a = String(cv(i, 0)).trim();
-            var b = String(cv(i, 1)).trim();
-            var c = String(cv(i, 2)).trim();
-            var combined = a + '|' + b + '|' + c;
+            var c1 = String(cv(i, 2)).trim();
+            if (/รวมรายรับ/.test(c1)) rowIncTotal = i;
+            else if (/รวมรายจ่าย/.test(c1)) rowExpTotal = i;
+            else if (/รายรับสูง\(ต่ำ/.test(c1)) rowNetBalance = i;
+            else if (/รวมเงินคงเหลือทั้งสิ้น/.test(c1)) rowCashTotal = i;
+            else if (/ประเภทออมทรัพย์/.test(c1)) rowCashSavings = i;
+            else if (/เงินฝากคลัง/.test(c1) && rowExpTotal >= 0) rowCashTreasury = i;
+            else if (/หักภาระผูกพัน/.test(c1)) rowObligation = i;
+        }
 
-            if (/^รายรับ$/.test(a) && !b && !c) { inIncomeSection = true; inExpenseSection = false; continue; }
-            if (/^รายจ่าย$/.test(a) && !b && !c) { inExpenseSection = true; inIncomeSection = false; continue; }
+        // Pass 2: classify sub-items ตามชื่อรายการ (ไม่พึ่ง section header)
+        for (var i = 0; i < rows.length; i++) {
+            var c2 = String(cv(i, 2)).trim();
+            if (!c2 || /รวมรายรับ|รวมรายจ่าย|รายรับสูง|เงินคงเหลือ|ภาระผูกพัน|กองทุนรอ/.test(c2)) continue;
 
-            if (/รวมรายรับ/.test(c)) { rowIncTotal = i; inIncomeSection = false; }
-            else if (/รวมรายจ่าย/.test(c)) { rowExpTotal = i; inExpenseSection = false; }
-            else if (/รายรับสูง\(ต่ำ/.test(c) || /รายรับสูงต่ำ/.test(c)) rowNetBalance = i;
-            else if (/รวมเงินคงเหลือทั้งสิ้น/.test(c)) rowCashTotal = i;
-            else if (/ประเภทออมทรัพย์/.test(c)) rowCashSavings = i;
-            else if (/เงินฝากคลัง/.test(c) && i > 60) rowCashTreasury = i; // เฉพาะส่วนล่าง
-            else if (/หักภาระผูกพัน/.test(c)) rowObligation = i;
-
-            // เก็บแถวย่อยรายรับ (col C มีชื่อ + col D มีแผนปี > 0)
-            if (inIncomeSection && c && Number(cv(i, PLAN_YEAR_COL)) > 0) {
-                incSubRows.push({ name: c, row: i });
+            // ต้องมีข้อมูลผลดำเนินงาน หรือ แผนปี
+            var hasData = false;
+            for (var rc = 0; rc < RESULT_COLS.length; rc++) {
+                if (Number(cv(i, RESULT_COLS[rc])) > 0) { hasData = true; break; }
             }
-            // เก็บแถวย่อยรายจ่าย
-            if (inExpenseSection && c && Number(cv(i, PLAN_YEAR_COL)) > 0) {
-                expSubRows.push({ name: c, row: i });
+            if (!hasData && !(Number(cv(i, PLAN_YEAR_COL)) > 0)) continue;
+
+            var item = { name: c2, row: i };
+
+            // ─── รายรับ (ก่อนแถวรวมรายรับ) ───
+            if (rowIncTotal >= 0 && i < rowIncTotal) {
+                allIncSubRows.push(item);
+                // รายรับจากการดำเนินงาน
+                if (/UC|สุขภาพถ้วนหน้า|EMS|ฉุกเฉิน|เบิกจ่ายตรง|กรมบัญชีกลาง|ต้นสังกัด|อปท|ประกันสังคม|แรงงานต่างด้าว|การบริการอื่น|ค่ารักษาพยาบาล/.test(c2)) {
+                    incOpsSubRows.push(item);
+                }
+                // รายรับอื่น
+                else if (/บริจาค|ดอกเบี้ย|อุดหนุน|ช่วยเหลือ|รายรับอื่น/.test(c2)) {
+                    incOthSubRows.push(item);
+                }
+                // fallback — ถ้าไม่ match → ใส่ดำเนินงาน
+                else {
+                    incOpsSubRows.push(item);
+                }
+            }
+            // ─── รายจ่าย (หลังรวมรายรับ ก่อนรวมรายจ่าย) ───
+            else if (rowIncTotal >= 0 && rowExpTotal >= 0 && i > rowIncTotal && i < rowExpTotal) {
+                allExpSubRows.push(item);
+                // บุคลากร
+                if (/ค่าจ้าง|ลูกจ้าง|พนักงานกระทรวง|ล่วงเวลา|ค่าตอบแทน|เวรผลัด|เวชปฏิบัติ|เบี้ยเลี้ยง|ฉ\.?5|ฉ\.?11|ฉ\.?12|พ\.ต\.ส|SMC|คลินิกพิเศษ|บุคลากรอื่น|นอกเวลา/.test(c2)) {
+                    expPersSubRows.push(item);
+                }
+                // ดำเนินงาน
+                else if (/ค่ายา|เวชภัณฑ์|วัสดุการแพทย์|วิทยาศาสตร์|เภสัช|ทันตกรรม|เอ็กซเรย์|ค่าวัสดุ$|สาธารณูปโภค|ค่าใช้สอย|ค่าใช้จ่ายดำเนินงาน/.test(c2)) {
+                    expOpsSubRows.push(item);
+                }
+                // ลงทุน
+                else if (/ครุภัณฑ์|ที่ดิน|สิ่งก่อสร้าง|ค่าเสื่อม/.test(c2)) {
+                    expInvestSubRows.push(item);
+                }
+                // รายจ่ายอื่น
+                else {
+                    expOtherSubRows.push(item);
+                }
             }
         }
+
+        var incSubRows = allIncSubRows;
+        var expSubRows = allExpSubRows;
 
         if (rowIncTotal < 0 || rowExpTotal < 0) {
             console.log('Finance gviz: ไม่พบแถวรวมรายรับ/รายจ่าย');
@@ -3926,36 +4842,17 @@ async function loadFinanceFromGAS() {
                 .map(function(s){ return {name:s.name, monthly:getResultRow(s.row)}; });
         }
 
-        // แยก incSubRows ตาม section: ดำเนินงาน (row 6-14) vs อื่น (row 16-20)
-        var incOpsRows = incSubRows.filter(function(s){ return s.row < 15; }); // ก่อน "รายรับอื่น" header
-        var incOthRows = incSubRows.filter(function(s){ return s.row >= 15; });
+        var incOpsDetail = buildDetail(incOpsSubRows);
+        var incOtherDetail = buildDetail(incOthSubRows);
+        var expPersDetail = buildDetail(expPersSubRows);
+        var expOpsDetail = buildDetail(expOpsSubRows);
+        var expInvestDetail = buildDetail(expInvestSubRows);
+        var expOtherDetail = buildDetail(expOtherSubRows);
 
-        // แยก expSubRows ตาม section header ที่ค้นพบ
-        var expPersRows = [], expOpsRows = [], expInvestRows = [], expOtherRows = [];
-        var expSection = '';
-        for (var i = 0; i < rows.length; i++) {
-            var b2 = String(cv(i, 1)).trim();
-            if (/รายจ่ายบุคลากร/.test(b2)) { expSection = 'pers'; continue; }
-            if (/รายจ่ายดำเนินงาน/.test(b2)) { expSection = 'ops'; continue; }
-            if (/รายจ่ายลงทุน/.test(b2)) { expSection = 'invest'; continue; }
-            if (/รายจ่ายอื่น/.test(b2)) { expSection = 'other'; continue; }
-            // หา sub row ที่มีข้อมูล
-            for (var es = 0; es < expSubRows.length; es++) {
-                if (expSubRows[es].row === i) {
-                    if (expSection === 'pers') expPersRows.push(expSubRows[es]);
-                    else if (expSection === 'ops') expOpsRows.push(expSubRows[es]);
-                    else if (expSection === 'invest') expInvestRows.push(expSubRows[es]);
-                    else if (expSection === 'other') expOtherRows.push(expSubRows[es]);
-                }
-            }
-        }
-
-        var incOpsDetail = buildDetail(incOpsRows);
-        var incOtherDetail = buildDetail(incOthRows);
-        var expPersDetail = buildDetail(expPersRows);
-        var expOpsDetail = buildDetail(expOpsRows);
-        var expInvestDetail = buildDetail(expInvestRows);
-        var expOtherDetail = buildDetail(expOtherRows);
+        console.log('Finance detail rows: incOps='+incOpsDetail.length+', incOth='+incOtherDetail.length+', expPers='+expPersDetail.length+', expOps='+expOpsDetail.length+', expInvest='+expInvestDetail.length+', expOther='+expOtherDetail.length);
+        console.log('Finance raw subRows: incOpsSubRows='+incOpsSubRows.length+', incOthSubRows='+incOthSubRows.length+', expPersSubRows='+expPersSubRows.length);
+        if (incOpsSubRows.length > 0) console.log('incOps items:', incOpsSubRows.map(function(s){return s.name.substring(0,20)+'(r'+s.row+')';}).join(', '));
+        if (incOpsSubRows.length === 0) console.log('⚠ incOpsSubRows EMPTY! First 5 rows A|B|C:', Array.from({length:Math.min(10,rows.length)},function(_,i){return 'r'+i+': A='+String(cv(i,0)).substring(0,10)+' B='+String(cv(i,1)).substring(0,15)+' C='+String(cv(i,2)).substring(0,20);}).join(' | '));
 
         // สร้าง d object
         var d = {
@@ -3994,10 +4891,27 @@ async function loadFinanceFromGAS() {
 
         console.log('✅ Finance gviz loaded:', mc, 'เดือน, รายรับ:', incActTotal, 'รายจ่าย:', expActTotal);
         applyFinanceLiveData(d);
+        return; // สำเร็จแล้ว ไม่ต้องไป GAS
 
-    } catch (e2) {
-        console.log('Finance gviz load error (ใช้ hardcoded):', e2.message || e2);
+    } catch (e1) {
+        console.log('⚠ Finance gviz error:', e1.message || e1, '→ ลอง GAS Web App...');
     }
+
+    // ── Layer 2: GAS Web App (fallback เมื่อ gviz ไม่ได้) ──
+    if (FIN_WEBAPP_URL) {
+        try {
+            var res = await fetch(FIN_WEBAPP_URL, { redirect: 'follow' });
+            var gasD = await res.json();
+            if (gasD && gasD.status === 'ok') {
+                console.log('✅ Finance GAS Web App loaded:', gasD.monthCount, 'เดือน');
+                applyFinanceLiveData(gasD);
+                return;
+            }
+        } catch (e2) {
+            console.log('⚠ Finance GAS Web App failed:', e2.message);
+        }
+    }
+    console.log('Finance: ใช้ hardcoded (ทั้ง gviz และ GAS ล้มเหลว)');
 }
 
 // ★ อัปเดต KPI + กราฟ + ERP Overview card จาก live data
