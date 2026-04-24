@@ -4277,15 +4277,14 @@ async function loadPlanFinFromGS() {
         }
 
         console.log('PlanFin revItems:', revItems.length, 'expItems:', expItems.length);
-        renderPfRevenueDetail(revItems, revPlanTotal, revActTotal, revPlanYear);
 
+        // ★ อัปเดต KPI cards + ERP Overview ก่อน (ไม่ให้ crash ของกราฟกระทบ)
         if (revActTotal > 0 || expActTotal > 0) {
             var numMonths = 6;
             var moLabels = ['ต.ค.68','พ.ย.68','ธ.ค.68','ม.ค.69','ก.พ.69','มี.ค.69'];
             var revPlanMonthly = revPlanYear > 0 ? revPlanYear / 12 : (revPlanTotal / numMonths);
             var expPlanMonthly = expPlanYear > 0 ? expPlanYear / 12 : (expPlanTotal / numMonths);
 
-            // ★ อัปเดต KPI cards + ERP Overview card ก่อนกราฟ (เพื่อให้ค่าตรงแม้กราฟ crash)
             var pfInfo = {
                 revActM: +(revActTotal / 1e6).toFixed(2),
                 revPlanMonthM: +(revPlanTotal / 1e6).toFixed(2),
@@ -4300,9 +4299,18 @@ async function loadPlanFinFromGS() {
                 expPct: expPlanTotal > 0 ? +((expActTotal - expPlanTotal) / expPlanTotal * 100).toFixed(2) : 0
             };
             updatePlanFinOverviewCard(pfInfo);
-            console.log('✅ PlanFin KPI cards อัปเดตสำเร็จ');
+            console.log('✅ PlanFin KPI cards อัปเดตสำเร็จ: รายได้=' + pfInfo.revActM + 'M');
+        }
 
-            // กราฟ trend (อาจ crash ถ้า canvas ซ้ำ — แต่ KPIs อัปเดตแล้ว)
+        // ★ Revenue detail (อาจ crash ถ้า pie chart canvas ซ้ำ)
+        try {
+            renderPfRevenueDetail(revItems, revPlanTotal, revActTotal, revPlanYear);
+        } catch (detailErr) {
+            console.log('⚠ PlanFin revenue detail error:', detailErr.message);
+        }
+
+        if (revActTotal > 0 || expActTotal > 0) {
+            // กราฟ trend
             try {
                 var rpc = [], epc = [];
                 for (var m = 1; m <= numMonths; m++) { rpc.push(+((revPlanMonthly * m) / 1e6).toFixed(2)); epc.push(+((expPlanMonthly * m) / 1e6).toFixed(2)); }
