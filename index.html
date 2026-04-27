@@ -1316,8 +1316,123 @@ body{background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 28%,#f0fdfa 55%,#e8fdf
     <div class="erp-section-head">
         <h3>📊 รายงานการเรียกเก็บชดเชยค่าบริการทางการแพทย์ ปีงบประมาณ 2569</h3>
         <div class="line"></div>
-        <div id="nhso-last-updated" style="font-size:0.8rem;color:#64748b;margin-top:0.5rem">กำลังโหลดข้อมูล...</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:0.5rem;flex-wrap:wrap">
+            <div id="nhso-last-updated" style="font-size:0.8rem;color:#64748b">กำลังโหลดข้อมูล...</div>
+            <button id="btnGenReport" onclick="openReportModal()" style="
+                background:linear-gradient(135deg,#059669 0%,#10b981 100%);color:#fff;border:none;border-radius:10px;
+                padding:10px 20px;font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;
+                box-shadow:0 2px 8px rgba(16,185,129,0.3);transition:all .2s;font-family:inherit;
+            " onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 16px rgba(16,185,129,0.4)'"
+               onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(16,185,129,0.3)'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                สร้างรายงานผู้บริหาร (AI)
+            </button>
+        </div>
     </div>
+
+    <!-- ============== MODAL: สร้างรายงานผู้บริหาร ============== -->
+    <div id="reportModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center">
+        <div style="background:#fff;border-radius:16px;max-width:800px;width:95%;max-height:90vh;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);display:flex;flex-direction:column">
+            <!-- Header -->
+            <div style="background:linear-gradient(135deg,#059669,#10b981);padding:20px 24px;color:#fff;display:flex;align-items:center;justify-content:space-between">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:40px;height:40px;background:rgba(255,255,255,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px">📋</div>
+                    <div>
+                        <div style="font-weight:700;font-size:1.1rem">สร้างรายงานผู้บริหาร</div>
+                        <div style="font-size:0.75rem;opacity:0.85">ใช้ AI วิเคราะห์ข้อมูล NHSO Billing อัตโนมัติ</div>
+                    </div>
+                </div>
+                <button onclick="closeReportModal()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">✕</button>
+            </div>
+
+            <!-- Body -->
+            <div style="padding:24px;overflow-y:auto;flex:1" id="reportModalBody">
+                <!-- ตั้งค่า API Key -->
+                <div style="margin-bottom:20px">
+                    <label style="font-weight:600;color:#1e293b;font-size:0.9rem;display:block;margin-bottom:6px">🔑 Claude API Key</label>
+                    <div style="display:flex;gap:8px">
+                        <input id="claudeApiKey" type="password" placeholder="sk-ant-api03-..." style="
+                            flex:1;padding:10px 14px;border:1.5px solid #d1d5db;border-radius:10px;font-size:0.85rem;
+                            font-family:'JetBrains Mono',monospace;outline:none;transition:border .2s;
+                        " onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#d1d5db'">
+                        <button onclick="toggleApiKey()" style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:10px;background:#fff;cursor:pointer;font-size:16px" title="แสดง/ซ่อน">👁</button>
+                    </div>
+                    <div style="font-size:0.7rem;color:#94a3b8;margin-top:4px">API Key จะไม่ถูกบันทึก ใช้เฉพาะ session นี้เท่านั้น</div>
+                </div>
+
+                <!-- เลือกรูปแบบรายงาน -->
+                <div style="margin-bottom:20px">
+                    <label style="font-weight:600;color:#1e293b;font-size:0.9rem;display:block;margin-bottom:8px">📝 เลือกรูปแบบรายงาน</label>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="reportTypeGrid">
+                        <label class="rpt-opt" style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all .2s;background:#fff" onclick="selectReportType(this,'summary')">
+                            <input type="radio" name="rptType" value="summary" checked style="margin-top:3px;accent-color:#10b981">
+                            <div><div style="font-weight:600;color:#1e293b;font-size:0.85rem">📊 สรุปภาพรวม</div><div style="font-size:0.72rem;color:#64748b;margin-top:2px">สรุป SMT ทุกกองทุน + แนวโน้ม + ข้อเสนอแนะ 1–2 หน้า</div></div>
+                        </label>
+                        <label class="rpt-opt" style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all .2s;background:#fff" onclick="selectReportType(this,'detailed')">
+                            <input type="radio" name="rptType" value="detailed" style="margin-top:3px;accent-color:#10b981">
+                            <div><div style="font-weight:600;color:#1e293b;font-size:0.85rem">📋 รายงานเต็ม 13 หมวด</div><div style="font-size:0.72rem;color:#64748b;margin-top:2px">ครบทุกกองทุน OP/IP/ANC/KTP/Telemed/ไตวาย/HC-Drug/OFC/LGO/กองทุนอื่น</div></div>
+                        </label>
+                        <label class="rpt-opt" style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all .2s;background:#fff" onclick="selectReportType(this,'compare')">
+                            <input type="radio" name="rptType" value="compare" style="margin-top:3px;accent-color:#10b981">
+                            <div><div style="font-weight:600;color:#1e293b;font-size:0.85rem">📈 วิเคราะห์เปรียบเทียบ</div><div style="font-size:0.72rem;color:#64748b;margin-top:2px">เทียบรายเดือน หาแนวโน้ม จุดเด่น-จุดด้อย พร้อมกราฟ</div></div>
+                        </label>
+                        <label class="rpt-opt" style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all .2s;background:#fff" onclick="selectReportType(this,'custom')">
+                            <input type="radio" name="rptType" value="custom" style="margin-top:3px;accent-color:#10b981">
+                            <div><div style="font-weight:600;color:#1e293b;font-size:0.85rem">✏️ กำหนดเอง</div><div style="font-size:0.72rem;color:#64748b;margin-top:2px">ระบุ prompt เองตามต้องการ เช่น วิเคราะห์เฉพาะ IP หรือเฉพาะ KTP</div></div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Custom prompt (แสดงเฉพาะเมื่อเลือก custom) -->
+                <div id="customPromptArea" style="display:none;margin-bottom:20px">
+                    <label style="font-weight:600;color:#1e293b;font-size:0.9rem;display:block;margin-bottom:6px">💬 คำสั่งเพิ่มเติม</label>
+                    <textarea id="customPrompt" rows="3" placeholder="เช่น: วิเคราะห์เฉพาะกองทุน IP เปรียบเทียบ 6 เดือน พร้อมข้อเสนอแนะ..." style="
+                        width:100%;padding:12px 14px;border:1.5px solid #d1d5db;border-radius:10px;font-size:0.85rem;
+                        font-family:inherit;resize:vertical;outline:none;box-sizing:border-box;
+                    " onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#d1d5db'"></textarea>
+                </div>
+
+                <!-- ปุ่มสร้างรายงาน -->
+                <button id="btnGenerate" onclick="generateReport()" style="
+                    width:100%;padding:14px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;
+                    border-radius:12px;font-size:0.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;
+                    justify-content:center;gap:10px;transition:all .2s;font-family:inherit;
+                " onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    สร้างรายงาน
+                </button>
+
+                <!-- Progress -->
+                <div id="reportProgress" style="display:none;margin-top:16px">
+                    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0">
+                        <div class="ld-spin" style="width:20px;height:20px;border:2.5px solid #d1fae5;border-top-color:#10b981;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+                        <span id="reportProgressText" style="font-size:0.85rem;color:#065f46;font-weight:500">กำลังรวบรวมข้อมูล...</span>
+                    </div>
+                </div>
+
+                <!-- Result -->
+                <div id="reportResult" style="display:none;margin-top:20px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                        <div style="font-weight:700;color:#1e293b;font-size:0.95rem">📄 รายงานผู้บริหาร</div>
+                        <div style="display:flex;gap:8px">
+                            <button onclick="copyReport()" style="padding:6px 14px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:0.78rem;font-family:inherit;font-weight:500;color:#475569">📋 คัดลอก</button>
+                            <button onclick="downloadReport()" style="padding:6px 14px;background:#059669;border:none;border-radius:8px;cursor:pointer;font-size:0.78rem;font-family:inherit;font-weight:600;color:#fff">💾 ดาวน์โหลด .txt</button>
+                        </div>
+                    </div>
+                    <div id="reportContent" style="
+                        background:#fafbfc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;
+                        font-size:0.85rem;line-height:1.75;color:#334155;max-height:50vh;overflow-y:auto;
+                        white-space:pre-wrap;font-family:'IBM Plex Sans Thai','Sarabun',sans-serif;
+                    "></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .rpt-opt:has(input:checked){border-color:#10b981 !important;background:#f0fdf4 !important;box-shadow:0 0 0 3px rgba(16,185,129,0.12)}
+    .rpt-opt:hover{border-color:#86efac !important;background:#f8fffe !important}
+    </style>
 
     <!-- ============== Hero Stats (KPI Cards 4 ช่อง) ============== -->
     <section class="hero-grid mb-4">
@@ -4533,6 +4648,120 @@ function updatePfOvKPIs(info) {
         ins.className = 'nt-insight ' + (info.niM >= 0 ? 'good' : 'warn');
     }
 }
+// ==================== REPORT GENERATOR (Claude API) ====================
+
+function openReportModal() {
+    var m = document.getElementById('reportModal');
+    if (m) { m.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+}
+function closeReportModal() {
+    var m = document.getElementById('reportModal');
+    if (m) { m.style.display = 'none'; document.body.style.overflow = ''; }
+}
+function toggleApiKey() {
+    var inp = document.getElementById('claudeApiKey');
+    if (inp) inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+function selectReportType(el, type) {
+    var cpa = document.getElementById('customPromptArea');
+    if (cpa) cpa.style.display = type === 'custom' ? 'block' : 'none';
+}
+
+function collectNHSOData() {
+    if (!nhsoBilling) return null;
+    var d = nhsoBilling;
+    var out = {};
+    if (d.smt) out.smt = { summary: d.smt.summary, byFund: d.smt.byFund ? d.smt.byFund.map(function(f){ return { name:f.name, totalAmt:f.totalAmt, totalNet:f.totalNet, records:f.records }; }) : [], monthly: d.smt.monthly };
+    if (d.op) out.op = { summary: d.op.summary, months: d.op.months };
+    if (d.ip) out.ip = { summary: d.ip.summary, months: d.ip.months };
+    if (d.anc) out.anc = { summary: d.anc.summary, months: d.anc.months };
+    if (d.telemed) out.telemed = { summary: d.telemed.summary, months: d.telemed.months };
+    if (d.kidney) out.kidney = { summary: d.kidney.summary, months: d.kidney.months };
+    if (d.hcDrug) out.hcDrug = { summary: d.hcDrug.summary, months: d.hcDrug.months };
+    if (d.ktpClaim) out.ktpClaim = { summary: d.ktpClaim.summary, items: d.ktpClaim.items };
+    if (d.mophClaim) out.mophClaim = { summary: d.mophClaim.summary, items: d.mophClaim.items };
+    if (d.otherFunds) out.otherFunds = { summary: d.otherFunds.summary, months: d.otherFunds.months };
+    if (d.opFixed) out.opFixed = d.opFixed;
+    if (d.ipSum) out.ipSum = d.ipSum;
+    if (d.ofc) out.ofc = d.ofc;
+    if (d.lgo) out.lgo = d.lgo;
+    if (d.rh) out.rh = d.rh;
+    return out;
+}
+
+function buildPrompt(type, customText, data) {
+    var base = 'คุณเป็นนักวิเคราะห์การเงินของโรงพยาบาลเสลภูมิ จังหวัดร้อยเอ็ด ปีงบประมาณ 2569 (ต.ค.2568–มี.ค.2569)\n\nข้อมูลการเรียกเก็บชดเชยค่าบริการทางการแพทย์ (NHSO Billing):\n';
+    base += JSON.stringify(data, null, 0) + '\n\n';
+    if (type === 'summary') {
+        return base + 'จงเขียนรายงานสรุปผู้บริหาร (Executive Summary) แบบ bullet-point ภาษาไทย ครอบคลุม:\n1. ภาพรวม: ยอด SMT รวม, จำนวนกองทุน, แนวโน้มรายเดือน\n2. กองทุนที่มียอดสูงสุด 3 อันดับ\n3. จุดสังเกต/ความผิดปกติ\n4. ข้อเสนอแนะสำหรับผู้บริหาร\nความยาว 1-2 หน้า A4 ใช้ภาษาราชการกึ่งทางการ';
+    } else if (type === 'detailed') {
+        return base + 'จงเขียนรายงานผู้บริหารแบบเต็ม ภาษาไทย ครอบคลุมทั้ง 13 หมวด:\n1.ภาพรวม SMT 2.OP ผู้ป่วยนอก 3.IP ผู้ป่วยใน 4.หญิงตั้งครรภ์ ANC 5.KTP-Claim 6.Telemedicine 7.ไตวาย 8.HC-Drug 9.DMHT 10.OFC 11.LGO 12.กองทุนอื่นๆ 13.สรุปประเด็นสำคัญ\nแต่ละหมวดระบุ: ยอดสะสม, แนวโน้มรายเดือน, จุดสังเกต, ข้อเสนอแนะ\nรูปแบบ bullet-point headings ไม่ใช้ตาราง ภาษาราชการกึ่งทางการ';
+    } else if (type === 'compare') {
+        return base + 'จงวิเคราะห์เปรียบเทียบรายเดือน (ต.ค.68–มี.ค.69) ภาษาไทย:\n1. เปรียบเทียบยอด SMT รายเดือน หาแนวโน้ม\n2. กองทุนที่เติบโตมากที่สุด vs ลดลงมากที่สุด\n3. วิเคราะห์ seasonal pattern\n4. พยากรณ์แนวโน้ม 3 เดือนข้างหน้า\n5. ข้อเสนอแนะเชิงกลยุทธ์\nใช้ bullet-point ภาษาราชการกึ่งทางการ';
+    } else {
+        return base + (customText || 'จงวิเคราะห์และเขียนรายงานตามข้อมูลที่ให้ ภาษาไทย');
+    }
+}
+
+async function generateReport() {
+    var apiKey = (document.getElementById('claudeApiKey').value || '').trim();
+    if (!apiKey) { alert('กรุณาใส่ Claude API Key'); return; }
+    if (!nhsoBilling) { alert('ยังไม่มีข้อมูล NHSO Billing กรุณารอให้โหลดข้อมูลเสร็จก่อน'); return; }
+    var type = 'summary';
+    var radios = document.querySelectorAll('input[name="rptType"]');
+    for (var i = 0; i < radios.length; i++) { if (radios[i].checked) type = radios[i].value; }
+    var customText = (document.getElementById('customPrompt').value || '').trim();
+    var prog = document.getElementById('reportProgress');
+    var progText = document.getElementById('reportProgressText');
+    var result = document.getElementById('reportResult');
+    var content = document.getElementById('reportContent');
+    var btn = document.getElementById('btnGenerate');
+    prog.style.display = 'block'; result.style.display = 'none';
+    btn.disabled = true; btn.style.opacity = '0.6';
+    progText.textContent = '🔄 กำลังรวบรวมข้อมูล NHSO...';
+    var data = collectNHSOData();
+    progText.textContent = '🤖 กำลังส่งข้อมูลไปยัง Claude AI...';
+    var prompt = buildPrompt(type, customText, data);
+    try {
+        var response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+            body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 8000, messages: [{ role: 'user', content: prompt }] })
+        });
+        if (!response.ok) {
+            var errData = await response.json().catch(function(){ return {}; });
+            throw new Error('API Error ' + response.status + ': ' + (errData.error ? errData.error.message : response.statusText));
+        }
+        progText.textContent = '📝 กำลังสร้างรายงาน...';
+        var respData = await response.json();
+        var reportText = respData.content && respData.content[0] ? respData.content[0].text : 'ไม่ได้รับข้อมูลจาก API';
+        content.textContent = reportText;
+        result.style.display = 'block'; prog.style.display = 'none';
+        console.log('✅ รายงานผู้บริหารสร้างสำเร็จ (' + reportText.length + ' chars)');
+    } catch (err) {
+        prog.style.display = 'none';
+        content.textContent = '❌ เกิดข้อผิดพลาด: ' + err.message + '\n\nกรุณาตรวจสอบ:\n• API Key ถูกต้อง\n• มี credit เหลือใน Anthropic account\n• เชื่อมต่ออินเทอร์เน็ตได้';
+        result.style.display = 'block';
+    }
+    btn.disabled = false; btn.style.opacity = '1';
+}
+
+function copyReport() {
+    var c = document.getElementById('reportContent');
+    if (c) navigator.clipboard.writeText(c.textContent).then(function(){ alert('คัดลอกรายงานแล้ว'); });
+}
+
+function downloadReport() {
+    var c = document.getElementById('reportContent');
+    if (!c) return;
+    var blob = new Blob([c.textContent], { type: 'text/plain;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    var now = new Date();
+    a.download = 'รายงานผู้บริหาร_NHSO_' + now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '.txt';
+    a.click(); URL.revokeObjectURL(a.href);
+}
+
 // ==================== FINANCE CHARTS ====================
 
 // ★ Render รายละเอียดรายได้แยกกองทุน (ตาราง + กราฟ + KPI)
