@@ -1339,7 +1339,7 @@ body{background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 28%,#f0fdfa 55%,#e8fdf
                     <div style="width:40px;height:40px;background:rgba(255,255,255,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px">📋</div>
                     <div>
                         <div style="font-weight:700;font-size:1.1rem">สร้างรายงานผู้บริหาร</div>
-                        <div style="font-size:0.75rem;opacity:0.85">ใช้ AI วิเคราะห์ข้อมูล NHSO Billing อัตโนมัติ</div>
+                        <div style="font-size:0.75rem;opacity:0.85">ใช้ Gemini AI วิเคราะห์ข้อมูล NHSO Billing อัตโนมัติ</div>
                     </div>
                 </div>
                 <button onclick="closeReportModal()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">✕</button>
@@ -1349,15 +1349,15 @@ body{background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 28%,#f0fdfa 55%,#e8fdf
             <div style="padding:24px;overflow-y:auto;flex:1" id="reportModalBody">
                 <!-- ตั้งค่า API Key -->
                 <div style="margin-bottom:20px">
-                    <label style="font-weight:600;color:#1e293b;font-size:0.9rem;display:block;margin-bottom:6px">🔑 Claude API Key</label>
+                    <label style="font-weight:600;color:#1e293b;font-size:0.9rem;display:block;margin-bottom:6px">🔑 Gemini API Key</label>
                     <div style="display:flex;gap:8px">
-                        <input id="claudeApiKey" type="password" placeholder="sk-ant-api03-..." style="
+                        <input id="claudeApiKey" type="password" placeholder="AIzaSy..." style="
                             flex:1;padding:10px 14px;border:1.5px solid #d1d5db;border-radius:10px;font-size:0.85rem;
                             font-family:'JetBrains Mono',monospace;outline:none;transition:border .2s;
                         " onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#d1d5db'">
                         <button onclick="toggleApiKey()" style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:10px;background:#fff;cursor:pointer;font-size:16px" title="แสดง/ซ่อน">👁</button>
                     </div>
-                    <div style="font-size:0.7rem;color:#94a3b8;margin-top:4px">API Key จะไม่ถูกบันทึก ใช้เฉพาะ session นี้เท่านั้น</div>
+                    <div style="font-size:0.7rem;color:#94a3b8;margin-top:4px">รับ API Key ฟรีได้ที่ <a href="https://aistudio.google.com/apikey" target="_blank" style="color:#10b981">Google AI Studio</a> — ไม่ถูกบันทึก ใช้เฉพาะ session นี้</div>
                 </div>
 
                 <!-- เลือกรูปแบบรายงาน -->
@@ -4705,7 +4705,7 @@ function buildPrompt(type, customText, data) {
 
 async function generateReport() {
     var apiKey = (document.getElementById('claudeApiKey').value || '').trim();
-    if (!apiKey) { alert('กรุณาใส่ Claude API Key'); return; }
+    if (!apiKey) { alert('กรุณาใส่ Gemini API Key\n\nรับฟรีได้ที่: https://aistudio.google.com/apikey'); return; }
     if (!nhsoBilling) { alert('ยังไม่มีข้อมูล NHSO Billing กรุณารอให้โหลดข้อมูลเสร็จก่อน'); return; }
     var type = 'summary';
     var radios = document.querySelectorAll('input[name="rptType"]');
@@ -4720,27 +4720,58 @@ async function generateReport() {
     btn.disabled = true; btn.style.opacity = '0.6';
     progText.textContent = '🔄 กำลังรวบรวมข้อมูล NHSO...';
     var data = collectNHSOData();
-    progText.textContent = '🤖 กำลังส่งข้อมูลไปยัง Claude AI...';
+    progText.textContent = '🤖 กำลังส่งข้อมูลไปยัง Gemini AI...';
     var prompt = buildPrompt(type, customText, data);
     try {
-        var response = await fetch('https://api.anthropic.com/v1/messages', {
+        // ★ Gemini API (gemini-2.0-flash)
+        var geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey;
+        var response = await fetch(geminiUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-            body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 8000, messages: [{ role: 'user', content: prompt }] })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    temperature: 0.4,
+                    maxOutputTokens: 8192,
+                    topP: 0.95
+                }
+            })
         });
         if (!response.ok) {
             var errData = await response.json().catch(function(){ return {}; });
-            throw new Error('API Error ' + response.status + ': ' + (errData.error ? errData.error.message : response.statusText));
+            var errMsg = 'API Error ' + response.status;
+            if (errData.error) errMsg += ': ' + (errData.error.message || errData.error.status || response.statusText);
+            throw new Error(errMsg);
         }
         progText.textContent = '📝 กำลังสร้างรายงาน...';
         var respData = await response.json();
-        var reportText = respData.content && respData.content[0] ? respData.content[0].text : 'ไม่ได้รับข้อมูลจาก API';
-        content.textContent = reportText;
+        var reportText = '';
+        if (respData.candidates && respData.candidates[0] && respData.candidates[0].content && respData.candidates[0].content.parts) {
+            reportText = respData.candidates[0].content.parts.map(function(p){ return p.text || ''; }).join('');
+        } else {
+            reportText = 'ไม่ได้รับข้อมูลจาก Gemini API';
+        }
+
+        // ★ Render markdown → HTML สำหรับแสดงผลสวย
+        var rendered = reportText
+            .replace(/^### (.+)$/gm, '<h4 style="color:#059669;margin:18px 0 8px;font-size:1rem;border-bottom:1px solid #e2e8f0;padding-bottom:4px">$1</h4>')
+            .replace(/^## (.+)$/gm, '<h3 style="color:#1e293b;margin:22px 0 10px;font-size:1.1rem;border-bottom:2px solid #10b981;padding-bottom:6px">$1</h3>')
+            .replace(/^# (.+)$/gm, '<h2 style="color:#064e3b;margin:24px 0 12px;font-size:1.2rem;font-weight:800">$1</h2>')
+            .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#1e293b">$1</strong>')
+            .replace(/^\* (.+)$/gm, '<div style="padding:2px 0 2px 16px;border-left:3px solid #d1fae5">• $1</div>')
+            .replace(/^- (.+)$/gm, '<div style="padding:2px 0 2px 16px;border-left:3px solid #d1fae5">• $1</div>')
+            .replace(/^\d+\. (.+)$/gm, function(m, p1, offset, str) { return '<div style="padding:2px 0 2px 16px;color:#334155">'+m+'</div>'; })
+            .replace(/\n{2,}/g, '<div style="height:10px"></div>')
+            .replace(/\n/g, '<br>');
+
+        content.innerHTML = rendered;
+        content.setAttribute('data-raw', reportText);
         result.style.display = 'block'; prog.style.display = 'none';
-        console.log('✅ รายงานผู้บริหารสร้างสำเร็จ (' + reportText.length + ' chars)');
+        console.log('✅ รายงานผู้บริหารสร้างสำเร็จ (Gemini, ' + reportText.length + ' chars)');
     } catch (err) {
         prog.style.display = 'none';
-        content.textContent = '❌ เกิดข้อผิดพลาด: ' + err.message + '\n\nกรุณาตรวจสอบ:\n• API Key ถูกต้อง\n• มี credit เหลือใน Anthropic account\n• เชื่อมต่ออินเทอร์เน็ตได้';
+        content.innerHTML = '<div style="color:#ef4444;font-weight:600">❌ เกิดข้อผิดพลาด: ' + err.message + '</div>' +
+            '<div style="margin-top:10px;color:#64748b;font-size:0.8rem">กรุณาตรวจสอบ:<br>• Gemini API Key ถูกต้อง (ขึ้นต้นด้วย AIza...)<br>• เปิดใช้งาน Generative Language API แล้ว<br>• เชื่อมต่ออินเทอร์เน็ตได้</div>';
         result.style.display = 'block';
     }
     btn.disabled = false; btn.style.opacity = '1';
@@ -4748,13 +4779,17 @@ async function generateReport() {
 
 function copyReport() {
     var c = document.getElementById('reportContent');
-    if (c) navigator.clipboard.writeText(c.textContent).then(function(){ alert('คัดลอกรายงานแล้ว'); });
+    if (c) {
+        var raw = c.getAttribute('data-raw') || c.textContent;
+        navigator.clipboard.writeText(raw).then(function(){ alert('คัดลอกรายงานแล้ว'); });
+    }
 }
 
 function downloadReport() {
     var c = document.getElementById('reportContent');
     if (!c) return;
-    var blob = new Blob([c.textContent], { type: 'text/plain;charset=utf-8' });
+    var raw = c.getAttribute('data-raw') || c.textContent;
+    var blob = new Blob([raw], { type: 'text/plain;charset=utf-8' });
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     var now = new Date();
