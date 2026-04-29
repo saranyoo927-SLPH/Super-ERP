@@ -4700,24 +4700,66 @@ function showFundChart(code, name, color) {
     if (icon) { icon.textContent = code; icon.style.background = color; }
     var title = document.getElementById('fundChartTitle');
     if (title) title.textContent = name;
-    var sub = document.getElementById('fundChartSub');
+    if (sub) sub.textContent = 'รายได้รายเดือน ปีงบประมาณ 2569';
 
     // ★ ดึง monthly data ตาม code
     var d = nhsoBilling;
-    var labels = [], values = [], chartLabel = 'คงเหลือรายเดือน (บาท)';
+    var labels = [], values = [], chartLabel = name;
     var monthlyData = null;
 
-    // Map fund code → data source
+    // Map fund code → data source (ใช้ field ที่ถูกต้องตาม table rendering)
     var fundDataMap = {
-        'OP':  function() { return d.op && d.op.months ? d.op.months.map(function(m){ return {month:m.month, value:m.opaeComp||0}; }) : null; },
-        'IP':  function() { return d.ip && d.ip.months ? d.ip.months.map(function(m){ return {month:m.month, value:m.totalComp||m.adjRw||0}; }) : null; },
+        'OP':  function() {
+            if (!d.op || !d.op.months) return null;
+            return d.op.months.map(function(m) {
+                // รวมทุก sub-category ของ OP
+                var total = (Number(m.opaeComp)||0) + (Number(m.erComp)||0) + (Number(m.ucepTotal)||0) +
+                    (Number(m.ambulComp)||0) + (Number(m.walkinTotal)||0) + (Number(m.ttmComp)||0) +
+                    (Number(m.pcTotal)||0) + (Number(m.prosTotal)||0) + (Number(m.rh)||0);
+                return { month: m.month, value: total };
+            });
+        },
+        'IP':  function() {
+            if (!d.ip || !d.ip.months) return null;
+            return d.ip.months.map(function(m) {
+                return { month: m.month, value: Number(m.compAfterCut) || Number(m.compBeforeCut) || 0 };
+            });
+        },
         'PP':  function() { return d.smt && d.smt.byMonth ? extractFundMonthly(d, 'PP') : null; },
         'CR':  function() { return d.smt && d.smt.byMonth ? extractFundMonthly(d, 'CR') : null; },
-        'HD':  function() { return d.kidney && d.kidney.months ? d.kidney.months.map(function(m){ return {month:m.month, value:m.totalComp||m.amount||0}; }) : null; },
-        'LGO': function() { return d.lgo && d.lgo.months ? d.lgo.months.map(function(m){ return {month:m.month, value:m.amount||0}; }) : null; },
-        'RH':  function() { return d.rh && d.rh.months ? d.rh.months.map(function(m){ return {month:m.month, value:m.amount||0}; }) : null; },
-        'DMHT':function() { return d.hcDrug && d.hcDrug.months ? d.hcDrug.months.map(function(m){ return {month:m.month, value:m.totalComp||m.amount||0}; }) : null; },
-        'TTM': function() { return d.telemed && d.telemed.months ? d.telemed.months.map(function(m){ return {month:m.month, value:m.totalComp||m.amount||0}; }) : null; },
+        'INVS': function() { return d.smt && d.smt.byMonth ? extractFundMonthly(d, 'INVS') : null; },
+        'HD':  function() {
+            if (!d.kidney || !d.kidney.months) return null;
+            return d.kidney.months.map(function(m) {
+                return { month: m.month, value: Number(m.comp) || Number(m.amount) || 0 };
+            });
+        },
+        'TTM': function() {
+            if (!d.telemed || !d.telemed.months) return null;
+            return d.telemed.months.map(function(m) {
+                return { month: m.month, value: Number(m.comp) || Number(m.amount) || 0 };
+            });
+        },
+        'LGO': function() {
+            if (!d.lgo || !d.lgo.months) return null;
+            return d.lgo.months.map(function(m) {
+                return { month: m.month, value: Number(m.comp) || Number(m.amount) || 0 };
+            });
+        },
+        'RH':  function() {
+            if (!d.rh || !d.rh.months) return null;
+            return d.rh.months.map(function(m) {
+                return { month: m.month, value: Number(m.comp) || Number(m.amount) || 0 };
+            });
+        },
+        'DMHT':function() {
+            if (!d.hcDrug || !d.hcDrug.months) return null;
+            return d.hcDrug.months.map(function(m) {
+                return { month: m.month, value: Number(m.comp) || Number(m.amount) || 0 };
+            });
+        },
+        'PH':  function() { return d.smt && d.smt.byMonth ? extractFundMonthly(d, 'PH') : null; },
+        'HIV': function() { return d.smt && d.smt.byMonth ? extractFundMonthly(d, 'HIV') : null; },
     };
 
     // ลองดึงจาก map ก่อน
