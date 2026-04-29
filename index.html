@@ -2951,9 +2951,17 @@ function renderNHSOBilling() {
     const smtAmt = (d.smt && d.smt.summary && d.smt.summary.totalAmount) || 0;
 
     // 🎯 === 1) Hero Stats (4 cards) ===
-    const opAmt = findFund('กองทุนผู้ป่วยนอก');
-    const ipAmt = findFund('กองทุนผู้ป่วยใน');
-    const ppAmt = findFund('กองทุนสร้างเสริมสุขภาพ');
+    // ★ ใช้ SMT byFund (remain) แทน pivot เพื่อให้ตรงกับ Fund Grid ด้านล่าง
+    const smtFunds = (d.smt && d.smt.byFund) || [];
+    const findSMT = (keyword) => {
+        const f = smtFunds.find(x => (x.name && x.name.indexOf(keyword) !== -1) || (x.code && x.code === keyword));
+        return f ? (f.remain || f.totalNet || 0) : 0;
+    };
+    const opAmt = findSMT('IP') > 0 ? findSMT('OP') : findFund('กองทุนผู้ป่วยนอก');
+    const ipAmt = findSMT('IP') > 0 ? findSMT('IP') : findFund('กองทุนผู้ป่วยใน');
+    const ppAmt = findSMT('PP') > 0 ? findSMT('PP') : findFund('กองทุนสร้างเสริมสุขภาพ');
+    // ใช้ totalRemain จาก SMT เป็นฐาน %
+    const totalRemainHero = smtFunds.reduce(function(a, f) { return a + (f.remain || 0); }, 0) || totalNode;
 
     setText('nhso-hero-smt', fmt(smtNet));
     setText('nhso-hero-fund-count', pivotFunds.length);
@@ -2961,11 +2969,11 @@ function renderNHSOBilling() {
     setText('nhso-hero-node-total', fmtM(totalNode));
 
     setText('nhso-hero-op', fmtM(opAmt));
-    setText('nhso-hero-op-pct', pct(opAmt, totalNode));
+    setText('nhso-hero-op-pct', pct(opAmt, totalRemainHero));
     setText('nhso-hero-ip', fmtM(ipAmt));
-    setText('nhso-hero-ip-pct', pct(ipAmt, totalNode));
+    setText('nhso-hero-ip-pct', pct(ipAmt, totalRemainHero));
     setText('nhso-hero-pp', fmtM(ppAmt));
-    setText('nhso-hero-pp-pct', pct(ppAmt, totalNode));
+    setText('nhso-hero-pp-pct', pct(ppAmt, totalRemainHero));
 
     // Also update ERP Overview Hero (ov_totalRevenue)
     const ovEl = document.getElementById('ov_totalRevenue');
