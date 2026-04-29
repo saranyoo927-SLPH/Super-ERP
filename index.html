@@ -1483,6 +1483,26 @@ body{background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 28%,#f0fdfa 55%,#e8fdf
         </div>
     </section>
 
+    <!-- ============== MODAL: กราฟรายเดือนกองทุน ============== -->
+    <div id="fundChartModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center">
+        <div style="background:#fff;border-radius:18px;max-width:820px;width:95%;max-height:85vh;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column">
+            <div id="fundChartHeader" style="padding:20px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f1f5f9">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <div id="fundChartIcon" style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff">-</div>
+                    <div>
+                        <div id="fundChartTitle" style="font-weight:800;font-size:1.1rem;color:#1e293b">-</div>
+                        <div id="fundChartSub" style="font-size:0.78rem;color:#64748b;margin-top:2px">รายได้รายเดือน ปีงบประมาณ 2569</div>
+                    </div>
+                </div>
+                <button onclick="closeFundChart()" style="background:#f1f5f9;border:none;width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:#64748b;transition:all .2s" onmouseover="this.style.background='#fee2e2';this.style.color='#ef4444'" onmouseout="this.style.background='#f1f5f9';this.style.color='#64748b'">✕</button>
+            </div>
+            <div style="padding:24px;overflow-y:auto;flex:1">
+                <div style="height:320px;position:relative"><canvas id="fundChartCanvas"></canvas></div>
+                <div id="fundChartSummary" style="margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- ============== Fund Grid (12 กองทุน แยกประเภท) ============== -->
     <section class="mb-4">
         <h2 class="section-title">📊 กองทุนแยกประเภท (SMT คงเหลือ)</h2>
@@ -2997,11 +3017,12 @@ function renderNHSOBilling() {
         fundGrid.innerHTML = smtByFund.map(function(f, i) {
             var displayName = fundNameMap[f.code] || f.code;
             var p = totalRemain ? (f.remain / totalRemain * 100).toFixed(2) : 0;
-            return '<div class="fund-card" style="border-top:4px solid ' + colors[i % colors.length] + '">' +
+            return '<div class="fund-card" style="border-top:4px solid ' + colors[i % colors.length] + ';cursor:pointer" onclick="showFundChart(\'' + f.code + '\',\'' + displayName.replace(/'/g, "\\'") + '\',\'' + colors[i % colors.length] + '\')" title="คลิกเพื่อดูกราฟรายเดือน">' +
                 '<div class="fund-code" style="font-size:0.85rem;font-weight:700;color:' + colors[i % colors.length] + ';margin-bottom:0.15rem;">' + f.code + '</div>' +
                 '<div class="fund-name" title="' + displayName + '">' + displayName + '</div>' +
                 '<div class="fund-value">' + fmtM(f.remain) + '</div>' +
                 '<div class="fund-pct">' + p + '%</div>' +
+                '<div style="margin-top:6px;font-size:0.65rem;color:#94a3b8;display:flex;align-items:center;gap:4px;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>ดูกราฟ</div>' +
                 '</div>';
         }).join('');
     }
@@ -4666,6 +4687,167 @@ function updatePfOvKPIs(info) {
     }
 }
 // ==================== REPORT GENERATOR (Claude API) ====================
+
+// ★ แสดงกราฟรายเดือนเมื่อคลิกที่กองทุน
+function showFundChart(code, name, color) {
+    var modal = document.getElementById('fundChartModal');
+    if (!modal || !nhsoBilling) return;
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    // Header
+    var icon = document.getElementById('fundChartIcon');
+    if (icon) { icon.textContent = code; icon.style.background = color; }
+    var title = document.getElementById('fundChartTitle');
+    if (title) title.textContent = name;
+    var sub = document.getElementById('fundChartSub');
+
+    // ★ ดึง monthly data ตาม code
+    var d = nhsoBilling;
+    var labels = [], values = [], chartLabel = 'คงเหลือรายเดือน (บาท)';
+    var monthlyData = null;
+
+    // Map fund code → data source
+    var fundDataMap = {
+        'OP':  function() { return d.op && d.op.months ? d.op.months.map(function(m){ return {month:m.month, value:m.opaeComp||0}; }) : null; },
+        'IP':  function() { return d.ip && d.ip.months ? d.ip.months.map(function(m){ return {month:m.month, value:m.totalComp||m.adjRw||0}; }) : null; },
+        'PP':  function() { return d.smt && d.smt.byMonth ? extractFundMonthly(d, 'PP') : null; },
+        'CR':  function() { return d.smt && d.smt.byMonth ? extractFundMonthly(d, 'CR') : null; },
+        'HD':  function() { return d.kidney && d.kidney.months ? d.kidney.months.map(function(m){ return {month:m.month, value:m.totalComp||m.amount||0}; }) : null; },
+        'LGO': function() { return d.lgo && d.lgo.months ? d.lgo.months.map(function(m){ return {month:m.month, value:m.amount||0}; }) : null; },
+        'RH':  function() { return d.rh && d.rh.months ? d.rh.months.map(function(m){ return {month:m.month, value:m.amount||0}; }) : null; },
+        'DMHT':function() { return d.hcDrug && d.hcDrug.months ? d.hcDrug.months.map(function(m){ return {month:m.month, value:m.totalComp||m.amount||0}; }) : null; },
+        'TTM': function() { return d.telemed && d.telemed.months ? d.telemed.months.map(function(m){ return {month:m.month, value:m.totalComp||m.amount||0}; }) : null; },
+    };
+
+    // ลองดึงจาก map ก่อน
+    if (fundDataMap[code]) {
+        monthlyData = fundDataMap[code]();
+    }
+
+    // ถ้าไม่มี specific data → ใช้ smt.byMonth (ยอดรวมทุกกองทุน) เป็น fallback + แสดง note
+    if (!monthlyData && d.smt && d.smt.byMonth) {
+        monthlyData = d.smt.byMonth.map(function(m) { return {month:m.month, value:m.remain||0}; });
+        chartLabel = 'SMT คงเหลือรวม (บาท) — ไม่มีข้อมูลรายเดือนเฉพาะกองทุน ' + code;
+    }
+
+    if (!monthlyData || !monthlyData.length) {
+        if (sub) sub.textContent = 'ไม่มีข้อมูลรายเดือนสำหรับกองทุนนี้';
+        return;
+    }
+
+    labels = monthlyData.map(function(m) { return m.month; });
+    values = monthlyData.map(function(m) { return m.value; });
+    if (sub) sub.textContent = chartLabel;
+
+    // ★ Render Chart
+    var canvas = document.getElementById('fundChartCanvas');
+    if (!canvas) return;
+    if (chartInstances && chartInstances['fundChartCanvas']) {
+        chartInstances['fundChartCanvas'].destroy();
+    }
+    var ctx = canvas.getContext('2d');
+    chartInstances['fundChartCanvas'] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: name,
+                data: values,
+                backgroundColor: values.map(function(v,i) {
+                    return i === values.length-1 ? color : color + 'bb';
+                }),
+                borderRadius: 8,
+                barPercentage: 0.65,
+                borderSkipped: false
+            }, {
+                label: 'เฉลี่ย',
+                data: Array(values.length).fill(values.reduce(function(a,b){return a+b;},0) / values.length),
+                type: 'line',
+                borderColor: '#f59e0b',
+                borderDash: [6,3],
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'top', labels: { font: { size: 11 }, color: '#64748b', boxWidth: 12 } },
+                tooltip: {
+                    backgroundColor: '#1e293b',
+                    titleFont: { size: 12 },
+                    bodyFont: { size: 12 },
+                    callbacks: {
+                        label: function(ctx2) { return ctx2.dataset.label + ': ' + Number(ctx2.raw).toLocaleString('th-TH', {maximumFractionDigits:2}) + ' บาท'; }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#f1f5f9' },
+                    ticks: { font: { size: 11 }, color: '#94a3b8', callback: function(v) { return (v/1e6).toFixed(1) + 'M'; } }
+                },
+                x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#64748b' } }
+            }
+        }
+    });
+
+    // ★ Summary cards
+    var total = values.reduce(function(a,b){return a+b;},0);
+    var avg = total / values.length;
+    var maxVal = Math.max.apply(null, values);
+    var maxIdx = values.indexOf(maxVal);
+    var minVal = Math.min.apply(null, values);
+    var minIdx = values.indexOf(minVal);
+    var fmtB = function(n) { return Number(n).toLocaleString('th-TH',{maximumFractionDigits:0}); };
+    var summary = document.getElementById('fundChartSummary');
+    if (summary) {
+        summary.innerHTML =
+            '<div style="background:#f0fdf4;border-radius:12px;padding:14px;text-align:center;border:1px solid #d1fae5">' +
+                '<div style="font-size:0.72rem;color:#64748b;margin-bottom:4px">ยอดรวม</div>' +
+                '<div style="font-size:1.1rem;font-weight:800;color:#059669">' + fmtB(total) + '</div>' +
+                '<div style="font-size:0.68rem;color:#94a3b8;margin-top:2px">เฉลี่ย ' + fmtB(avg) + '/เดือน</div>' +
+            '</div>' +
+            '<div style="background:#eff6ff;border-radius:12px;padding:14px;text-align:center;border:1px solid #bfdbfe">' +
+                '<div style="font-size:0.72rem;color:#64748b;margin-bottom:4px">▲ สูงสุด</div>' +
+                '<div style="font-size:1.1rem;font-weight:800;color:#2563eb">' + fmtB(maxVal) + '</div>' +
+                '<div style="font-size:0.68rem;color:#94a3b8;margin-top:2px">' + labels[maxIdx] + '</div>' +
+            '</div>' +
+            '<div style="background:#fef2f2;border-radius:12px;padding:14px;text-align:center;border:1px solid #fecaca">' +
+                '<div style="font-size:0.72rem;color:#64748b;margin-bottom:4px">▼ ต่ำสุด</div>' +
+                '<div style="font-size:1.1rem;font-weight:800;color:#dc2626">' + fmtB(minVal) + '</div>' +
+                '<div style="font-size:0.68rem;color:#94a3b8;margin-top:2px">' + labels[minIdx] + '</div>' +
+            '</div>';
+    }
+}
+
+// Helper: extract monthly from smt.byMonth for a specific fund code (fallback)
+function extractFundMonthly(d, code) {
+    // smt.byMonth ไม่มีแยกกองทุน → ใช้ byFund remain ÷ จำนวนเดือน แทน (estimate)
+    if (!d.smt || !d.smt.byMonth) return null;
+    var fund = (d.smt.byFund || []).find(function(f) { return f.code === code; });
+    if (!fund) return null;
+    var months = d.smt.byMonth;
+    var totalRemainAll = months.reduce(function(a,m){return a + (m.remain||0);},0);
+    if (totalRemainAll === 0) return null;
+    var ratio = (fund.remain || 0) / totalRemainAll;
+    return months.map(function(m) { return { month: m.month, value: Math.round((m.remain||0) * ratio) }; });
+}
+
+function closeFundChart() {
+    var modal = document.getElementById('fundChartModal');
+    if (modal) { modal.style.display = 'none'; document.body.style.overflow = ''; }
+}
+
+// คลิกนอก modal ปิด
+document.addEventListener('click', function(e) {
+    var modal = document.getElementById('fundChartModal');
+    if (modal && modal.style.display === 'flex' && e.target === modal) closeFundChart();
+});
 
 function openReportModal() {
     var m = document.getElementById('reportModal');
