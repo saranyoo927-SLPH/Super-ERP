@@ -6,6 +6,7 @@
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
 *{font-family:'Sarabun', 'DM Sans', sans-serif;} .card-glow{box-shadow:0 0 0 1px rgba(99,102,241,0.05), 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(99,102,241,0.06);}
@@ -1424,6 +1425,7 @@ body{background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 28%,#f0fdfa 55%,#e8fdf
                         <div style="display:flex;gap:8px">
                             <button onclick="copyReport()" style="padding:6px 14px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:0.78rem;font-family:inherit;font-weight:500;color:#475569">📋 คัดลอก</button>
                             <button onclick="downloadReport()" style="padding:6px 14px;background:#059669;border:none;border-radius:8px;cursor:pointer;font-size:0.78rem;font-family:inherit;font-weight:600;color:#fff">💾 ดาวน์โหลด .txt</button>
+                            <button onclick="generateWordReport()" style="padding:6px 14px;background:#2563eb;border:none;border-radius:8px;cursor:pointer;font-size:0.78rem;font-family:inherit;font-weight:600;color:#fff">📄 สร้างรายงาน Word</button>
                         </div>
                     </div>
                     <div id="reportContent" style="
@@ -5036,6 +5038,209 @@ function downloadReport() {
     var now = new Date();
     a.download = 'รายงานผู้บริหาร_NHSO_' + now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '.txt';
     a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ★ สร้างรายงาน Word (.docx) จากข้อมูล NHSO Billing
+async function generateWordReport() {
+    if (!nhsoBilling) { alert('ยังไม่มีข้อมูล NHSO Billing กรุณารอให้โหลดเสร็จก่อน'); return; }
+    var d = nhsoBilling;
+    var fmt = function(n) { return Number(n||0).toLocaleString('th-TH', {maximumFractionDigits:2}); };
+    var fmt0 = function(n) { return Number(n||0).toLocaleString('th-TH', {maximumFractionDigits:0}); };
+    var fmtM = function(n) { return (Number(n||0)/1e6).toFixed(2) + 'M'; };
+    var pct = function(n,t) { return t>0 ? (n/t*100).toFixed(2)+'%' : '-'; };
+
+    // ดึงข้อมูล
+    var smtFunds = (d.smt && d.smt.byFund) || [];
+    var totalRemain = smtFunds.reduce(function(a,f){return a+(f.remain||0);},0);
+    var smtTotal = d.smt && d.smt.summary ? (d.smt.summary.totalNet || d.smt.summary.totalAmount || totalRemain) : totalRemain;
+    var findFund = function(code) { var f = smtFunds.find(function(x){return x.code===code;}); return f ? (f.remain||0) : 0; };
+
+    var D = docx;
+    var b = function(t) { return new D.TextRun({text:t, bold:true, font:'TH SarabunPSK', size:32}); };
+    var r = function(t) { return new D.TextRun({text:t, font:'TH SarabunPSK', size:32}); };
+    var heading = function(text, level) {
+        return new D.Paragraph({spacing:{before:200,after:100},children:[new D.TextRun({text:text,bold:true,font:'TH SarabunPSK',size:level===1?36:34,color:level===1?'1e3a5f':'2e7d32'})]});
+    };
+    var bullet = function(text) {
+        return new D.Paragraph({spacing:{before:40,after:40},indent:{left:720,hanging:360},children:[new D.TextRun({text:'• '+text, font:'TH SarabunPSK', size:32})]});
+    };
+    var emptyLine = function() { return new D.Paragraph({spacing:{before:60},children:[r('')]}); };
+
+    var children = [];
+
+    // ===== TITLE =====
+    children.push(new D.Paragraph({alignment:D.AlignmentType.CENTER,spacing:{after:200},children:[
+        new D.TextRun({text:'รายงานการเรียกเก็บชดเชยค่าบริการทางการแพทย์', bold:true, font:'TH SarabunPSK', size:40, color:'064e3b'}),
+    ]}));
+    children.push(new D.Paragraph({alignment:D.AlignmentType.CENTER,spacing:{after:300},children:[
+        new D.TextRun({text:'โรงพยาบาลเสลภูมิ ปีงบประมาณ 2569', bold:true, font:'TH SarabunPSK', size:36, color:'1e293b'}),
+    ]}));
+
+    // ===== 1. ภาพรวม =====
+    children.push(heading('1. ภาพรวมการเรียกเก็บ เดือนเมษายน 2569', 1));
+    children.push(bullet('ยอดคงเหลือรวม (SMT โอนเข้าบัญชี): ' + fmt(smtTotal) + ' บาท'));
+    children.push(emptyLine());
+    children.push(new D.Paragraph({spacing:{before:80},children:[b('สัดส่วนกองทุนหลัก')]}));
+
+    var fundList = [
+        {code:'IP', name:'IP ผู้ป่วยใน'}, {code:'OP', name:'OP ผู้ป่วยนอก'},
+        {code:'PP', name:'PP สร้างเสริมสุขภาพ'}, {code:'CR', name:'CR Central Reimburse'},
+        {code:'INVS', name:'INVS งบลงทุน'}, {code:'HD', name:'HD ไตวายเรื้อรัง'},
+        {code:'TTM', name:'TTM แพทย์แผนไทย'}, {code:'LGO', name:'LGO สวัสดิการ อปท.'},
+        {code:'RH', name:'RH ฟื้นฟูสมรรถภาพ'}, {code:'DMHT', name:'DMHT เบาหวาน/ความดัน'},
+        {code:'PH', name:'PH บริการปฐมภูมิ'}, {code:'HIV', name:'HIV กองทุนเอดส์'}
+    ];
+    fundList.forEach(function(fl) {
+        var val = findFund(fl.code);
+        children.push(bullet(fl.name + ': ' + fmtM(val) + ' (' + pct(val, totalRemain) + ')'));
+    });
+
+    // ===== 2. OP =====
+    children.push(emptyLine());
+    children.push(heading('2. กองทุนผู้ป่วยนอก (OP)', 1));
+    children.push(bullet('ยอดรวม OP (SMT): ' + fmtM(findFund('OP')) + ' (' + pct(findFund('OP'), totalRemain) + ')'));
+
+    if (d.op && d.op.months) {
+        children.push(heading('2.1 รายละเอียดรายเดือน (ข้อมูล e-Claim)', 2));
+        var opS = d.op.summary || {};
+        d.op.months.forEach(function(m) {
+            var total = (Number(m.opaeComp)||0)+(Number(m.erComp)||0)+(Number(m.ucepTotal)||0)+(Number(m.ambulComp)||0)+(Number(m.walkinTotal)||0)+(Number(m.ttmComp)||0)+(Number(m.pcTotal)||0)+(Number(m.prosTotal)||0)+(Number(m.rh)||0);
+            children.push(bullet(m.month + ': ' + fmt0(m.totalCases) + ' ราย (ผ่าน ' + fmt0(m.passed) + ' / ไม่ผ่าน ' + fmt0(m.notPassed) + ') ยอดเคลม ' + fmt(total) + ' บาท'));
+        });
+        children.push(heading('2.2 กองทุนย่อย OP (สะสม)', 2));
+        children.push(bullet('OPAE อุบัติเหตุฉุกเฉิน: ' + fmt(opS.totalOPAE||0) + ' บาท'));
+        children.push(bullet('ER คุณภาพ: ' + fmt(opS.totalER||0) + ' บาท'));
+        children.push(bullet('UCEP ภาครัฐ: ' + fmt(opS.totalUCEP||0) + ' บาท'));
+        children.push(bullet('ค่าพาหนะส่งต่อ: ' + fmt(opS.totalAmbul||0) + ' บาท'));
+        children.push(bullet('Walkin รับบริการ: ' + fmt(opS.totalWalkin||0) + ' บาท'));
+        children.push(bullet('แพทย์แผนไทย/สมุนไพร: ' + fmt(opS.totalTTM||0) + ' บาท'));
+        children.push(bullet('Palliative Care: ' + fmt(opS.totalPC||0) + ' บาท'));
+        children.push(bullet('อวัยวะเทียม/อุปกรณ์: ' + fmt(opS.totalPros||0) + ' บาท'));
+        children.push(bullet('ฟื้นฟูสภาพ (RH): ' + fmt(opS.totalRH||0) + ' บาท'));
+    }
+
+    // ===== 3. IP =====
+    children.push(emptyLine());
+    children.push(heading('3. กองทุนผู้ป่วยใน (IP)', 1));
+    if (d.ip && d.ip.months) {
+        var ipS = d.ip.summary || {};
+        children.push(bullet('ผู้ป่วย Admit ทั้งหมด: ' + fmt0(ipS.totalCases) + ' ราย'));
+        children.push(bullet('ผ่านการตรวจสอบ: ' + fmt0(ipS.totalPassed) + ' ราย (' + (ipS.totalCases>0?((ipS.totalPassed/ipS.totalCases)*100).toFixed(2):0) + '%)'));
+        children.push(bullet('ไม่ผ่านการตรวจสอบ: ' + fmt0(ipS.totalNotPassed) + ' ราย'));
+        children.push(bullet('AdjRW รวม: ' + fmt(ipS.totalAdjRW)));
+        children.push(bullet('ค่าชดเชยรวม (หลังหักค่าแรง): ' + fmt(ipS.totalCompAfter) + ' บาท'));
+        children.push(heading('3.1 รายละเอียดรายเดือน', 2));
+        d.ip.months.forEach(function(m) {
+            children.push(bullet(m.month + ': ' + fmt0(m.totalCases) + ' ราย (ผ่าน ' + fmt0(m.passed) + ' / ไม่ผ่าน ' + fmt0(m.notPassed) + ') AdjRW ' + fmt(m.sumAdjRW) + ' ชดเชย ' + fmt(m.compAfterCut) + ' บาท'));
+        });
+    }
+
+    // ===== 4. ANC =====
+    children.push(emptyLine());
+    children.push(heading('4. บริการหญิงตั้งครรภ์', 1));
+    if (d.anc && d.anc.summary) {
+        var ancS = d.anc.summary;
+        children.push(bullet('ยอดรวมสะสม: ' + fmt(ancS.totalComp||ancS.totalAmount||0) + ' บาท'));
+        if (d.anc.months) {
+            d.anc.months.forEach(function(m) {
+                children.push(bullet(m.month + ': ' + fmt(m.comp||m.amount||0) + ' บาท (' + fmt0(m.count||m.cases||0) + ' ครั้ง)'));
+            });
+        }
+    }
+
+    // ===== 5. KTP-Claim =====
+    children.push(emptyLine());
+    children.push(heading('5. KTP-Claim (บริการคัดกรอง)', 1));
+    if (d.ktpClaim && d.ktpClaim.summary) {
+        var ktpS = d.ktpClaim.summary;
+        children.push(bullet('ยอดรวม: ' + fmt(ktpS.totalComp||ktpS.totalAmount||0) + ' บาท (' + fmt0(ktpS.totalCount||ktpS.totalCases||0) + ' ครั้ง)'));
+        if (d.ktpClaim.items) {
+            d.ktpClaim.items.forEach(function(item) {
+                children.push(bullet(item.name + ': ' + fmt(item.comp||item.amount||0) + ' บาท (' + fmt0(item.count||item.cases||0) + ' ครั้ง)'));
+            });
+        }
+    }
+
+    // ===== 6. Telemedicine =====
+    children.push(emptyLine());
+    children.push(heading('6. Telemedicine', 1));
+    if (d.telemed && d.telemed.summary) {
+        var teleS = d.telemed.summary;
+        children.push(bullet('จำนวนครั้งรวม: ' + fmt0(teleS.totalCount||teleS.totalCases||0) + ' ครั้ง'));
+        children.push(bullet('ค่าชดเชยรวม: ' + fmt(teleS.totalComp||0) + ' บาท'));
+        if (d.telemed.months) {
+            d.telemed.months.forEach(function(m) {
+                children.push(bullet(m.month + ': ' + fmt0(m.count||m.cases||0) + ' ครั้ง / ' + fmt(m.comp||m.amount||0) + ' บาท'));
+            });
+        }
+    }
+
+    // ===== 7. HD =====
+    children.push(emptyLine());
+    children.push(heading('7. กองทุนไตวายเรื้อรัง (HD)', 1));
+    children.push(bullet('ยอดรวม SMT: ' + fmt(findFund('HD')) + ' บาท'));
+    if (d.kidney && d.kidney.months) {
+        d.kidney.months.forEach(function(m) {
+            children.push(bullet(m.month + ': ' + fmt0(m.count||0) + ' รายการ / ' + fmt(m.comp||0) + ' บาท'));
+        });
+    }
+
+    // ===== 8. HC-Drug / CR =====
+    children.push(emptyLine());
+    children.push(heading('8. HC-Drug / CR (ยาราคาแพงและรายการชดเชยกลาง)', 1));
+    children.push(bullet('ยอดรวม CR (SMT): ' + fmt(findFund('CR')) + ' บาท'));
+    if (d.hcDrug && d.hcDrug.summary) {
+        children.push(bullet('ค่าชดเชยรวม: ' + fmt(d.hcDrug.summary.totalComp||0) + ' บาท'));
+    }
+
+    // ===== 9. DMHT =====
+    children.push(emptyLine());
+    children.push(heading('9. บริการ DMHT', 1));
+    children.push(bullet('ยอดรวม SMT: ' + fmt(findFund('DMHT')) + ' บาท'));
+
+    // ===== 10. PP/OFC =====
+    children.push(emptyLine());
+    children.push(heading('10. กองทุน PP / OFC (สร้างเสริมสุขภาพ)', 1));
+    children.push(bullet('ยอดรวม PP (SMT): ' + fmt(findFund('PP')) + ' บาท'));
+
+    // ===== 11. LGO =====
+    children.push(emptyLine());
+    children.push(heading('11. กองทุน LGO (สวัสดิการ อปท.)', 1));
+    children.push(bullet('ยอดรวม SMT: ' + fmt(findFund('LGO')) + ' บาท'));
+
+    // ===== 12. กองทุนอื่นๆ =====
+    children.push(emptyLine());
+    children.push(heading('12. กองทุนอื่นๆ', 1));
+    if (d.otherFunds && d.otherFunds.summary) {
+        children.push(bullet('ยอดรวม: ' + fmt(d.otherFunds.summary.totalComp||d.otherFunds.summary.totalAmount||0) + ' บาท'));
+    }
+
+    // ===== Footer =====
+    children.push(emptyLine());
+    children.push(new D.Paragraph({spacing:{before:300},children:[
+        new D.TextRun({text:'จัดทำโดย: ระบบ SELAPHUM HOSPITAL SMART ERP', italics:true, font:'TH SarabunPSK', size:28, color:'94a3b8'}),
+    ]}));
+    children.push(new D.Paragraph({children:[
+        new D.TextRun({text:'วันที่: ' + new Date().toLocaleDateString('th-TH', {year:'numeric',month:'long',day:'numeric'}), italics:true, font:'TH SarabunPSK', size:28, color:'94a3b8'}),
+    ]}));
+
+    // ===== Create Document =====
+    var doc = new D.Document({
+        sections: [{
+            properties: {
+                page: { size: { width: 11906, height: 16838 }, margin: { top: 1134, right: 1134, bottom: 1134, left: 1418 } }
+            },
+            children: children
+        }]
+    });
+
+    var buffer = await D.Packer.toBlob(doc);
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(buffer);
+    a.download = 'รายงานการเรียกเก็บ_NHSO_เมษายน2569.docx';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    console.log('✅ รายงาน Word สร้างเสร็จ');
 }
 
 // ==================== FINANCE CHARTS ====================
