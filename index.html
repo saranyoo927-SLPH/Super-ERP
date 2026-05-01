@@ -160,10 +160,13 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
   line-height:1.5;
 }
 /* บังคับ KTP/MOPH ไม่ให้มี scroll bar */
-#nhso-ktp-table,#nhso-moph-table{table-layout:fixed !important;width:100% !important;}
-#nhso-ktp-table th:nth-child(1),#nhso-moph-table th:nth-child(1){width:80px;}
-#nhso-ktp-table th:nth-child(3),#nhso-moph-table th:nth-child(3){width:80px;}
-#nhso-ktp-table th:nth-child(4),#nhso-moph-table th:nth-child(4){width:120px;}
+#nhso-ktp-table,#nhso-moph-table{table-layout:auto !important;width:100% !important;}
+#nhso-ktp-table th:nth-child(1){width:80px;}
+#nhso-ktp-table th:nth-child(3){width:80px;}
+#nhso-ktp-table th:nth-child(4){width:120px;}
+#nhso-moph-table th:nth-child(1){width:160px;min-width:160px;}
+#nhso-moph-table th:nth-child(3){width:80px;}
+#nhso-moph-table th:nth-child(4){width:130px;}
 
 /* ตาราง billing ในทุก table-card / erp-card — บังคับ width 100% */
 .table-card .billing-row-table,
