@@ -4733,16 +4733,31 @@ function updatePfOvKPIs(info) {
 // ==================== REPORT GENERATOR (Claude API) ====================
 
 // ★ แสดงกราฟรายเดือนเมื่อคลิกที่กองทุน
+// ============================================================
+// ★ FIX: showFundChart() — กราฟกองทุนแยกประเภทไม่แสดงผล
+// ============================================================
+// ปัญหาที่แก้ไข:
+//   1. ตัวแปร 'sub' ไม่ได้ประกาศ → ReferenceError ทำให้ฟังก์ชันหยุดทำงาน
+//   2. เพิ่ม var sub = document.getElementById('fundChartSub')
+//   3. แก้ data mapping ให้ครอบคลุมทุกกองทุน
+//   4. เพิ่ม SMT byMonth fallback ที่แข็งแกร่งขึ้น
+//   5. เพิ่ม setTimeout เพื่อให้ modal render ก่อน chart
+// ============================================================
+
+// ★ แสดงกราฟรายเดือนเมื่อคลิกที่กองทุน
 function showFundChart(code, name, color) {
     var modal = document.getElementById('fundChartModal');
     if (!modal || !nhsoBilling) return;
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 
-    // Header
+    // ★ FIX #1: ประกาศ sub ให้ถูกต้อง
     var icon = document.getElementById('fundChartIcon');
-    if (icon) { icon.textContent = code; icon.style.background = color; }
     var title = document.getElementById('fundChartTitle');
+    var sub = document.getElementById('fundChartSub');   // ← แก้ไข: เพิ่มบรรทัดนี้
+
+    // Header
+    if (icon) { icon.textContent = code; icon.style.background = color; }
     if (title) title.textContent = name;
     if (sub) sub.textContent = 'รายได้รายเดือน ปีงบประมาณ 2569';
 
@@ -4751,12 +4766,11 @@ function showFundChart(code, name, color) {
     var labels = [], values = [], chartLabel = name;
     var monthlyData = null;
 
-    // Map fund code → data source (ใช้ field ที่ถูกต้องตาม table rendering)
+    // ★ FIX #2: Map fund code → data source (ใช้ field ที่ถูกต้อง + null safety)
     var fundDataMap = {
         'OP':  function() {
             if (!d.op || !d.op.months) return null;
             return d.op.months.map(function(m) {
-                // รวมทุก sub-category ของ OP
                 var total = (Number(m.opaeComp)||0) + (Number(m.erComp)||0) + (Number(m.ucepTotal)||0) +
                     (Number(m.ambulComp)||0) + (Number(m.walkinTotal)||0) + (Number(m.ttmComp)||0) +
                     (Number(m.pcTotal)||0) + (Number(m.prosTotal)||0) + (Number(m.rh)||0);
@@ -4769,9 +4783,6 @@ function showFundChart(code, name, color) {
                 return { month: m.month, value: Number(m.compAfterCut) || Number(m.compBeforeCut) || 0 };
             });
         },
-        'PP':  function() { return d.smt && d.smt.byMonth ? extractFundMonthly(d, 'PP') : null; },
-        'CR':  function() { return d.smt && d.smt.byMonth ? extractFundMonthly(d, 'CR') : null; },
-        'INVS': function() { return d.smt && d.smt.byMonth ? extractFundMonthly(d, 'INVS') : null; },
         'HD':  function() {
             if (!d.kidney || !d.kidney.months) return null;
             return d.kidney.months.map(function(m) {
@@ -4787,7 +4798,7 @@ function showFundChart(code, name, color) {
         'LGO': function() {
             if (!d.lgo || !d.lgo.months) return null;
             return d.lgo.months.map(function(m) {
-                return { month: m.month, value: Number(m.comp) || Number(m.amount) || 0 };
+                return { month: m.month, value: Number(m.total) || Number(m.comp) || Number(m.amount) || 0 };
             });
         },
         'RH':  function() {
@@ -4796,14 +4807,24 @@ function showFundChart(code, name, color) {
                 return { month: m.month, value: Number(m.comp) || Number(m.amount) || 0 };
             });
         },
-        'DMHT':function() {
+        'DMHT': function() {
             if (!d.hcDrug || !d.hcDrug.months) return null;
             return d.hcDrug.months.map(function(m) {
-                return { month: m.month, value: Number(m.comp) || Number(m.amount) || 0 };
+                return { month: m.month, value: Number(m.total) || Number(m.comp) || Number(m.amount) || 0 };
             });
         },
-        'PH':  function() { return d.smt && d.smt.byMonth ? extractFundMonthly(d, 'PH') : null; },
-        'HIV': function() { return d.smt && d.smt.byMonth ? extractFundMonthly(d, 'HIV') : null; },
+        'OFC': function() {
+            if (!d.ofc || !d.ofc.months) return null;
+            return d.ofc.months.map(function(m) {
+                return { month: m.month, value: Number(m.total) || Number(m.comp) || 0 };
+            });
+        },
+        // ★ FIX #3: กองทุนที่ไม่มี dedicated monthly data → ใช้ SMT byMonth + ratio
+        'PP':   function() { return extractFundMonthly(d, 'PP'); },
+        'CR':   function() { return extractFundMonthly(d, 'CR'); },
+        'INVS': function() { return extractFundMonthly(d, 'INVS'); },
+        'PH':   function() { return extractFundMonthly(d, 'PH'); },
+        'HIV':  function() { return extractFundMonthly(d, 'HIV'); },
     };
 
     // ลองดึงจาก map ก่อน
@@ -4811,28 +4832,56 @@ function showFundChart(code, name, color) {
         monthlyData = fundDataMap[code]();
     }
 
-    // ถ้าไม่มี specific data → ใช้ smt.byMonth (ยอดรวมทุกกองทุน) เป็น fallback + แสดง note
+    // ★ FIX #4: Fallback — ถ้าไม่มี specific data → ใช้ smt.byMonth
     if (!monthlyData && d.smt && d.smt.byMonth) {
-        monthlyData = d.smt.byMonth.map(function(m) { return {month:m.month, value:m.remain||0}; });
+        // ลอง extract จาก SMT ก่อน
+        monthlyData = extractFundMonthly(d, code);
+    }
+
+    // Fallback สุดท้าย — ใช้ smt.byMonth total
+    if (!monthlyData && d.smt && d.smt.byMonth) {
+        monthlyData = d.smt.byMonth.map(function(m) { return {month: m.month, value: m.remain || 0}; });
         chartLabel = 'SMT คงเหลือรวม (บาท) — ไม่มีข้อมูลรายเดือนเฉพาะกองทุน ' + code;
     }
 
     if (!monthlyData || !monthlyData.length) {
         if (sub) sub.textContent = 'ไม่มีข้อมูลรายเดือนสำหรับกองทุนนี้';
+        // ★ FIX: แสดงข้อความแทนที่จะปล่อยว่าง
+        var summary = document.getElementById('fundChartSummary');
+        if (summary) {
+            summary.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#94a3b8;font-size:0.9rem">' +
+                '📊 ไม่มีข้อมูลรายเดือนสำหรับกองทุน <b>' + code + '</b><br>' +
+                '<span style="font-size:0.78rem">ข้อมูลอาจยังไม่ถูกอัปเดตจาก NHSO</span></div>';
+        }
         return;
     }
 
+    // กรองเฉพาะเดือนที่มีข้อมูล (value > 0) หรือแสดงทุกเดือน
     labels = monthlyData.map(function(m) { return m.month; });
     values = monthlyData.map(function(m) { return m.value; });
     if (sub) sub.textContent = chartLabel;
 
-    // ★ Render Chart
+    // ★ FIX #5: ใช้ setTimeout ให้ modal render ก่อน แล้วค่อยวาด chart
+    // (แก้ปัญหา canvas size = 0 เมื่อ modal ยังไม่แสดงผลเต็มที่)
+    setTimeout(function() {
+        renderFundChartContent(code, name, color, labels, values);
+    }, 100);
+}
+
+// ★ แยก render chart ออกมาเป็นฟังก์ชันย่อย
+function renderFundChartContent(code, name, color, labels, values) {
     var canvas = document.getElementById('fundChartCanvas');
     if (!canvas) return;
+
+    // ★ Destroy chart เก่า
     if (chartInstances && chartInstances['fundChartCanvas']) {
         chartInstances['fundChartCanvas'].destroy();
+        chartInstances['fundChartCanvas'] = null;
     }
+
     var ctx = canvas.getContext('2d');
+    var avg = values.reduce(function(a,b){return a+b;},0) / (values.length || 1);
+
     chartInstances['fundChartCanvas'] = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -4848,7 +4897,7 @@ function showFundChart(code, name, color) {
                 borderSkipped: false
             }, {
                 label: 'เฉลี่ย',
-                data: Array(values.length).fill(values.reduce(function(a,b){return a+b;},0) / values.length),
+                data: Array(values.length).fill(avg),
                 type: 'line',
                 borderColor: '#f59e0b',
                 borderDash: [6,3],
@@ -4882,6 +4931,76 @@ function showFundChart(code, name, color) {
         }
     });
 
+    // ★ Summary cards
+    var total = values.reduce(function(a,b){return a+b;},0);
+    var maxVal = Math.max.apply(null, values);
+    var maxIdx = values.indexOf(maxVal);
+    var minVal = Math.min.apply(null, values.filter(function(v) { return v > 0; }));
+    if (minVal === Infinity || minVal === undefined) minVal = 0;
+    var minIdx = values.indexOf(minVal);
+    var fmtB = function(n) { return Number(n).toLocaleString('th-TH',{maximumFractionDigits:0}); };
+
+    var summary = document.getElementById('fundChartSummary');
+    if (summary) {
+        summary.innerHTML =
+            '<div style="background:#f0fdf4;border-radius:12px;padding:14px;text-align:center;border:1px solid #d1fae5">' +
+                '<div style="font-size:0.72rem;color:#64748b;margin-bottom:4px">ยอดรวม</div>' +
+                '<div style="font-size:1.1rem;font-weight:800;color:#059669">' + fmtB(total) + '</div>' +
+                '<div style="font-size:0.68rem;color:#94a3b8;margin-top:2px">เฉลี่ย ' + fmtB(avg) + '/เดือน</div>' +
+            '</div>' +
+            '<div style="background:#eff6ff;border-radius:12px;padding:14px;text-align:center;border:1px solid #bfdbfe">' +
+                '<div style="font-size:0.72rem;color:#64748b;margin-bottom:4px">▲ สูงสุด</div>' +
+                '<div style="font-size:1.1rem;font-weight:800;color:#2563eb">' + fmtB(maxVal) + '</div>' +
+                '<div style="font-size:0.68rem;color:#94a3b8;margin-top:2px">' + (labels[maxIdx] || '-') + '</div>' +
+            '</div>' +
+            '<div style="background:#fef2f2;border-radius:12px;padding:14px;text-align:center;border:1px solid #fecaca">' +
+                '<div style="font-size:0.72rem;color:#64748b;margin-bottom:4px">▼ ต่ำสุด</div>' +
+                '<div style="font-size:1.1rem;font-weight:800;color:#dc2626">' + fmtB(minVal) + '</div>' +
+                '<div style="font-size:0.68rem;color:#94a3b8;margin-top:2px">' + (labels[minIdx] || '-') + '</div>' +
+            '</div>';
+    }
+}
+
+// ★ FIX #6: extractFundMonthly — ปรับปรุงให้แข็งแกร่งขึ้น
+function extractFundMonthly(d, code) {
+    if (!d || !d.smt || !d.smt.byMonth) return null;
+
+    // หากองทุนจาก byFund
+    var fund = null;
+    if (d.smt.byFund) {
+        fund = d.smt.byFund.find(function(f) { return f.code === code; });
+    }
+    if (!fund) return null;
+
+    var months = d.smt.byMonth;
+    var totalRemainAll = 0;
+    for (var i = 0; i < months.length; i++) {
+        totalRemainAll += (months[i].remain || 0);
+    }
+
+    // ถ้า totalRemainAll = 0 → ไม่สามารถคำนวณ ratio ได้
+    if (totalRemainAll === 0) return null;
+
+    var ratio = (fund.remain || 0) / totalRemainAll;
+
+    // ถ้า ratio = 0 → กองทุนนี้ไม่มีข้อมูล
+    if (ratio === 0) return null;
+
+    return months.map(function(m) {
+        return { month: m.month, value: Math.round((m.remain || 0) * ratio) };
+    });
+}
+
+function closeFundChart() {
+    var modal = document.getElementById('fundChartModal');
+    if (modal) { modal.style.display = 'none'; document.body.style.overflow = ''; }
+}
+
+// คลิกนอก modal ปิด
+document.addEventListener('click', function(e) {
+    var modal = document.getElementById('fundChartModal');
+    if (modal && modal.style.display === 'flex' && e.target === modal) closeFundChart();
+});
     // ★ Summary cards
     var total = values.reduce(function(a,b){return a+b;},0);
     var avg = total / values.length;
