@@ -2399,18 +2399,6 @@ function renderProjects() {
     fStrategy.innerHTML = '<option value="">ทุกยุทธศาสตร์</option>' + strategies.map(s => `<option value="${s}" ${s===curStr?'selected':''}>${s}</option>`).join('');
   }
 
-  // Pagination
-  const pagDiv = document.getElementById('projectPagination');
-  if (pagDiv) {
-    pagDiv.innerHTML = `
-      <span>แสดง ${filtered.length > 0 ? start+1 : 0}-${Math.min(start+PAGE_SIZE, filtered.length)} จาก ${filtered.length}</span>
-      <div class="flex gap-1">
-      <button onclick="changePage(-1)" class="px-3 py-1 rounded border border-slate-200 hover:bg-slate-50 ${projectPage <= 1 ? 'opacity-40 pointer-events-none' : ''}">&laquo;</button>
-      ${Array.from({length: totalPages}, (_,i) => `<button onclick="changePage(${i+1},true)" class="px-3 py-1 rounded border ${projectPage === i+1 ? 'bg-indigo-600 text-white border-indigo-600' : 'border-slate-200 hover:bg-slate-50'}">${i+1}</button>`).join('')}
-      <button onclick="changePage(1)" class="px-3 py-1 rounded border border-slate-200 hover:bg-slate-50 ${projectPage >= totalPages ? 'opacity-40 pointer-events-none' : ''}">&raquo;</button>
-      </div>`;
-  }
-
   // Populate filters
   const fStatus = document.getElementById('filterStatus');
   const fStrategy = document.getElementById('filterStrategy');
