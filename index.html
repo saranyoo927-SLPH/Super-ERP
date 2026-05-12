@@ -2374,6 +2374,7 @@ function renderProjects() {
       <td class="px-4 py-3 text-center"><span class="badge ${sts.badge}">${p.status}</span></td>
       </tr>`;
     });
+  } // 🟢 1. เติมปีกกาปิดของ else ตรงนี้ครับ!
 
   // Pagination
   const pagDiv = document.getElementById('projectPagination');
@@ -2386,7 +2387,7 @@ function renderProjects() {
       <button onclick="changePage(1)" class="px-3 py-1 rounded border border-slate-200 hover:bg-slate-50 ${projectPage >= totalPages ? 'opacity-40 pointer-events-none' : ''}">&raquo;</button>
       </div>`;
   }
-
+} // 🟢 2. เติมปีกกาปิดของฟังก์ชัน renderProjects ตรงนี้ครับ!
   // Populate filters
   const fStatus = document.getElementById('filterStatus');
   const fStrategy = document.getElementById('filterStrategy');
