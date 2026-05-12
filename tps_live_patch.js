@@ -10,7 +10,7 @@
 // ============================================================
 
 // ── TPS Sheet ID (อ้างอิงจาก GAS SHEET_IDS.tps) ──
-const TPS_SHEET_ID = '1yfjMsHAHTiDxpYgb2MvcI-k_KKBlvCkiUQnQPH-tEl0';
+TPS_SHEET_ID = '1yfjMsHAHTiDxpYgb2MvcI-k_KKBlvCkiUQnQPH-tEl0';
 
 // ── TPS Hardcoded Fallback (ข้อมูลเดิมจาก Dashboard) ──
 const TPS_FALLBACK = {
