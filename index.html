@@ -43,10 +43,10 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 .erp-stat-card.purple::before{background:#8b5cf6}.erp-stat-card.purple .s-val{color:#8b5cf6} .erp-stat-card.amber::before{background:#f59e0b}.erp-stat-card.amber .s-val{color:#f59e0b}
 .erp-stat-card.rose::before{background:#f43f5e}.erp-stat-card.rose .s-val{color:#f43f5e} .erp-stat-card.cyan::before{background:#06b6d4}.erp-stat-card.cyan .s-val{color:#06b6d4}
 .erp-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;transition:all 0.3s;} .erp-card:hover{border-color:#c7d2fe;}
-.erp-card .erp-card-body{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent;}
-.erp-card .erp-card-body::-webkit-scrollbar{height:6px;}.erp-card .erp-card-body::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px;}
+.erp-card .erp-card-{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent;}
+.erp-card .erp-card-::-webkit-scrollbar{height:6px;}.erp-card .erp-card-::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px;}
 .erp-card-head{padding:14px 20px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;}
-.erp-card-title{font-weight:600;font-size:14px;color:#334155;display:flex;align-items:center;gap:8px;} .erp-card-body{padding:20px;}
+.erp-card-title{font-weight:600;font-size:14px;color:#334155;display:flex;align-items:center;gap:8px;} .erp-card-{padding:20px;}
 .erp-charts-grid{display:grid;grid-template-columns:repeat(2, 1fr);gap:16px;margin-bottom:20px;} .erp-section-head{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
 .erp-section-head h3{font-weight:700;font-size:18px;color:#1e293b;} .erp-section-head .line{flex:1;height:1px;background:linear-gradient(90deg, #e2e8f0, transparent);}
 .erp-tbl-wrap{overflow-x:auto;} .erp-tbl-wrap table{width:100%;border-collapse:collapse;}
@@ -77,7 +77,7 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 .erp-strat-item .s-count{font-size:11px;color:#94a3b8;} .erp-strat-item .s-score{font-size:20px;font-weight:700;}
 .erp-budget-tbl{table-layout:fixed;width:100%;}
 .erp-budget-tbl th{padding:12px 10px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#6366f1;border-bottom:2px solid rgba(99,102,241,0.15);background:rgba(99,102,241,0.03);}
-.erp-budget-tbl td{padding:12px 10px;vertical-align:middle;border-bottom:1px solid #f1f5f9;} .erp-budget-tbl tbody tr:hover td{background:rgba(99,102,241,0.02);}
+.erp-budget-tbl td{padding:12px 10px;vertical-align:middle;border-bottom:1px solid #f1f5f9;} .erp-budget-tbl t tr:hover td{background:rgba(99,102,241,0.02);}
 .erp-budget-tbl .total-row td{background:#f8fafc;border-top:2px solid #e2e8f0;}
 @media(max-width:900px){
 .erp-charts-grid{grid-template-columns:1fr;} .erp-stats-row.col4,.erp-stats-row.col5{grid-template-columns:repeat(2, 1fr);}
@@ -139,8 +139,8 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 .billing-row-table thead{background:linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.08)) !important;}
 .billing-row-table th{padding:0.7rem 0.85rem !important;font-size:0.75rem !important;font-weight:700 !important;color:#3b82f6 !important;border-bottom:2px solid #60a5fa !important;text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap;background:#f8fafc !important;}
 .billing-row-table td{padding:0.65rem 0.85rem !important;font-size:0.84rem !important;color:#334155 !important;border-bottom:1px solid #e2e8f0 !important;white-space:nowrap;}
-.billing-row-table tbody tr:nth-child(even) td{background:rgba(241,245,249,0.5) !important;}
-.billing-row-table tbody tr:hover td{background:rgba(59,130,246,0.06) !important;}
+.billing-row-table t tr:nth-child(even) td{background:rgba(241,245,249,0.5) !important;}
+.billing-row-table t tr:hover td{background:rgba(59,130,246,0.06) !important;}
 .billing-row-table tr:last-child td{border-bottom:none !important;}
 .billing-row-table tr.total-row td{background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(99,102,241,0.06)) !important;font-weight:700 !important;color:#1e293b !important;border-top:2px solid #3b82f6 !important;font-size:0.88rem !important;}
 .billing-row-table tr.total-row td.num{color:#3b82f6 !important;font-weight:800 !important;}
@@ -171,7 +171,7 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 /* ตาราง billing ในทุก table-card / erp-card — บังคับ width 100% */
 .table-card .billing-row-table,
 .erp-card .billing-row-table,
-.erp-card-body .billing-row-table,
+.erp-card- .billing-row-table,
 #tab-erp-billing .billing-row-table{
   width:100% !important;min-width:100% !important;
 }
@@ -179,10 +179,10 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 .table-card{overflow:visible !important;}
 .table-card>.billing-row-table,
 .table-card>div>.billing-row-table{width:100% !important;}
-.erp-card-body{overflow-x:auto !important;}
+.erp-card-{overflow-x:auto !important;}
 /* บังคับทุกตารางใน billing section ขยายเต็มความกว้าง */
 #tab-erp-billing table{width:100% !important;border-collapse:collapse !important;}
-#tab-erp-billing .erp-card-body table{min-width:100% !important;}
+#tab-erp-billing .erp-card- table{min-width:100% !important;}
 #tab-erp-billing .table-card table{min-width:100% !important;} .service-grid{display:grid !important;grid-template-columns:repeat(2, 1fr);gap:1.5rem;margin-bottom:2rem;}
 .service-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:1.75rem;box-shadow:0 1px 3px rgba(0,0,0,0.06);transition:all 0.3s;}
 .service-card:hover{box-shadow:0 4px 6px rgba(0,0,0,0.1);transform:translateY(-2px);}
@@ -297,7 +297,7 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 .ai-modal-head h3{font-size:16px;font-weight:700;color:#1e293b;display:flex;align-items:center;gap:8px;}
 .ai-modal-close{width:32px;height:32px;border:none;background:#f1f5f9;border-radius:8px;cursor:pointer;font-size:16px;color:#64748b;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
 .ai-modal-close:hover{background:#fee2e2;color:#f43f5e;}
-.ai-modal-body{padding:24px;}
+.ai-modal-{padding:24px;}
 .ai-form-group{margin-bottom:18px;}
 .ai-label{font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;display:block;letter-spacing:0.02em;}
 .ai-input{width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-family:inherit;font-size:13px;color:#334155;background:#fff;transition:all 0.2s;box-sizing:border-box;}
@@ -343,7 +343,7 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
    ============================================================ */
 
 /* Page background — subtle animated gradient */
-body{
+{
   background:linear-gradient(135deg,#eef2ff 0%,#f5f0ff 25%,#fdf0fb 50%,#f0fdf9 75%,#eff6ff 100%) !important;
   background-attachment:fixed !important;
   min-height:100vh;
@@ -649,7 +649,7 @@ body{
   --gb:rgba(22,163,74,0.14);
 }
 /* Page background */
-body{background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 28%,#f0fdfa 55%,#e8fdf5 80%,#f0fdf4 100%) !important;background-attachment:fixed !important;}
+{background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 28%,#f0fdfa 55%,#e8fdf5 80%,#f0fdf4 100%) !important;background-attachment:fixed !important;}
 /* Blobs */
 #app::before{background:radial-gradient(ellipse,var(--gp1) 0%,transparent 68%) !important;}
 #app::after{background:radial-gradient(ellipse,var(--gp2) 0%,transparent 68%) !important;}
@@ -718,7 +718,7 @@ body{background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 28%,#f0fdfa 55%,#e8fdf
 .tab-active{border-bottom:none !important;}
 </style>
  </head>
- <body class="h-full bg-slate-50">
+ < class="h-full bg-slate-50">
   <div id="app" class="h-full w-full overflow-auto">
    <!-- Header -->
    <header id="header" class="bg-white border-b border-slate-200 sticky top-0 z-30">
@@ -855,7 +855,7 @@ body{background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 28%,#f0fdfa 55%,#e8fdf
 <th class="px-4 py-3 text-center">สถานะ</th>
 </tr>
 </thead>
-<tbody id="projectTableBody" class="divide-y divide-slate-100"></tbody>
+<t id="projectTable" class="divide-y divide-slate-100"></t>
 </table>
  </div>
  <div id="projectPagination" class="p-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500"></div>
@@ -872,7 +872,7 @@ body{background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 28%,#f0fdfa 55%,#e8fdf
 <thead class="bg-slate-50 text-slate-500 text-xs">
 <tr id="timelineHeader"></tr>
 </thead>
-<tbody id="timelineBody"></tbody>
+<t id="timeline"></t>
 </table>
  </div>
  </div>
@@ -902,7 +902,7 @@ body{background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 28%,#f0fdfa 55%,#e8fdf
  </div>
  <div class="erp-card">
  <div class="erp-card-head"><div class="erp-card-title">📊 คะแนนแยกหมวด</div></div>
- <div class="erp-card-body">
+ <div class="erp-card-">
  <div class="nt-score-row"><div class="nt-score-lbl"><b>1.1 บริหารแผน Planfin</b></div><div class="nt-score-track"><div class="nt-score-fill full" style="width:100%">2 / 2</div></div><div class="nt-score-max">2</div></div>
  <div class="nt-score-row"><div class="nt-score-lbl"><b>1.2 บริหารสินทรัพย์</b></div><div class="nt-score-track"><div class="nt-score-fill zero" style="width:2%">0 / 3</div></div><div class="nt-score-max">3</div></div>
  <div class="nt-score-row"><div class="nt-score-lbl"><b>1.3 บริหารต้นทุน/จัดการ</b></div><div class="nt-score-track"><div class="nt-score-fill part" style="width:60%">1 / 2</div></div><div class="nt-score-max">2</div></div>
@@ -4300,25 +4300,7 @@ function ltChart(id,type,data,opts={}){
  scales:type==='doughnut'||type==='pie'||type==='radar'?{}:{x:{grid:LT_GRID,ticks:{font:{size:10},color:'#64748b'}},y:{grid:LT_GRID,ticks:{color:'#64748b',...(opts.ytick||{})}},...(opts.scales||{})},
  animation:{duration:700},...(opts.extra||{})}});
 } function ltMean(val,lbl,col,dash){return{label:lbl||'Mean',data:Array(20).fill(val),type:'line',borderColor:col||'#f59e0b',borderWidth:2,borderDash:dash||[6,4],pointRadius:0,fill:false}}
-// ==================== TPS CHARTS ====================
-function renderTPSCharts(){
-    // Radar
-    new Chart(document.getElementById('tps_radar'),{type:'radar',data:{labels:['บริหารแผน\n(2)','บริหารต้นทุน\n(2)','บัญชี/การเงิน\n(1)','บริหารสินทรัพย์\n(3)','OM (1)','ROA (1)','NWC (1)','EBITDA (1)','Cash Ratio (1)'],datasets:[{label:'คะแนนได้',data:[2,1,1,0,0,1,1,1,0],borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.1)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#f59e0b'},{label:'คะแนนเต็ม',data:[2,2,1,3,1,1,1,1,1],borderColor:'rgba(99,102,241,0.3)',backgroundColor:'rgba(99,102,241,0.03)',borderWidth:1.5,borderDash:[4,4],pointRadius:3,pointBackgroundColor:'rgba(99,102,241,0.4)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},color:'#64748b',boxWidth:10,padding:12}},tooltip:LT_TT},scales:{r:{grid:{color:'rgba(0,0,0,0.06)'},angleLines:{color:'rgba(0,0,0,0.06)'},ticks:{display:false,stepSize:1},pointLabels:{font:{size:10},color:'#64748b'},min:0,max:3}}}});
-    // Bar Score
-    ltChart('tps_barScore','bar',{labels:['บริหารแผน','บริหารสินทรัพย์','บริหารต้นทุน','บัญชี/งบทดลอง','ผลผลิต','OM','ROA+EBITDA','สภาพคล่อง'],datasets:[{label:'ได้',data:[2,0,1,1,2,0,2,1],backgroundColor:'rgba(245,158,11,0.8)',borderRadius:5},{label:'เต็ม',data:[2,3,2,1,2,1,2,2],backgroundColor:'rgba(99,102,241,0.15)',borderRadius:5}]},{ytick:{stepSize:1}});
-    // P1 bar
-    ltChart('tps_p1bar','bar',{labels:['มิติรายได้','มิติค่าใช้จ่าย'],datasets:[{label:'ค่าจริง (%)',data:[-1.68,-4.98],backgroundColor:['rgba(16,185,129,0.8)','rgba(16,185,129,0.8)'],borderRadius:6},{label:'เกณฑ์ +5%',data:[5,5],type:'line',borderColor:'rgba(245,158,11,0.8)',borderWidth:2,borderDash:[6,4],pointRadius:4,pointBackgroundColor:'#f59e0b',fill:false},{label:'เกณฑ์ -5%',data:[-5,-5],type:'line',borderColor:'rgba(245,158,11,0.5)',borderWidth:2,borderDash:[6,4],pointRadius:4,pointBackgroundColor:'#f59e0b',fill:false}]},{ytick:{callback:v=>v+'%'}});
-    // P2 bar
-    ltChart('tps_p2bar','bar',{labels:['เจ้าหนี้ยา (≤90วัน)','ลูกหนี้ UC (≤60วัน)','ลูกหนี้ขรก. (≤60วัน)','สินคงคลัง (≤60วัน)'],datasets:[{label:'ค่าจริง (วัน)',data:[210,74,65,73],backgroundColor:'rgba(244,63,94,0.8)',borderRadius:6},{label:'เกณฑ์สูงสุด',data:[90,60,60,60],type:'line',borderColor:'#f59e0b',borderWidth:2,borderDash:[5,4],pointRadius:5,pointBackgroundColor:'#f59e0b',fill:false}]},{ytick:{callback:v=>v+' วัน'}});
-    // P3 Unit Cost
-    ltChart('tps_p3unit','bar',{labels:['OPD (บาท/ครั้ง)','IPD (บาท/AdjRW)'],datasets:[{label:'รพ.เสลภูมิ',data:[1038,10743],backgroundColor:['rgba(244,63,94,0.8)','rgba(16,185,129,0.8)'],borderRadius:6},{label:'ค่ากลาง',data:[1010,16120],backgroundColor:'rgba(245,158,11,0.3)',borderRadius:6}]});
-    // P3 MC
-    ltChart('tps_p3mc','bar',{labels:['LC แรงงาน','MC ยา','MC วัสดุวิทย์','MC วัสดุแพทย์'],datasets:[{label:'รพ.เสลภูมิ (ลบ.)',data:[51.39,14.30,5.82,7.59],backgroundColor:'rgba(244,63,94,0.8)',borderRadius:6},{label:'ค่ากลาง (ลบ.)',data:[49.09,10.71,3.37,5.17],backgroundColor:'rgba(245,158,11,0.3)',borderRadius:6}]});
-    // R1
-    ltChart('tps_r1bar','bar',{labels:['Operating Margin (%)','Return on Asset (%)'],datasets:[{label:'รพ.เสลภูมิ',data:[13.87,4.20],backgroundColor:['rgba(244,63,94,0.8)','rgba(16,185,129,0.8)'],borderRadius:6},{label:'ค่ากลาง',data:[17.83,3.02],backgroundColor:'rgba(245,158,11,0.3)',borderRadius:6}]},{ytick:{callback:v=>v+'%'}});
-    // R2
-    ltChart('tps_r2bar','bar',{labels:['Cash Ratio','เกณฑ์ขั้นต่ำ'],datasets:[{label:'ค่า',data:[0.26,0.80],backgroundColor:['rgba(244,63,94,0.8)','rgba(245,158,11,0.5)'],borderRadius:8}]},{leg:false,ytick:{callback:v=>v+'x'}});
-}
+
 // ==================== RISK CHARTS ====================
 function renderRiskCharts(){
     const M5=['ต.ค.68','พ.ย.68','ธ.ค.68','ม.ค.69','ก.พ.69'];
@@ -6966,5 +6948,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 500);
 </script>
+<script src="tps_live_patch.js"></script>
  </body>
 </html>
