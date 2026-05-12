@@ -6950,5 +6950,23 @@ document.addEventListener('DOMContentLoaded', () => {
 setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 500);
 </script>
 <script src="tps_live_patch.js"></script>
+  <!-- โครงสร้าง Project Modal ที่ขาดหายไป -->
+<div id="projectModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto w-full h-full">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+        
+        <!-- ปุ่มปิด -->
+        <div class="flex justify-end">
+            <button onclick="closeProjectModal()" class="text-gray-400 hover:text-gray-600 font-bold text-2xl">
+                &times;
+            </button>
+        </div>
+
+        <!-- กล่องสำหรับแสดงเนื้อหา (ID นี้แหละที่ JavaScript หาไม่เจอ) -->
+        <div id="modalBody" class="mt-3">
+            <!-- ข้อมูลจาก JavaScript จะมาโผล่ตรงนี้ -->
+        </div>
+
+    </div>
+</div>
  </body>
 </html>
