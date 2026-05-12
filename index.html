@@ -2400,7 +2400,7 @@ function renderProjects() {
   }
 }
 // จบฟังก์ชัน renderProjects แค่ตรงนี้ครับ ห้ามมีโค้ดอะไรต่อท้ายที่เป็นเรื่อง pagination หรือ filter อีก!
-function renderTimeline() {
+  function renderTimeline() {
   const monthlyTotals = MONTHS.map(() => 0);
   allProjects.forEach(p => p.months.forEach((v,i) => monthlyTotals[i] += v));
   // Cumulative
@@ -2453,42 +2453,7 @@ function changePage(val, absolute) {
   else projectPage += val;
   renderProjects();
 }
-   <!-- ชุดตัวกรอง (ฟิลเตอร์) -->
-<div class="flex gap-2 mb-4">
-    <input type="text" id="searchInput" placeholder="ค้นหาโครงการ..." class="border p-2 rounded">
-    <select id="filterStatus" class="border p-2 rounded">
-        <option value="">ทุกสถานะ</option>
-    </select>
-    <select id="filterStrategy" class="border p-2 rounded">
-        <option value="">ทุกยุทธศาสตร์</option>
-    </select>
-</div>
 
-<!-- ตารางแสดงโครงการ -->
-<div class="overflow-x-auto bg-white rounded-lg shadow">
-    <table class="w-full text-left border-collapse">
-        <thead>
-            <tr class="bg-slate-100 text-slate-500 text-sm border-b">
-                <th class="px-4 py-3">ID</th>
-                <th class="px-4 py-3">ชื่อโครงการ</th>
-                <th class="px-4 py-3">ยุทธศาสตร์</th>
-                <th class="px-4 py-3">ผู้รับผิดชอบ</th>
-                <th class="px-4 py-3 text-right">งบประมาณ</th>
-                <th class="px-4 py-3 text-right">เบิกจ่ายแล้ว</th>
-                <th class="px-4 py-3 text-center">สถานะ</th>
-            </tr>
-        </thead>
-        <!-- ID นี้แหละที่ JavaScript ตามหา! -->
-        <tbody id="projectTableBody">
-            <!-- ข้อมูลจะถูกดึงมาใส่ตรงนี้ -->
-        </tbody>
-    </table>
-</div>
-
-<!-- กล่องเปลี่ยนหน้า (Pagination) -->
-<div id="projectPagination" class="mt-4 flex justify-between items-center text-sm text-slate-500">
-    <!-- ปุ่มเปลี่ยนหน้าจะถูกดึงมาใส่ตรงนี้ -->
-</div>
 // ===== PROJECT DETAIL POPUP =====
 function showProjectDetail(projectId) {
   const p = allProjects.find(pr => pr.id === projectId);
