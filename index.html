@@ -2329,6 +2329,7 @@ function renderStrategy() {
  </div>`;
   });
 }
+   
 function renderProjects() {
   // 🛑 ระบบป้องกัน: ถ้าหาตารางไม่เจอ ให้หยุดทำงานทันที แดชบอร์ดจะได้ไม่พัง
   if (!document.getElementById('projectTableBody') || !document.getElementById('searchInput')) {
@@ -2396,7 +2397,6 @@ function renderProjects() {
     fStatus.innerHTML = '<option value="">ทุกสถานะ</option>' + statuses.map(s => `<option value="${s}" ${s===curSt?'selected':''}>${s}</option>`).join('');
     fStrategy.innerHTML = '<option value="">ทุกยุทธศาสตร์</option>' + strategies.map(s => `<option value="${s}" ${s===curStr?'selected':''}>${s}</option>`).join('');
   }
-} // <--- ปีกกาปิดตัวนี้แหละครับที่หายไป!
 
   // Pagination
   const pagDiv = document.getElementById('projectPagination');
