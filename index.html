@@ -2330,7 +2330,18 @@ function renderStrategy() {
   });
 }
 function renderProjects() {
+ function renderProjects() {
+  // 🛑 1. เพิ่มโค้ด 3 บรรทัดนี้เข้าไปบนสุดของฟังก์ชัน
+  if (!document.getElementById('projectTableBody') || !document.getElementById('searchInput')) {
+      return; // ถ้าหาจุดแสดงผลไม่เจอ ให้หยุดทำงานเฉพาะฟังก์ชันนี้ แดชบอร์ดหลักจะได้ไม่พัง
+  }
+
+  // 👇 โค้ดเดิมของคุณเริ่มต้นตรงนี้ ไม่ต้องไปแก้ไขมันครับ
   const search = document.getElementById('searchInput').value.toLowerCase();
+  const filterSt = document.getElementById('filterStatus').value;
+  // ... โค้ดอื่นๆ ...
+}
+ const search = document.getElementById('searchInput').value.toLowerCase();
   const filterSt = document.getElementById('filterStatus').value;
   const filterStr = document.getElementById('filterStrategy').value;
   let filtered = allProjects.filter(p => {
