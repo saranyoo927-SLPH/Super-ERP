@@ -872,7 +872,7 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 <thead class="bg-slate-50 text-slate-500 text-xs">
 <tr id="timelineHeader"></tr>
 </thead>
-<t id="timeline"></t>
+<tbody id="timelineBody"></tbody>
 </table>
  </div>
  </div>
@@ -2401,45 +2401,58 @@ function renderProjects() {
 }
 // จบฟังก์ชัน renderProjects แค่ตรงนี้ครับ ห้ามมีโค้ดอะไรต่อท้ายที่เป็นเรื่อง pagination หรือ filter อีก!
   function renderTimeline() {
+  // 🛑 ระบบป้องกัน: ถ้าหาตารางไทม์ไลน์ไม่เจอ ให้หยุดทำงานทันที แดชบอร์ดหลักจะได้ไม่พัง
+  if (!document.getElementById('timelineHeader') || !document.getElementById('timelineBody') || !document.getElementById('chartTimeline')) {
+    return; 
+  }
+
   const monthlyTotals = MONTHS.map(() => 0);
   allProjects.forEach(p => p.months.forEach((v,i) => monthlyTotals[i] += v));
+  
   // Cumulative
   const cumulative = [];
   let running = 0;
   monthlyTotals.forEach(v => { running += v; cumulative.push(running); });
+  
   const ctx = document.getElementById('chartTimeline').getContext('2d');
   if (charts.timeline) {
     charts.timeline.destroy();
     charts.timeline = null;
   }
+  
   const canvas3 = document.getElementById('chartTimeline');
   canvas3.width = canvas3.parentElement.clientWidth;
   canvas3.height = canvas3.parentElement.clientHeight;
+  
   charts.timeline = new Chart(ctx, {
     type: 'bar',
     data: {
- labels: MONTHS,
- datasets: [
- { type: 'bar', label: 'เบิกจ่ายรายเดือน', data: monthlyTotals, backgroundColor: '#818cf840', borderColor: '#6366f1', borderWidth: 1.5, borderRadius: 4, order: 2 },
- { type: 'line', label: 'สะสม', data: cumulative, borderColor: '#f59e0b', backgroundColor: '#f59e0b20', fill: true, tension: 0.4, pointRadius: 3, order: 1 }
- ]
+      labels: MONTHS,
+      datasets: [
+        { type: 'bar', label: 'เบิกจ่ายรายเดือน', data: monthlyTotals, backgroundColor: '#818cf840', borderColor: '#6366f1', borderWidth: 1.5, borderRadius: 4, order: 2 },
+        { type: 'line', label: 'สะสม', data: cumulative, borderColor: '#f59e0b', backgroundColor: '#f59e0b20', fill: true, tension: 0.4, pointRadius: 3, order: 1 }
+      ]
     },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Sarabun', size: 11 } } } }, scales: { x: { ticks: { font: { family: 'Sarabun' } } }, y: { ticks: { callback: v => fmt(v), font: { family: 'Sarabun', size: 10 } } } } }
   });
+
   // Monthly detail table
   const header = document.getElementById('timelineHeader');
   header.innerHTML = '<th class="px-3 py-2 text-left">โครงการ</th>' + MONTHS.map(m => `<th class="px-2 py-2 text-right text-xs">${m}</th>`).join('') + '<th class="px-3 py-2 text-right">รวม</th>';
+  
   const tbody = document.getElementById('timelineBody');
   tbody.innerHTML = '';
+  
   const withSpend = allProjects.filter(p => p.months.some(v => v > 0));
   withSpend.forEach(p => {
     const total = p.months.reduce((s,v) => s + v, 0);
     tbody.innerHTML += `<tr class="border-b border-slate-50 hover:bg-slate-50" data-project-id="${p.id}" onclick="showProjectDetail(${p.id})">
- <td class="px-3 py-2 text-sm text-indigo-600 max-w-[200px] truncate" style="cursor:pointer">${p.name}</td>
- ${p.months.map(v => `<td class="px-2 py-2 text-right text-xs ${v > 0 ? 'text-indigo-600 font-medium' : 'text-slate-300'}">${v > 0 ? fmt(v) : '-'}</td>`).join('')}
- <td class="px-3 py-2 text-right text-sm font-semibold text-slate-700">${fmt(total)}</td>
+    <td class="px-3 py-2 text-sm text-indigo-600 max-w-[200px] truncate" style="cursor:pointer">${p.name}</td>
+    ${p.months.map(v => `<td class="px-2 py-2 text-right text-xs ${v > 0 ? 'text-indigo-600 font-medium' : 'text-slate-300'}">${v > 0 ? fmt(v) : '-'}</td>`).join('')}
+    <td class="px-3 py-2 text-right text-sm font-semibold text-slate-700">${fmt(total)}</td>
     </tr>`;
   });
+
   // Totals row
   const grandTotal = monthlyTotals.reduce((s,v) => s+v, 0);
   tbody.innerHTML += `<tr class="bg-slate-50 font-semibold">
