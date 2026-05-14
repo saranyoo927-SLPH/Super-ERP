@@ -603,15 +603,26 @@ function renderTPSSubCharts(catMap, indicators) {
             origP2Canvas.style.display = 'none'; 
             let parent = origP2Canvas.parentElement;
             
+            // 🔥 FIX: ปลดล็อคความสูงของกล่องแม่ "ทุกชั้น" ป้องกันกราฟแถวล่างโดนตัดซ่อนไป
+            let pNode = parent;
+            for (let i = 0; i < 6; i++) { // วนลูปปลดล็อคขึ้นไป 6 ชั้น
+                if (!pNode || pNode.tagName === 'BODY') break;
+                pNode.style.setProperty('height', 'auto', 'important');
+                pNode.style.setProperty('max-height', 'none', 'important');
+                pNode.style.setProperty('min-height', 'fit-content', 'important');
+                pNode.style.setProperty('overflow', 'visible', 'important');
+                pNode = pNode.parentElement;
+            }
+            
             let oldCustomP2 = document.getElementById('custom_p2_container');
             if (oldCustomP2) oldCustomP2.remove();
             
             let customContainerP2 = document.createElement('div');
             customContainerP2.id = 'custom_p2_container';
-            /* ลบ inline grid ออก ให้ CSS ด้านบนควบคุมแบบ 2x2 แทน */
+            /* ลบ inline grid ออก ให้ CSS ควบคุมแบบ 2x2 แทน */
             customContainerP2.style.width = '100%';
             customContainerP2.style.marginTop = '20px';
-            customContainerP2.style.paddingBottom = '10px';
+            customContainerP2.style.paddingBottom = '20px';
             parent.appendChild(customContainerP2);
 
             if(typeof destroyChart === 'function') destroyChart('tps_p2bar');
