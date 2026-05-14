@@ -1,5 +1,5 @@
 // ============================================================
-// TPS LIVE DATA PATCH (Final Reverted: ล็อค UI เดิม และดึงข้อมูลให้ตรง 100%)
+// TPS LIVE DATA PATCH (Final Reverted: ล็อค UI เดิม และเพิ่มข้อมูลกราฟ MC ครบ 4 ตัว)
 // ============================================================
 let tpsLiveData = null;
 
@@ -326,7 +326,7 @@ function renderTPSChartsFromData(catMap, totalScore, totalMax) {
 }
 
 // ============================================================
-// 7. ✅ อัปเดตข้อมูลแท็บย่อย
+// 7. ✅ อัปเดตข้อมูลแท็บย่อย (ดึงข้อมูลให้ครบถ้วน)
 // ============================================================
 function updateTPSSubTabs(catMap, indicators) {
     // 🔒 1.1 บริหารแผน (ล็อค Stable 100%)
@@ -374,7 +374,7 @@ function updateTPSSubTabs(catMap, indicators) {
 }
 
 // ============================================================
-// 8. ✅ วาดกราฟแท็บย่อย (เจาะจง 1.3 ตามรหัสข้อ ป้องกันข้อมูลผิด 100%)
+// 8. ✅ วาดกราฟแท็บย่อย (ดึงเฉพาะ 1.3 จากรหัสให้ตรงกับการ์ด 100%)
 // ============================================================
 function renderTPSSubCharts(catMap, indicators) {
     // 🔒 P1 กราฟบริหารแผน (ล็อค Stable 100%)
@@ -395,7 +395,7 @@ function renderTPSSubCharts(catMap, indicators) {
         }
     }
 
-    // 🔒 P2 กราฟสินทรัพย์ (แนวนอน)
+    // 🔒 P2 กราฟสินทรัพย์ (แนวนอน ให้ข้อความไม่ล้นขอบ)
     const p2Items = catMap.asset.items;
     if (p2Items.length > 0) {
         const labels = p2Items.map(ind => {
@@ -439,7 +439,7 @@ function renderTPSSubCharts(catMap, indicators) {
                name.startsWith('1.3.1') || name.startsWith('1.3.2') || name.startsWith('1.3.3');
     });
     
-    // 1. กราฟ Unit Cost (OPD/IPD) - ให้ตรงกับ Card เป๊ะๆ โดยดึงจากรหัส และต้องมีค่าผลงานจริงเท่านั้น (ข้ามบรรทัดหัวข้อ)
+    // 1. กราฟ Unit Cost (OPD/IPD)
     const opdItem = p3Items.find(i => (String(i.code).includes('1.3.1.1') || String(i.name).includes('ผู้ป่วยนอก') || String(i.name).toLowerCase().includes('opd')) && safeParse(i.actual) !== null);
     const ipdItem = p3Items.find(i => (String(i.code).includes('1.3.1.2') || String(i.name).includes('ผู้ป่วยใน') || String(i.name).toLowerCase().includes('ipd')) && !String(i.name).includes('ครองเตียง') && safeParse(i.actual) !== null);
     
@@ -466,7 +466,7 @@ function renderTPSSubCharts(catMap, indicators) {
         });
     }
 
-    // 2. แยกกราฟต้นทุน 4 ประเภท (LC/MC) แยก 4 กราฟเรียงลงมาตามโครงสร้างดั้งเดิม ไม่เปลี่ยน CSS
+    // 2. กราฟต้นทุน LC/MC รวมกัน 1 กราฟ ให้มีครบ 4 แท่ง
     const lcItem = p3Items.find(i => (String(i.code).includes('1.3.1.3') || String(i.name).toLowerCase().includes('lc') || String(i.name).includes('แรงงาน')) && safeParse(i.actual) !== null);
     const mcDrugItem = p3Items.find(i => (String(i.code).includes('1.3.1.4') || String(i.name).includes('ค่ายา') || String(i.name).includes('เวชภัณฑ์ยา')) && safeParse(i.actual) !== null);
     const mcSciItem = p3Items.find(i => (String(i.code).includes('1.3.1.5') || String(i.name).includes('วิทยาศาสตร์')) && safeParse(i.actual) !== null);
@@ -482,56 +482,42 @@ function renderTPSSubCharts(catMap, indicators) {
     const mcSciMean = parseMean(mcSciItem, 3.37);
     const mcMedMean = parseMean(mcMedItem, 5.17);
 
+    // นำ Custom Container เก่าออก (ถ้ามี) แล้วกลับมาวาดกราฟเดี่ยวตัวเดิม
+    let oldCustom = document.getElementById('custom_mc_container');
+    if (oldCustom) oldCustom.remove();
     const origMcCanvas = document.getElementById('tps_p3mc');
     if (origMcCanvas) {
-        origMcCanvas.style.display = 'none'; 
-        let parent = origMcCanvas.parentElement;
-        
-        let oldCustom = document.getElementById('custom_mc_container');
-        if (oldCustom) oldCustom.remove();
-        
-        let customContainer = document.createElement('div');
-        customContainer.id = 'custom_mc_container';
-        customContainer.style.display = 'flex';
-        customContainer.style.flexDirection = 'column';
-        customContainer.style.gap = '15px';
-        customContainer.style.width = '100%';
-        customContainer.style.marginTop = '10px';
-        parent.appendChild(customContainer);
+        origMcCanvas.style.display = ''; 
+    }
 
-        const createBar = (id, title, val, mean) => {
-            const wrapper = document.createElement('div');
-            wrapper.style.height = '70px'; 
-            wrapper.style.width = '100%';
-            wrapper.innerHTML = `<canvas id="${id}"></canvas>`;
-            customContainer.appendChild(wrapper);
-
-            const color = val <= mean ? 'rgba(16,185,129,0.8)' : 'rgba(244,63,94,0.8)';
-            
-            if (typeof Chart !== 'undefined') {
-                new Chart(document.getElementById(id), {
-                    type: 'bar',
-                    data: {
-                        labels: [title],
-                        datasets: [
-                            { label: 'รพ.เสลภูมิ (%)', data: [val], backgroundColor: color, borderRadius: 4 },
-                            { label: 'ค่ากลาง (%)', data: [mean], backgroundColor: 'rgba(245,158,11,0.3)', borderRadius: 4 }
-                        ]
+    if(typeof destroyChart === 'function') destroyChart('tps_p3mc');
+    if (typeof Chart !== 'undefined' && document.getElementById('tps_p3mc')) {
+        new Chart(document.getElementById('tps_p3mc'), {
+            type: 'bar',
+            data: {
+                labels: ['LC ค่าแรง', 'MC ค่ายา', 'MC วัสดุวิทย์', 'MC เวชภัณฑ์ฯ'],
+                datasets: [
+                    { 
+                        label: 'รพ.เสลภูมิ (%)', 
+                        data: [lcVal, mcDrugVal, mcSciVal, mcMedVal], 
+                        backgroundColor: [
+                            lcVal <= lcMean ? 'rgba(16,185,129,0.8)' : 'rgba(244,63,94,0.8)',
+                            mcDrugVal <= mcDrugMean ? 'rgba(16,185,129,0.8)' : 'rgba(244,63,94,0.8)',
+                            mcSciVal <= mcSciMean ? 'rgba(16,185,129,0.8)' : 'rgba(244,63,94,0.8)',
+                            mcMedVal <= mcMedMean ? 'rgba(16,185,129,0.8)' : 'rgba(244,63,94,0.8)'
+                        ], 
+                        borderRadius: 6 
                     },
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        indexAxis: 'y', // กราฟแนวนอน
-                        plugins: { legend: { display: false }, tooltip: { enabled: true } },
-                        scales: { x: { display: true, beginAtZero: true }, y: { display: true } }
+                    { 
+                        label: 'ค่ากลาง (%)', 
+                        data: [lcMean, mcDrugMean, mcSciMean, mcMedMean], 
+                        backgroundColor: 'rgba(245,158,11,0.3)', 
+                        borderRadius: 6 
                     }
-                });
-            }
-        };
-
-        createBar('mc_chart_1', '1.3.1.3 LC ค่าแรงบุคลากร', lcVal, lcMean);
-        createBar('mc_chart_2', '1.3.1.4 MC ค่ายา', mcDrugVal, mcDrugMean);
-        createBar('mc_chart_3', '1.3.1.5 MC ค่าวัสดุวิทยาศาสตร์และการแพทย์', mcSciVal, mcSciMean);
-        createBar('mc_chart_4', '1.3.1.6 MC ค่าเวชภัณฑ์มิใช่ยาและวัสดุการแพทย์', mcMedVal, mcMedMean);
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
     }
 
     // 🚀 R1 กราฟทำกำไร (OM และ ROA ชนค่ากลาง ป้องกันดึงหัวข้อมาโชว์)
