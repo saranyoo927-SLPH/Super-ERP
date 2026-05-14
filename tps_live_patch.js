@@ -637,16 +637,35 @@ function renderTPSSubCharts(catMap, indicators) {
                 wrapper.innerHTML = `<canvas id="${canvasId}"></canvas>`;
                 customContainerP2.appendChild(wrapper);
 
-                const color = val <= limit ? 'rgba(16,185,129,0.85)' : 'rgba(244,63,94,0.85)';
-                
+                const isGood = val <= limit;
+                // ✨ Dribbble Style Colors (สีสดใสขึ้น และเกณฑ์สีนวลตาขึ้น)
+                const valColor = isGood ? 'rgba(16, 185, 129, 0.9)' : 'rgba(244, 63, 94, 0.9)'; 
+                const limitColor = 'rgba(245, 158, 11, 0.18)'; 
+
                 if (typeof Chart !== 'undefined') {
                     new Chart(document.getElementById(canvasId), {
                         type: 'bar',
                         data: {
                             labels: [title],
                             datasets: [
-                                { label: 'รพ.เสลภูมิ (วัน)', data: [val], backgroundColor: color, borderRadius: 6, maxBarThickness: 30 },
-                                { label: 'เกณฑ์สูงสุด (วัน)', data: [limit], backgroundColor: 'rgba(245,158,11,0.20)', borderRadius: 6, maxBarThickness: 30 }
+                                { 
+                                    label: 'รพ.เสลภูมิ (วัน)', 
+                                    data: [val], 
+                                    backgroundColor: valColor, 
+                                    borderRadius: 100, // ✨ ทำให้ขอบมนแบบ Pill Shape 100%
+                                    borderSkipped: false, // ✨ บังคับให้มนทั้งซ้ายและขวา
+                                    barPercentage: 0.65, // ✨ ปรับให้แท่งเพรียวบางลง ดูโปร่งขึ้น
+                                    categoryPercentage: 0.8
+                                },
+                                { 
+                                    label: 'เกณฑ์สูงสุด (วัน)', 
+                                    data: [limit], 
+                                    backgroundColor: limitColor, 
+                                    borderRadius: 100, // ✨ Pill Shape
+                                    borderSkipped: false,
+                                    barPercentage: 0.65,
+                                    categoryPercentage: 0.8
+                                }
                             ]
                         },
                         options: {
@@ -655,13 +674,25 @@ function renderTPSSubCharts(catMap, indicators) {
                             plugins: { 
                                 legend: { display: false }, 
                                 tooltip: commonPlugins.tooltip,
-                                datalabels: { anchor: 'end', align: 'end', color: '#475569', font: { weight: 'bold' } }
+                                datalabels: { 
+                                    anchor: 'end', align: 'end', offset: 6, // ✨ เขยิบเลขให้ห่างจากแท่งนิดนึง
+                                    color: '#475569', font: { weight: '800', size: 11 } 
+                                }
                             },
                             scales: { 
-                                x: { display: true, beginAtZero: true, grid: { color: 'rgba(241, 245, 249, 0.8)', drawBorder: false, borderDash: [5, 5] }, ticks: { color: '#94a3b8', font: { size: 11 } } }, 
-                                y: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: '#64748b', font: { weight: '500' } } } 
+                                x: { 
+                                    display: true, 
+                                    beginAtZero: true, 
+                                    grid: { color: 'rgba(226, 232, 240, 0.6)', drawBorder: false, borderDash: [4, 4] }, // ✨ เส้นตารางจางๆ แบบไข่ปลา
+                                    ticks: { color: '#94a3b8', font: { size: 11 }, padding: 8 } 
+                                }, 
+                                y: { 
+                                    display: true, 
+                                    grid: { display: false, drawBorder: false }, 
+                                    ticks: { color: '#334155', font: { weight: '700', size: 12 }, padding: 12 } // ✨ ทำหัวข้อแกน Y ให้หนาขึ้นและมีมิติ
+                                } 
                             },
-                            layout: { padding: { right: 30 } } 
+                            layout: { padding: { right: 40, top: 10, bottom: 10 } } // ✨ เพิ่มพื้นที่ขวาให้ Datalabels ไม่ตกขอบ
                         }
                     });
                 }
