@@ -374,7 +374,7 @@ function updateTPSSubTabs(catMap, indicators) {
 }
 
 // ============================================================
-// 8. ✅ วาดกราฟแท็บย่อย (ดึงเฉพาะ 1.3 จากรหัสให้ตรงกับการ์ด 100%)
+// 8. ✅ วาดกราฟแท็บย่อย (เจาะจงดักจับเฉพาะตัวที่มีค่าผลงานจริง ป้องกันค่าเป็น 0)
 // ============================================================
 function renderTPSSubCharts(catMap, indicators) {
     // 🔒 P1 กราฟบริหารแผน (ล็อค Stable 100%)
@@ -432,7 +432,6 @@ function renderTPSSubCharts(catMap, indicators) {
     }
 
     // 🚀 P3 กราฟต้นทุน 1.3 
-    // กรองข้อมูลเฉพาะหมวด 1.3 ให้เหมือนกับที่ใช้ในการ์ดเป๊ะๆ
     const p3Items = indicators.filter(i => {
         const code = String(i.code || '').trim();
         const name = String(i.name || '').trim();
@@ -440,12 +439,12 @@ function renderTPSSubCharts(catMap, indicators) {
                name.startsWith('1.3.1') || name.startsWith('1.3.2') || name.startsWith('1.3.3');
     });
     
-    // 1. กราฟ Unit Cost (OPD/IPD) - ใช้การเช็ครหัส 1.3.1.1 และ 1.3.1.2 ป้องกันการไปจับตัวอื่นมั่ว
-    const opdItem = p3Items.find(i => String(i.code).startsWith('1.3.1.1') || String(i.name).includes('ผู้ป่วยนอก') || String(i.name).toLowerCase().includes('opd'));
-    const ipdItem = p3Items.find(i => String(i.code).startsWith('1.3.1.2') || String(i.name).includes('ผู้ป่วยใน') || String(i.name).toLowerCase().includes('ipd'));
+    // 1. กราฟ Unit Cost (OPD/IPD) - ดักจับเฉพาะแถวที่มีค่าตัวเลข (ตัดบรรทัดหัวข้อทิ้ง 100%)
+    const opdItem = p3Items.find(i => (String(i.code).includes('1.3.1.1') || String(i.name).includes('ผู้ป่วยนอก') || String(i.name).toLowerCase().includes('opd')) && safeParse(i.actual) !== null);
+    const ipdItem = p3Items.find(i => (String(i.code).includes('1.3.1.2') || String(i.name).includes('ผู้ป่วยใน') || String(i.name).toLowerCase().includes('ipd')) && !String(i.name).includes('ครองเตียง') && safeParse(i.actual) !== null);
     
-    const opdVal = opdItem && opdItem.actual !== null ? safeParse(opdItem.actual) : 0;
-    const ipdVal = ipdItem && ipdItem.actual !== null ? safeParse(ipdItem.actual) : 0;
+    const opdVal = opdItem ? safeParse(opdItem.actual) : 0;
+    const ipdVal = ipdItem ? safeParse(ipdItem.actual) : 0;
     const opdMean = parseMean(opdItem, 1010.51);
     const ipdMean = parseMean(ipdItem, 16120);
 
@@ -467,16 +466,16 @@ function renderTPSSubCharts(catMap, indicators) {
         });
     }
 
-    // 2. แยกกราฟต้นทุน 4 ประเภท (LC, MC ยา, MC วิทย์, MC เวชภัณฑ์) โดยล็อคจากรหัสข้อให้เป๊ะกับการ์ด
-    const lcItem = p3Items.find(i => String(i.code).startsWith('1.3.1.3') || String(i.name).toLowerCase().includes('lc') || String(i.name).includes('แรงงาน'));
-    const mcDrugItem = p3Items.find(i => String(i.code).startsWith('1.3.1.4') || String(i.name).includes('ค่ายา') || String(i.name).includes('เวชภัณฑ์ยา'));
-    const mcSciItem = p3Items.find(i => String(i.code).startsWith('1.3.1.5') || String(i.name).includes('วิทยาศาสตร์'));
-    const mcMedItem = p3Items.find(i => String(i.code).startsWith('1.3.1.6') || String(i.name).includes('มิใช่ยา') || String(i.name).includes('วัสดุการแพทย์'));
+    // 2. แยกกราฟต้นทุน 4 ประเภท โดยดักจับเฉพาะตัวที่มีค่าผลงานจริง
+    const lcItem = p3Items.find(i => (String(i.code).includes('1.3.1.3') || String(i.name).toLowerCase().includes('lc') || String(i.name).includes('แรงงาน')) && safeParse(i.actual) !== null);
+    const mcDrugItem = p3Items.find(i => (String(i.code).includes('1.3.1.4') || String(i.name).includes('ค่ายา') || String(i.name).includes('เวชภัณฑ์ยา')) && safeParse(i.actual) !== null);
+    const mcSciItem = p3Items.find(i => (String(i.code).includes('1.3.1.5') || String(i.name).includes('วิทยาศาสตร์')) && safeParse(i.actual) !== null);
+    const mcMedItem = p3Items.find(i => (String(i.code).includes('1.3.1.6') || String(i.name).includes('มิใช่ยา') || String(i.name).includes('วัสดุการแพทย์')) && !String(i.name).includes('วิทยาศาสตร์') && safeParse(i.actual) !== null);
 
-    const lcVal = lcItem ? safeParse(lcItem.actual) || 0 : 0;
-    const mcDrugVal = mcDrugItem ? safeParse(mcDrugItem.actual) || 0 : 0;
-    const mcSciVal = mcSciItem ? safeParse(mcSciItem.actual) || 0 : 0;
-    const mcMedVal = mcMedItem ? safeParse(mcMedItem.actual) || 0 : 0;
+    const lcVal = lcItem ? safeParse(lcItem.actual) : 0;
+    const mcDrugVal = mcDrugItem ? safeParse(mcDrugItem.actual) : 0;
+    const mcSciVal = mcSciItem ? safeParse(mcSciItem.actual) : 0;
+    const mcMedVal = mcMedItem ? safeParse(mcMedItem.actual) : 0;
 
     const lcMean = parseMean(lcItem, 49.09);
     const mcDrugMean = parseMean(mcDrugItem, 10.71);
@@ -535,14 +534,14 @@ function renderTPSSubCharts(catMap, indicators) {
         createBar('mc_chart_4', 'MC ค่าเวชภัณฑ์มิใช่ยาและวัสดุการแพทย์', mcMedVal, mcMedMean);
     }
 
-    // 🚀 R1 กราฟทำกำไร (OM และ ROA ชนค่ากลาง)
+    // 🚀 R1 กราฟทำกำไร (OM และ ROA ชนค่ากลาง ป้องกันดึงหัวข้อมาโชว์)
     const r1Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.1'));
-    const omItem = r1Items.find(i => String(i.code).includes('2.1.1') || String(i.name).toLowerCase().includes('om') || String(i.name).includes('ดำเนินงาน'));
-    const roaItem = r1Items.find(i => String(i.code).includes('2.1.2') || String(i.name).toLowerCase().includes('roa') || String(i.name).includes('สินทรัพย์'));
+    const omItem = r1Items.find(i => (String(i.code).includes('2.1.1') || String(i.name).toLowerCase().includes('om') || String(i.name).includes('ดำเนินงาน')) && safeParse(i.actual) !== null);
+    const roaItem = r1Items.find(i => (String(i.code).includes('2.1.2') || String(i.name).toLowerCase().includes('roa') || String(i.name).includes('สินทรัพย์')) && safeParse(i.actual) !== null);
 
     if (omItem || roaItem) {
-        const omVal = omItem ? safeParse(omItem.actual) || 0 : 0;
-        const roaVal = roaItem ? safeParse(roaItem.actual) || 0 : 0;
+        const omVal = omItem ? safeParse(omItem.actual) : 0;
+        const roaVal = roaItem ? safeParse(roaItem.actual) : 0;
         const omMean = parseMean(omItem, 16.68);
         const roaMean = parseMean(roaItem, 7.23);
 
@@ -568,8 +567,8 @@ function renderTPSSubCharts(catMap, indicators) {
     // 🚀 R2 กราฟสภาพคล่อง (Cash Ratio)
     const r2Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.2'));
     const r2Valid = r2Items.filter(i => i.actual !== null || i.unit !== '');
-    const cashItem = r2Valid.find(i => String(i.name).toLowerCase().includes('cash') || String(i.name).includes('สภาพคล่อง'));
-    const cashVal = cashItem ? safeParse(cashItem.actual) || 0.26 : 0.26;
+    const cashItem = r2Valid.find(i => (String(i.name).toLowerCase().includes('cash') || String(i.name).includes('สภาพคล่อง')) && safeParse(i.actual) !== null);
+    const cashVal = cashItem ? safeParse(cashItem.actual) : 0.26;
     
     if(typeof destroyChart === 'function') destroyChart('tps_r2bar');
     if (typeof Chart !== 'undefined' && document.getElementById('tps_r2bar')) {
