@@ -957,6 +957,13 @@ function updateSubTabKPIs(panelId, items) {
         // ✨ จัดฟอร์แมตชื่อหัวข้อให้สวยงาม (แยกเลขข้อออกจากชื่อ)
         if (lblEl) {
             let rawName = ind.name || ind.code || '';
+            
+            // 🔥 แทนที่ข้อความเฉพาะหมวด 1.2 ให้เนี๊ยบตามต้องการ (เก็บรหัสตัวเลขด้านหน้าไว้)
+            if (rawName.startsWith('1.2.1')) rawName = rawName.replace(/^([\d\.]+\s).*/, '$1ระยะเวลาชำระเจ้าหนี้การค้า');
+            else if (rawName.startsWith('1.2.2')) rawName = rawName.replace(/^([\d\.]+\s).*/, '$1ระยะเรียกเก็บหนี้สิทธิ UC');
+            else if (rawName.startsWith('1.2.3')) rawName = rawName.replace(/^([\d\.]+\s).*/, '$1ระยะเรียกเก็บหนี้สิทธิ OFC');
+            else if (rawName.startsWith('1.2.4')) rawName = rawName.replace(/^([\d\.]+\s).*/, '$1การบริหารสินคงคลัง');
+
             // ใช้ Regex จับคู่ตัวเลขรหัส เช่น 1.3.1.1 และเว้นวรรค
             let formattedName = rawName.replace(/^([\d\.]+\s)/, '<span class="nt-lbl-code">$1</span>');
             lblEl.innerHTML = formattedName;
