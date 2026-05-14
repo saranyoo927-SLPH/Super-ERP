@@ -524,6 +524,11 @@ function updateTPSSubTabs(catMap, indicators) {
     const p3Items = indicators.filter(i => {
         const code = String(i.code || '').trim();
         const name = String(i.name || '').trim();
+        
+        // 🔥 ตัด Card หัวข้อหลักที่ไม่มีค่าจริง (1.3.1 การบริหารต้นทุน... และ 1.3.3 ผลผลิต) ออก
+        if (code === '1.3.1' || name.includes('การบริหารต้นทุนและค่าใช้')) return false;
+        if (code === '1.3.3' || name.includes('ผลผลิต (PRODUCTIVITY)')) return false;
+
         return code.startsWith('1.3.1') || code.startsWith('1.3.2') || code.startsWith('1.3.3') ||
                name.startsWith('1.3.1') || name.startsWith('1.3.2') || name.startsWith('1.3.3');
     });
