@@ -1,5 +1,5 @@
 // ============================================================
-// TPS LIVE DATA PATCH (ผสมผสาน: Stable สำคัญ + อัปเดตส่วนที่ขาด)
+// TPS LIVE DATA PATCH (Final Mixed: ล็อค 1.1, 1.2 และอัปเดต 1.3, 2.1, 2.2)
 // ============================================================
 let tpsLiveData = null;
 
@@ -70,7 +70,7 @@ function applyTPSLiveData(data) {
     const sectionHead = document.querySelector('#tab-tps-score .erp-section-head h3');
     if (sectionHead) sectionHead.textContent = '📊 Total Performance Score (Live Data)';
 
-    // 🎯 โครงสร้างภาพรวม (Stable 100%)
+    // 🎯 โครงสร้างภาพรวม (ล็อค Stable 100%)
     const catMap = buildCategoryMap(indicators);
     if(typeof updateScoreBars === 'function') updateScoreBars(catMap, totalScore, totalMax, gi.color);
     if(typeof updateTPSKpiCards === 'function') updateTPSKpiCards(catMap);
@@ -84,7 +84,7 @@ function applyTPSLiveData(data) {
 }
 
 // ============================================================
-// 3. HELPER: จัดกลุ่ม indicators (Stable 100%)
+// 3. HELPER: จัดกลุ่ม indicators (ล็อค Stable 100%)
 // ============================================================
 function buildCategoryMap(indicators) {
     const cats = {
@@ -132,7 +132,7 @@ function buildCategoryMap(indicators) {
 }
 
 // ============================================================
-// 4. อัปเดตคะแนนแถบสี (Stable 100%)
+// 4. อัปเดตคะแนนแถบสี (ล็อค Stable 100%)
 // ============================================================
 function updateScoreBars(catMap, totalScore, totalMax, gradeColor) {
     const barContainer = document.querySelector('#tps-ov .erp-card-body');
@@ -176,7 +176,7 @@ function updateScoreBars(catMap, totalScore, totalMax, gradeColor) {
 }
 
 // ============================================================
-// 5. อัปเดตการ์ด Overview (Stable 100%)
+// 5. อัปเดตการ์ด Overview (ล็อค Stable 100%)
 // ============================================================
 function updateTPSKpiCards(catMap) {
     const kpiRow = document.querySelector('#tps-ov .nt-kpi-row');
@@ -263,7 +263,7 @@ function updateGradeTable(totalScore, grade) {
 }
 
 // ============================================================
-// 6. RENDER กราฟหลัก (Stable 100%)
+// 6. RENDER กราฟหลัก (ล็อค Stable 100%)
 // ============================================================
 function renderTPSChartsFromData(catMap, totalScore, totalMax) {
     const catKeys = ['planfin', 'cost', 'accounting', 'asset', 'profit', 'liquidity'];
@@ -309,16 +309,16 @@ function renderTPSChartsFromData(catMap, totalScore, totalMax) {
 }
 
 // ============================================================
-// 7. ✅ อัปเดตข้อมูลแท็บย่อย (ผสมผสาน 2 เวอร์ชัน)
+// 7. ✅ อัปเดตข้อมูลแท็บย่อย (ผสมผสาน)
 // ============================================================
 function updateTPSSubTabs(catMap, indicators) {
-    // 🔒 1.1 บริหารแผน (Stable 100%)
+    // 🔒 1.1 บริหารแผน (ล็อค Stable 100%)
     updateSubTabKPIs('tps-p1', catMap.planfin.items);
     
-    // 🔒 1.2 สินทรัพย์ (Stable 100%)
+    // 🔒 1.2 สินทรัพย์ (ล็อค Stable 100%)
     updateSubTabKPIs('tps-p2', catMap.asset.items);
 
-    // 🚀 1.3 บริหารจัดการ (Latest - อัปเดตใหม่ให้แม่นยำ)
+    // 🚀 1.3 บริหารจัดการ (อัปเดตใหม่)
     const p3Items = indicators.filter(i => {
         const code = String(i.code || '').trim();
         const name = String(i.name || '').trim();
@@ -327,17 +327,17 @@ function updateTPSSubTabs(catMap, indicators) {
     });
     updateSubTabKPIs('tps-p3', p3Items);
 
-    // 🚀 2.1 ความสามารถในการทำกำไร (Latest)
+    // 🚀 2.1 ความสามารถในการทำกำไร (อัปเดตใหม่)
     const r1Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.1'));
     const r1Valid = r1Items.filter(i => i.actual !== null || i.unit !== '');
     updateSubTabKPIs('tps-r1', r1Valid);
 
-    // 🚀 2.2 สภาพคล่อง (Latest)
+    // 🚀 2.2 สภาพคล่อง (อัปเดตใหม่)
     const r2Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.2'));
     const r2Valid = r2Items.filter(i => i.actual !== null || i.unit !== '');
     updateSubTabKPIs('tps-r2', r2Valid);
 
-    // 🚀 ข้อมูลการเงิน (Latest)
+    // 🚀 ข้อมูลการเงิน (อัปเดตใหม่)
     const finPanel = document.getElementById('tps-fin');
     if (finPanel && indicators) {
         const finItems = indicators.filter(i => {
@@ -357,10 +357,10 @@ function updateTPSSubTabs(catMap, indicators) {
 }
 
 // ============================================================
-// 8. ✅ วาดกราฟแท็บย่อย (ผสมผสาน 2 เวอร์ชัน)
+// 8. ✅ วาดกราฟแท็บย่อย (ผสมผสาน)
 // ============================================================
 function renderTPSSubCharts(catMap, indicators) {
-    // 🔒 P1 กราฟบริหารแผน (Stable 100%)
+    // 🔒 P1 กราฟบริหารแผน (ล็อค Stable 100%)
     const p1Items = catMap.planfin.items;
     if (p1Items.length >= 2) {
         const revPct = Number(p1Items[0].actual) || 0;
@@ -378,7 +378,7 @@ function renderTPSSubCharts(catMap, indicators) {
         }
     }
 
-    // 🔒 P2 กราฟสินทรัพย์ (Stable 100%)
+    // 🔒 P2 กราฟสินทรัพย์ (ล็อค Stable 100%)
     const p2Items = catMap.asset.items;
     if (p2Items.length > 0) {
         const labels = p2Items.map(ind => (ind.name || ind.code));
@@ -400,7 +400,7 @@ function renderTPSSubCharts(catMap, indicators) {
         }
     }
 
-    // 🚀 P3 กราฟต้นทุน (Latest - รองรับผู้ป่วยนอก)
+    // 🚀 P3 กราฟต้นทุน (อัปเดตใหม่ - รองรับผู้ป่วยนอก)
     const p3Items = indicators.filter(i => {
         const code = String(i.code || '').trim();
         const name = String(i.name || '').trim();
@@ -423,7 +423,7 @@ function renderTPSSubCharts(catMap, indicators) {
         });
     }
 
-    // 🚀 R1 กราฟทำกำไร (Latest - แยก EBITDA ไม่ให้สเกลพัง)
+    // 🚀 R1 กราฟทำกำไร (อัปเดตใหม่ - แยก EBITDA ไม่ให้สเกลพัง)
     const r1Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.1'));
     const r1Valid = r1Items.filter(i => i.actual !== null || i.unit !== '');
     const chartableR1 = r1Valid.filter(i => !String(i.name).toLowerCase().includes('ebitda') && !String(i.unit).includes('บาท'));
@@ -442,7 +442,7 @@ function renderTPSSubCharts(catMap, indicators) {
         }
     }
 
-    // 🚀 R2 กราฟสภาพคล่อง (Latest)
+    // 🚀 R2 กราฟสภาพคล่อง (อัปเดตใหม่)
     const r2Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.2'));
     const r2Valid = r2Items.filter(i => i.actual !== null || i.unit !== '');
     const cashItem = r2Valid.find(i => String(i.name).toLowerCase().includes('cash') || String(i.name).includes('สภาพคล่อง'));
@@ -457,7 +457,9 @@ function renderTPSSubCharts(catMap, indicators) {
     }
 }
 
-// 📌 ฟังก์ชันช่วยเหลือสำหรับสร้างการ์ดในแท็บย่อย
+// ============================================================
+// 9. ฟังก์ชันเสริมวาดการ์ด KPI (เพิ่มลูกน้ำ และกัน Error)
+// ============================================================
 function updateSubTabKPIs(panelId, items) {
     const panel = document.getElementById(panelId);
     if (!panel) return;
@@ -476,7 +478,7 @@ function updateSubTabKPIs(panelId, items) {
         if (lblEl) lblEl.textContent = ind.name || ind.code || '';
         if (valEl) {
             const actNum = Number(ind.actual);
-            // ใส่ลูกน้ำ (Comma) ให้อ่านง่าย
+            // เพิ่มการใส่ลูกน้ำ (Comma) ให้อ่านง่ายสำหรับ 1.3, 2.1, 2.2
             const valStr = (!isNaN(actNum) && ind.actual !== null && ind.actual !== '') ? actNum.toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
             valEl.innerHTML = valStr + ' <small>' + (ind.unit || '') + '</small>';
         }
@@ -493,11 +495,11 @@ function updateSubTabKPIs(panelId, items) {
             }
         }
         
-        // กำหนดสีการ์ด
-        if(ind.maxScore > 0) {
+        // ใส่สีให้การ์ด
+        if((ind.maxScore || 0) > 0) {
             card.className = 'nt-kpi ' + ((ind.score || 0) >= (ind.maxScore || 1) ? 'c-green' : (ind.score || 0) > 0 ? 'c-amber' : 'c-red');
         } else {
-            card.className = 'nt-kpi c-blue'; 
+            card.className = 'nt-kpi c-blue'; // สีพื้นฐานสำหรับหน้าข้อมูลการเงิน
         }
     });
 }
