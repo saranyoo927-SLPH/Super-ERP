@@ -40,28 +40,33 @@ let tpsLiveData = null;
 // 1. LOAD TPS FROM GAS WEB APP
 // ============================================================
 async function loadTPSFromGAS() {
-    // ── Layer 1: GAS Web App ──
-    // ✅ เปลี่ยนจาก GS_WEB_APP_URL เป็น TPS__WEB_APP_URL
-    if (TPS__WEB_APP_URL) {
-        try {
-            console.log('🔄 TPS: โหลดจาก GAS Web App...');
-            // ✅ ใช้ TPS__WEB_APP_URL ในการ fetch
-            const resp = await fetch(TPS__WEB_APP_URL + '?action=tps', { redirect: 'follow' });
-            if (!resp.ok) throw new Error('HTTP ' + resp.status);
-            const json = await resp.json();
+    if (!TPS__WEB_APP_URL) return;
+    try {
+        console.log('🔄 กำลังดึงตัวเลข TPS ล่าสุด...');
+        const resp = await fetch(TPS__WEB_APP_URL + '?action=tps', { redirect: 'follow' });
+        const json = await resp.json();
 
-            if (json && json.indicators && json.indicators.length > 0) {
-                tpsLiveData = json;
-                console.log('✅ TPS GAS loaded:', json.indicators.length, 'indicators, score:', json.summary?.totalScore + '/' + json.summary?.totalMax, 'grade:', json.summary?.grade);
-                applyTPSLiveData(json);
-                return;
-            } else if (json && json.error) {
-                console.warn('⚠ TPS GAS error:', json.error);
-            }
-        } catch (e) {
-            console.warn('⚠ TPS GAS Web App failed:', e.message, '→ ลอง gviz...');
+        if (json && json.summary) {
+            // ✅ ดึงตัวเลขจาก summary มาแสดงผลโดยตรง
+            const score = json.summary.totalScore;
+            const grade = json.summary.grade;
+            
+            console.log('✅ ได้รับตัวเลขแล้ว:', score, grade);
+            
+            // อัปเดตตัวเลขบนหน้าจอ (อ้างอิงตาม id ใน dashboard ของคุณ)
+            const scoreEl = document.querySelector('.nt-grade .score');
+            if (scoreEl) scoreEl.textContent = 'คะแนน ' + score + ' / 15';
+            
+            const letterEl = document.querySelector('.nt-grade .letter');
+            if (letterEl) letterEl.textContent = grade;
+
+            // ส่งข้อมูลไปวาดกราฟและตารางรายข้อต่อ
+            applyTPSLiveData(json); 
         }
+    } catch (e) {
+        console.error('❌ ดึงข้อมูลตัวเลขล้มเหลว:', e);
     }
+}
 
     // ── Layer 2: gviz (public sheet fallback) ──
     try {
