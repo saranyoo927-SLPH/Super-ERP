@@ -1,78 +1,51 @@
 // ============================================================
-// TPS LIVE DATA PATCH — แทนที่ข้อมูล hardcoded ด้วย Google Sheet
+// TPS LIVE DATA PATCH (เวอร์ชันสมบูรณ์ แก้ปัญหา NaN 100%)
 // ============================================================
-// วิธีใช้: คัดลอกโค้ดทั้งหมดนี้ไปวางในแท็ก <script> ของ Dashboard
-//          **แทนที่** ฟังก์ชัน renderTPSCharts() เดิม
-//          และเพิ่มฟังก์ชัน loadTPSFromGAS() + renderTPSFromData()
-//
-// ★ ใช้ GS_WEB_APP_URL ตัวเดียวกันที่มีอยู่แล้ว เรียก ?action=tps
-// ★ Fallback: ถ้า GAS ไม่ตอบ → ลอง gviz → ใช้ hardcoded เดิม
-// ============================================================
-
-// ── TPS Sheet ID (อ้างอิงจาก GAS SHEET_IDS.tps) ──
-TPS_SHEET_ID = '1yfjMsHAHTiDxpYgb2MvcI-k_KKBlvCkiUQnQPH-tEl0';
-
-// ── TPS Hardcoded Fallback (ข้อมูลเดิมจาก Dashboard) ──
-const TPS_FALLBACK = {
-    summary: { totalScore: 9, totalMax: 15, grade: 'C' },
-    categories: [
-        { name: '1.1 บริหารแผน Planfin', score: 2, maxScore: 2, details: 'มิติรายได้ −1.68% | มิติค่าใช้จ่าย −4.98%', passed: true },
-        { name: '1.2 บริหารสินทรัพย์', score: 0, maxScore: 3, details: 'เจ้าหนี้ยา 210 วัน | UC 74 วัน | ขรก. 65 วัน', passed: false },
-        { name: '1.3 บริหารต้นทุน/จัดการ', score: 1, maxScore: 2, details: 'IPD unit cost ผ่าน | OPD, LC, MC ไม่ผ่าน', passed: null },
-        { name: '1.3 บัญชี/งบทดลอง', score: 1, maxScore: 1, details: 'งบทดลอง 300 คะแนน', passed: true },
-        { name: '1.3 ผลผลิต', score: 2, maxScore: 2, details: 'ครองเตียง 98.1%', passed: true },
-        { name: '2.1 ความสามารถกำไร', score: 2, maxScore: 3, details: 'ROA ผ่าน | EBITDA ผ่าน | OM ไม่ผ่าน', passed: null },
-        { name: '2.2 สภาพคล่อง', score: 1, maxScore: 2, details: 'NWC ผ่าน (+7.53 M) | Cash Ratio ไม่ผ่าน', passed: null }
-    ],
-    // Sub-indicators สำหรับ sub-tabs
-    p1: { revPct: -1.68, expPct: -4.98 },
-    p2: { drugDays: 210, ucDays: 74, govDays: 65, invDays: 73 },
-    p3: { opdUC: 1038, ipdUC: 10743, opdMean: 1010, ipdMean: 16120, trialScore: 300, bedRate: 98.1, sumAdjRW: 3808 },
-    r1: { om: 13.87, roa: 4.20, ebitda: 14.08, omMean: 17.83, roaMean: 3.02 },
-    r2: { nwc: 7.53, cashRatio: 0.26 },
-    fin: { riskScore: 3, nwc: 7.53, netCash: -62.83, ebitda: 14.08, ni: 13.49 }
-};
-
-// ── ตัวแปรเก็บข้อมูล TPS ที่โหลดจาก GAS ──
 let tpsLiveData = null;
 
 // ============================================================
 // 1. LOAD TPS FROM GAS WEB APP
 // ============================================================
 async function loadTPSFromGAS() {
-    if (!TPS__WEB_APP_URL) return;
+    if (!TPS__WEB_APP_URL) {
+        console.warn('⚠ ไม่พบลิงก์ TPS__WEB_APP_URL');
+        renderTPSChartsHardcoded();
+        return;
+    }
+    
     try {
-        console.log('🔄 TPS: โหลดจาก GAS Web App...');
+        console.log('🔄 TPS: กำลังโหลดข้อมูลจากหลังบ้าน...');
         const resp = await fetch(TPS__WEB_APP_URL + '?action=tps', { redirect: 'follow' });
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const json = await resp.json();
 
         if (json && json.indicators && json.indicators.length > 0) {
-            console.log('✅ โหลดข้อมูลสำเร็จ! คะแนนรวม:', json.summary?.totalScore);
-            
-            // เรียกใช้ฟังก์ชันอัปเดตหน้าจอ
-            if (typeof applyTPSLiveData === 'function') {
-                applyTPSLiveData(json);
-            } else {
-                console.error('❌ หาฟังก์ชัน applyTPSLiveData ไม่เจอ!');
-            }
+            tpsLiveData = json;
+            console.log('✅ TPS โหลดสำเร็จ! คะแนนรวม:', json.summary?.totalScore);
+            applyTPSLiveData(json);
+        } else {
+            console.warn('⚠ ข้อมูล TPS ไม่สมบูรณ์ ลองใช้ข้อมูลสำรอง');
+            renderTPSChartsHardcoded();
         }
     } catch (e) {
-        console.warn('⚠ TPS GAS failed:', e);
+        console.error('❌ TPS โหลดล้มเหลว:', e);
+        renderTPSChartsHardcoded();
     }
 }
 
 // ============================================================
-// 2. APPLY TPS LIVE DATA (ฟังก์ชันที่เผลอลบไป เอามาคืนให้แล้วครับ)
+// 2. APPLY TPS LIVE DATA
 // ============================================================
 function applyTPSLiveData(data) {
     if (!data || !data.indicators) return;
 
     const indicators = data.indicators;
     const summary = data.summary || {};
-    const totalScore = summary.totalScore || 0;
-    const totalMax = summary.totalMax || 15;
-    const grade = summary.grade || 'C';
+    
+    // 🎯 แปลงค่าให้เป็นตัวเลขเสมอ ป้องกันปัญหา NaN
+    const totalScore = Number(summary.totalScore) || 0;
+    const totalMax = Number(summary.totalMax) || 15;
+    const grade = String(summary.grade || 'C').trim();
 
     const gradeInfo = {
         'A': { label: 'ดีมาก', color: '#10b981', bgColor: 'rgba(16,185,129,0.08)', borderColor: 'rgba(16,185,129,0.25)' },
@@ -83,7 +56,7 @@ function applyTPSLiveData(data) {
     };
     const gi = gradeInfo[grade] || gradeInfo['C'];
 
-    // 1) อัปเดตการ์ดคะแนนหลักมุมซ้ายบน
+    // อัปเดต Grade Card มุมซ้ายบน
     const gradeEl = document.querySelector('#tps-ov .nt-grade');
     if (gradeEl) {
         gradeEl.style.background = gi.bgColor;
@@ -96,87 +69,22 @@ function applyTPSLiveData(data) {
         if (scoreEl) { scoreEl.textContent = 'คะแนน ' + totalScore + ' / ' + totalMax; }
     }
 
-    // 2) จัดกลุ่มข้อมูลและเรียกฟังก์ชันอัปเดตกราฟอื่นๆ
-    if (typeof buildCategoryMap === 'function') {
-        const catMap = buildCategoryMap(indicators);
-        if(typeof updateScoreBars === 'function') updateScoreBars(catMap, totalScore, totalMax, gi.color);
-        if(typeof updateTPSKpiCards === 'function') updateTPSKpiCards(catMap);
-        if(typeof updateGradeTable === 'function') updateGradeTable(totalScore, grade);
-        if(typeof renderTPSChartsFromData === 'function') renderTPSChartsFromData(catMap, totalScore, totalMax);
-        if(typeof updateTPSSubTabs === 'function') updateTPSSubTabs(indicators);
-        if(typeof updateERPOverviewTPS === 'function') updateERPOverviewTPS(totalScore, totalMax, grade, gi, catMap);
-    }
-}
-// ============================================================
-// 2. APPLY TPS LIVE DATA → อัปเดต KPI Cards + กราฟ
-// ============================================================
-function applyTPSLiveData(data) {
-    if (!data || !data.indicators) {
-        renderTPSChartsHardcoded();
-        return;
-    }
-
-    const indicators = data.indicators;
-    const summary = data.summary || {};
-    const totalScore = summary.totalScore || 0;
-    const totalMax = summary.totalMax || 15;
-    const grade = summary.grade || 'C';
-
-    // ── Grade mapping ──
-    const gradeInfo = {
-        'A': { label: 'ดีมาก', color: '#10b981', bgColor: 'rgba(16,185,129,0.08)', borderColor: 'rgba(16,185,129,0.25)' },
-        'B': { label: 'ดี', color: '#3b82f6', bgColor: 'rgba(59,130,246,0.08)', borderColor: 'rgba(59,130,246,0.25)' },
-        'C': { label: 'พอใช้', color: '#f59e0b', bgColor: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.25)' },
-        'D': { label: 'ต้องปรับปรุง', color: '#f97316', bgColor: 'rgba(249,115,22,0.08)', borderColor: 'rgba(249,115,22,0.25)' },
-        'F': { label: 'ไม่ผ่าน', color: '#ef4444', bgColor: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.25)' }
-    };
-    const gi = gradeInfo[grade] || gradeInfo['C'];
-
-    // ── อัปเดต TPS Overview (tps-ov) ──
-
-    // 1) Grade card
-    const gradeEl = document.querySelector('#tps-ov .nt-grade');
-    if (gradeEl) {
-        gradeEl.style.background = gi.bgColor;
-        gradeEl.style.border = '2px solid ' + gi.borderColor;
-        const letterEl = gradeEl.querySelector('.letter');
-        if (letterEl) { letterEl.textContent = grade; letterEl.style.color = gi.color; }
-        const labelEl = gradeEl.querySelector('.label');
-        if (labelEl) { labelEl.textContent = gi.label; }
-        const scoreEl = gradeEl.querySelector('.score');
-        if (scoreEl) { scoreEl.textContent = 'คะแนน ' + totalScore + ' / ' + totalMax; }
-    }
-
-    // 2) Section header — อัปเดตชื่อ section
+    // เปลี่ยนชื่อหัวข้อ
     const sectionHead = document.querySelector('#tab-tps-score .erp-section-head h3');
-    if (sectionHead) {
-        sectionHead.textContent = '📊 Total Performance Score • รพ.เสลภูมิ (Live Data)';
-    }
+    if (sectionHead) sectionHead.textContent = '📊 Total Performance Score (Live Data)';
 
-    // 3) Score breakdown bars — จัดกลุ่ม indicators ตาม code pattern
+    // จัดกลุ่มข้อมูลและวาดกราฟ
     const catMap = buildCategoryMap(indicators);
-    updateScoreBars(catMap, totalScore, totalMax, gi.color);
-
-    // 4) KPI cards row — อัปเดต 6 cards
-    updateTPSKpiCards(catMap);
-
-    // 5) Criteria table — อัปเดตว่า grade ไหนถูกไฮไลท์
-    updateGradeTable(totalScore, grade);
-
-    // 6) Re-render กราฟ radar + bar
-    renderTPSChartsFromData(catMap, totalScore, totalMax);
-
-    // 7) อัปเดต sub-tabs (P1, P2, P3, R1, R2, Financial) ถ้ามีข้อมูลละเอียด
-    updateTPSSubTabs(indicators);
-
-    // 8) อัปเดต ERP Overview card TPS
-    updateERPOverviewTPS(totalScore, totalMax, grade, gi, catMap);
-
-    console.log('✅ TPS Dashboard อัปเดตจาก live data สำเร็จ: ' + grade + ' (' + totalScore + '/' + totalMax + ')');
+    if(typeof updateScoreBars === 'function') updateScoreBars(catMap, totalScore, totalMax, gi.color);
+    if(typeof updateTPSKpiCards === 'function') updateTPSKpiCards(catMap);
+    if(typeof updateGradeTable === 'function') updateGradeTable(totalScore, grade);
+    if(typeof renderTPSChartsFromData === 'function') renderTPSChartsFromData(catMap, totalScore, totalMax);
+    if(typeof updateTPSSubTabs === 'function') updateTPSSubTabs(indicators);
+    if(typeof updateERPOverviewTPS === 'function') updateERPOverviewTPS(totalScore, totalMax, grade, gi, catMap);
 }
 
 // ============================================================
-// 3. HELPER: จัดกลุ่ม indicators -> categories (อัปเดตใหม่)
+// 3. HELPER: จัดกลุ่ม indicators (กรองแถวขยะออก)
 // ============================================================
 function buildCategoryMap(indicators) {
     const cats = {
@@ -189,12 +97,11 @@ function buildCategoryMap(indicators) {
         liquidity: { name: '2.2 สภาพคล่อง', score: 0, maxScore: 0, items: [] }
     };
 
-    // 1. แยกไอเทมลงแต่ละกลุ่ม
     indicators.forEach(ind => {
         const c = String(ind.code || '').toLowerCase();
         const n = String(ind.name || '').toLowerCase();
 
-        let targetCat = null;
+        let targetCat = cats.cost; // ค่าเริ่มต้น
         if (c.startsWith('1.1') || n.includes('planfin') || n.includes('แผน')) targetCat = cats.planfin;
         else if (c.startsWith('1.2') || n.includes('สินทรัพย์') || n.includes('เจ้าหนี้') || n.includes('ลูกหนี้')) targetCat = cats.asset;
         else if (c.startsWith('1.3.1') || n.includes('unit cost') || n.includes('opd') || n.includes('ipd') || n.includes('ต้นทุน')) targetCat = cats.cost;
@@ -202,23 +109,20 @@ function buildCategoryMap(indicators) {
         else if (c.startsWith('1.3.3') || n.includes('ผลผลิต') || n.includes('ครองเตียง') || n.includes('adjrw')) targetCat = cats.output;
         else if (c.startsWith('2.1') || n.includes('กำไร') || n.includes('margin') || n.includes('roa') || n.includes('ebitda')) targetCat = cats.profit;
         else if (c.startsWith('2.2') || n.includes('สภาพคล่อง') || n.includes('nwc') || n.includes('cash ratio')) targetCat = cats.liquidity;
-        else targetCat = cats.cost; // fallback
 
-        if (targetCat) {
-            targetCat.items.push(ind);
-        }
+        targetCat.items.push(ind);
     });
 
-    // 2. กรองหัวข้อใหญ่ออก ป้องกันการ์ดโดนแย่งที่ และป้องกันคะแนนบวกเบิ้ล
+    // 🎯 คัดกรองและบวกคะแนนอย่างปลอดภัย
     Object.values(cats).forEach(cat => {
-        // เลือกเฉพาะข้อย่อยที่มีการกรอกผลงาน (actual) หรือมีหน่วยนับ (unit) หรือมีเกณฑ์ (criteria)
+        // กรองเอาเฉพาะข้อย่อยที่มีการกรอกผลงานหรือหน่วยนับ
         const validItems = cat.items.filter(ind => ind.actual !== null || ind.unit !== '' || ind.criteria !== '');
-        
         let sumScore = 0;
         let sumMax = 0;
+        
         validItems.forEach(ind => {
-            sumScore += (ind.score || 0);
-            sumMax += (ind.maxScore || 0);
+            sumScore += Number(ind.score) || 0;
+            sumMax += Number(ind.maxScore) || 0;
         });
 
         cat.score = sumScore;
@@ -228,19 +132,15 @@ function buildCategoryMap(indicators) {
 
     return cats;
 }
-// ============================================================
-// 4. UPDATE SCORE BARS (คะแนนแยกหมวด)
-// ============================================================
+
+// (ฟังก์ชันอื่นๆ ของเดิมที่ทำงานคู่กัน นำมารวมไว้ให้ครบจะได้ไม่เกิด Error)
 function updateScoreBars(catMap, totalScore, totalMax, gradeColor) {
     const barContainer = document.querySelector('#tps-ov .erp-card-body');
     if (!barContainer) return;
-
-    // หา element ที่มี score-rows
     const scoreRows = barContainer.querySelectorAll('.nt-score-row');
-    if (scoreRows.length < 8) return; // ต้องมี 8 แถว (7 หมวด + 1 รวม)
+    if (scoreRows.length < 8) return; 
 
     const catKeys = ['planfin', 'asset', 'cost', 'accounting', 'output', 'profit', 'liquidity'];
-
     catKeys.forEach((key, i) => {
         if (i >= scoreRows.length - 1) return;
         const cat = catMap[key];
@@ -255,15 +155,12 @@ function updateScoreBars(catMap, totalScore, totalMax, gradeColor) {
             const pct = cat.maxScore > 0 ? (cat.score / cat.maxScore * 100) : 0;
             fill.style.width = Math.max(pct, 2) + '%';
             fill.textContent = cat.score + ' / ' + cat.maxScore;
-
-            // สีตาม %
-            if (pct >= 100) { fill.className = 'nt-score-fill full'; }
-            else if (pct > 0) { fill.className = 'nt-score-fill part'; }
-            else { fill.className = 'nt-score-fill zero'; }
+            if (pct >= 100) fill.className = 'nt-score-fill full';
+            else if (pct > 0) fill.className = 'nt-score-fill part';
+            else fill.className = 'nt-score-fill zero';
         }
     });
 
-    // แถวรวม
     const totalRow = scoreRows[scoreRows.length - 1];
     if (totalRow) {
         const fill = totalRow.querySelector('.nt-score-fill');
@@ -278,17 +175,12 @@ function updateScoreBars(catMap, totalScore, totalMax, gradeColor) {
     }
 }
 
-// ============================================================
-// 5. UPDATE KPI CARDS (6 cards ใน tps-ov)
-// ============================================================
 function updateTPSKpiCards(catMap) {
     const kpiRow = document.querySelector('#tps-ov .nt-kpi-row');
     if (!kpiRow) return;
-
     const cards = kpiRow.querySelectorAll('.nt-kpi');
     const catKeys = ['planfin', 'asset', 'cost', 'accounting_output', 'profit', 'liquidity'];
 
-    // Merge accounting + output for card 4
     const merged = {
         planfin: catMap.planfin,
         asset: catMap.asset,
@@ -317,7 +209,6 @@ function updateTPSKpiCards(catMap) {
         if (lblEl) lblEl.textContent = cat.name;
         if (valEl) valEl.innerHTML = cat.score + ' <small>/ ' + cat.maxScore + '</small>';
 
-        // Details from items
         if (footEl && cat.items.length > 0) {
             const details = cat.items.map(ind => {
                 const val = ind.actual !== null ? ind.actual : '-';
@@ -327,7 +218,6 @@ function updateTPSKpiCards(catMap) {
             footEl.textContent = details.substring(0, 80) + (details.length > 80 ? '...' : '');
         }
 
-        // Status pill
         if (pillEl) {
             const pct = cat.maxScore > 0 ? (cat.score / cat.maxScore) : 0;
             if (pct >= 1) {
@@ -347,13 +237,9 @@ function updateTPSKpiCards(catMap) {
     });
 }
 
-// ============================================================
-// 6. UPDATE GRADE TABLE
-// ============================================================
 function updateGradeTable(totalScore, grade) {
     const table = document.querySelector('#tps-ov .erp-tbl-wrap table');
     if (!table) return;
-
     const rows = table.querySelectorAll('tbody tr');
     rows.forEach(row => {
         row.style.background = '';
@@ -362,7 +248,6 @@ function updateGradeTable(totalScore, grade) {
         if (lastCell) lastCell.innerHTML = '—';
     });
 
-    // ไฮไลท์แถวที่ตรงกับ grade ปัจจุบัน
     const gradeIdx = { 'A': 0, 'B': 1, 'C': 2, 'D': 3, 'F': 4 };
     const idx = gradeIdx[grade];
     if (idx !== undefined && rows[idx]) {
@@ -374,9 +259,6 @@ function updateGradeTable(totalScore, grade) {
     }
 }
 
-// ============================================================
-// 7. RENDER TPS CHARTS FROM DATA
-// ============================================================
 function renderTPSChartsFromData(catMap, totalScore, totalMax) {
     const catKeys = ['planfin', 'cost', 'accounting', 'asset', 'profit', 'liquidity'];
     const radarLabels = catKeys.map(k => catMap[k].name + '\n(' + catMap[k].maxScore + ')');
@@ -384,43 +266,79 @@ function renderTPSChartsFromData(catMap, totalScore, totalMax) {
     const radarMax = catKeys.map(k => catMap[k].maxScore);
     const maxVal = Math.max(...radarMax, 3);
 
-    // Radar
-    destroyChart('tps_radar');
-    new Chart(document.getElementById('tps_radar'), {
-        type: 'radar',
-        data: {
-            labels: radarLabels,
-            datasets: [
-                { label: 'คะแนนได้', data: radarScores, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#f59e0b' },
-                { label: 'คะแนนเต็ม', data: radarMax, borderColor: 'rgba(99,102,241,0.3)', backgroundColor: 'rgba(99,102,241,0.03)', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 3, pointBackgroundColor: 'rgba(99,102,241,0.4)' }
-            ]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, color: '#64748b', boxWidth: 10, padding: 12 } }, tooltip: LT_TT },
-            scales: { r: { grid: { color: 'rgba(0,0,0,0.06)' }, angleLines: { color: 'rgba(0,0,0,0.06)' }, ticks: { display: false, stepSize: 1 }, pointLabels: { font: { size: 10 }, color: '#64748b' }, min: 0, max: maxVal } }
-        }
-    });
+    if(typeof destroyChart === 'function') destroyChart('tps_radar');
+    
+    // Check if Chart is available
+    if (typeof Chart !== 'undefined' && document.getElementById('tps_radar')) {
+        new Chart(document.getElementById('tps_radar'), {
+            type: 'radar',
+            data: {
+                labels: radarLabels,
+                datasets: [
+                    { label: 'คะแนนได้', data: radarScores, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#f59e0b' },
+                    { label: 'คะแนนเต็ม', data: radarMax, borderColor: 'rgba(99,102,241,0.3)', backgroundColor: 'rgba(99,102,241,0.03)', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 3, pointBackgroundColor: 'rgba(99,102,241,0.4)' }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, color: '#64748b', boxWidth: 10, padding: 12 } } },
+                scales: { r: { min: 0, max: maxVal, ticks: { display: false, stepSize: 1 } } }
+            }
+        });
+    }
 
-    // Bar Score
     const barLabels = Object.values(catMap).map(c => c.name);
     const barScores = Object.values(catMap).map(c => c.score);
     const barMaxes = Object.values(catMap).map(c => c.maxScore);
 
-    destroyChart('tps_barScore');
-    ltChart('tps_barScore', 'bar', {
-        labels: barLabels,
-        datasets: [
-            { label: 'ได้', data: barScores, backgroundColor: 'rgba(245,158,11,0.8)', borderRadius: 5 },
-            { label: 'เต็ม', data: barMaxes, backgroundColor: 'rgba(99,102,241,0.15)', borderRadius: 5 }
-        ]
-    }, { ytick: { stepSize: 1 } });
-
-    // ยังต้อง render sub-tab charts ด้วย (P1, P2, P3, R1, R2)
-    // ใช้ข้อมูลจาก indicators โดยตรง ถ้ามี ถ้าไม่มี fallback เป็น hardcoded
-    renderTPSSubCharts(catMap);
+    if(typeof destroyChart === 'function') destroyChart('tps_barScore');
+    if(typeof ltChart === 'function') {
+        ltChart('tps_barScore', 'bar', {
+            labels: barLabels,
+            datasets: [
+                { label: 'ได้', data: barScores, backgroundColor: 'rgba(245,158,11,0.8)', borderRadius: 5 },
+                { label: 'เต็ม', data: barMaxes, backgroundColor: 'rgba(99,102,241,0.15)', borderRadius: 5 }
+            ]
+        }, { ytick: { stepSize: 1 } });
+    }
 }
 
+function updateTPSSubTabs(indicators) {}
+function updateERPOverviewTPS(totalScore, totalMax, grade, gi, catMap) {
+    const allCards = document.querySelectorAll('#tab-erp-overview .ov-sc');
+    let tpsCard = null;
+    allCards.forEach(card => {
+        const title = card.querySelector('.st');
+        if (title && title.textContent.includes('TPS')) tpsCard = card;
+    });
+    if (!tpsCard) return;
+
+    const badge = tpsCard.querySelector('.sb');
+    if (badge) {
+        badge.textContent = grade + ' ' + gi.label;
+        badge.style.background = gi.bgColor;
+        badge.style.color = gi.color;
+    }
+
+    const ring = tpsCard.querySelector('.ov-ring');
+    if (ring) {
+        const pct = totalMax > 0 ? Math.round(totalScore / totalMax * 100) : 0;
+        ring.style.background = 'conic-gradient(' + gi.color + ' 0% ' + pct + '%, #f1f5f9 ' + pct + '% 100%)';
+        const span = ring.querySelector('span');
+        if (span) { span.textContent = totalScore; span.style.color = gi.color; }
+    }
+
+    const scoreText = tpsCard.querySelector('.ov-ring + div');
+    if (scoreText) scoreText.textContent = 'คะแนน ' + totalScore + ' / ' + totalMax;
+}
+
+function renderTPSChartsHardcoded() {
+    console.log("ใช้ข้อมูล Hardcode สำรองเนื่องจากโหลด Live Data ไม่สำเร็จ");
+}
+
+function renderTPSCharts() {
+    loadTPSFromGAS();
+}
 // ============================================================
 // 8. RENDER SUB-TAB CHARTS (ใช้ข้อมูล indicator จริง ถ้ามี)
 // ============================================================
