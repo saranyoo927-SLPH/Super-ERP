@@ -309,7 +309,7 @@ function renderTPSChartsFromData(catMap, totalScore, totalMax) {
 }
 
 // ============================================================
-// 7. ✅ อัปเดตข้อมูลแท็บย่อย (อัปเดตเฉพาะส่วนที่สั่ง)
+// 7. ✅ อัปเดตข้อมูลแท็บย่อย (ผสมผสาน)
 // ============================================================
 function updateTPSSubTabs(catMap, indicators) {
     // 🔒 1.1 บริหารแผน (ล็อค Stable 100%)
@@ -318,7 +318,7 @@ function updateTPSSubTabs(catMap, indicators) {
     // 🔒 1.2 สินทรัพย์ (ล็อค Stable 100%)
     updateSubTabKPIs('tps-p2', catMap.asset.items);
 
-    // 🚀 1.3 บริหารจัดการ (ดึงครบถึง 1.3.1.6)
+    // 🚀 1.3 บริหารจัดการ (อัปเดตใหม่: ดึง 1.3.1 - 1.3.3 ครบถ้วน เพื่อให้การ์ด MC แสดงครบ)
     const p3Items = indicators.filter(i => {
         const code = String(i.code || '').trim();
         const name = String(i.name || '').trim();
@@ -327,17 +327,17 @@ function updateTPSSubTabs(catMap, indicators) {
     });
     updateSubTabKPIs('tps-p3', p3Items);
 
-    // 🚀 2.1 ความสามารถในการทำกำไร
+    // 🚀 2.1 ความสามารถในการทำกำไร (อัปเดตใหม่)
     const r1Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.1'));
     const r1Valid = r1Items.filter(i => i.actual !== null || i.unit !== '');
     updateSubTabKPIs('tps-r1', r1Valid);
 
-    // 🚀 2.2 สภาพคล่อง
+    // 🚀 2.2 สภาพคล่อง (อัปเดตใหม่)
     const r2Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.2'));
     const r2Valid = r2Items.filter(i => i.actual !== null || i.unit !== '');
     updateSubTabKPIs('tps-r2', r2Valid);
 
-    // 🚀 ข้อมูลการเงิน
+    // 🚀 ข้อมูลการเงิน (อัปเดตใหม่)
     const finPanel = document.getElementById('tps-fin');
     if (finPanel && indicators) {
         const finItems = indicators.filter(i => {
@@ -357,7 +357,7 @@ function updateTPSSubTabs(catMap, indicators) {
 }
 
 // ============================================================
-// 8. ✅ วาดกราฟแท็บย่อย (อัปเดตแก้ข้อความล้น และเสริมกราฟเปรียบเทียบค่ากลาง)
+// 8. ✅ วาดกราฟแท็บย่อย (ผสมผสานการเปลี่ยนแปลง)
 // ============================================================
 function renderTPSSubCharts(catMap, indicators) {
     // 🔒 P1 กราฟบริหารแผน (ล็อค Stable 100%)
@@ -378,19 +378,10 @@ function renderTPSSubCharts(catMap, indicators) {
         }
     }
 
-    // 🚀 P2 กราฟสินทรัพย์ (แก้ข้อความตัด และแยกตัวชี้วัดให้ชัดเจน)
+    // 🔒 P2 กราฟสินทรัพย์ (ล็อค Stable 100% ตามคำขอ: ไม่มีการตัดชื่อหรือดัดแปลงใดๆ)
     const p2Items = catMap.asset.items;
     if (p2Items.length > 0) {
-        // ใช้ชื่อแบบสั้นๆ ให้กราฟไม่ตัดข้อความ
-        const labels = p2Items.map(ind => {
-            let name = String(ind.name || ind.code);
-            if(name.includes('เจ้าหนี้')) return 'เจ้าหนี้การค้า';
-            if(name.includes('UC') || name.includes('บัตรทอง')) return 'ลูกหนี้ UC';
-            if(name.includes('ขรก') || name.includes('เบิกจ่ายตรง')) return 'ลูกหนี้ ขรก.';
-            if(name.includes('คงคลัง') || name.includes('สินค้า')) return 'วัสดุคงคลัง';
-            return name.substring(0, 15);
-        });
-        
+        const labels = p2Items.map(ind => (ind.name || ind.code));
         const values = p2Items.map(ind => Number(ind.actual) || 0);
         const limits = p2Items.map(ind => {
             const m = String(ind.criteria || '').match(/(\d+)/);
@@ -402,14 +393,14 @@ function renderTPSSubCharts(catMap, indicators) {
             ltChart('tps_p2bar', 'bar', {
                 labels: labels,
                 datasets: [
-                    { label: 'ค่าจริง (วัน)', data: values, backgroundColor: values.map((v, i) => v > limits[i] ? 'rgba(244,63,94,0.8)' : 'rgba(16,185,129,0.8)'), borderRadius: 6 },
+                    { label: 'ค่าจริง', data: values, backgroundColor: values.map((v, i) => v > limits[i] ? 'rgba(244,63,94,0.8)' : 'rgba(16,185,129,0.8)'), borderRadius: 6 },
                     { label: 'เกณฑ์สูงสุด', data: limits, type: 'line', borderColor: '#f59e0b', borderWidth: 2, borderDash: [5, 4], pointRadius: 5, pointBackgroundColor: '#f59e0b', fill: false }
                 ]
             });
         }
     }
 
-    // 🚀 P3 กราฟต้นทุน (เพิ่มกราฟ LC/MC เปรียบเทียบค่ากลาง)
+    // 🚀 P3 กราฟต้นทุน (อัปเดตใหม่ - แยก LC/MC vs ค่ากลางชัดเจน)
     const p3Items = indicators.filter(i => {
         const code = String(i.code || '').trim();
         const name = String(i.name || '').trim();
@@ -417,7 +408,7 @@ function renderTPSSubCharts(catMap, indicators) {
                name.startsWith('1.3.1') || name.startsWith('1.3.2') || name.startsWith('1.3.3');
     });
     
-    // 1. กราฟ Unit Cost (OPD/IPD)
+    // กราฟ 1.3 Unit Cost (OPD/IPD)
     const opdItem = p3Items.find(i => String(i.name).toLowerCase().includes('opd') || String(i.name).includes('ผู้ป่วยนอก'));
     const ipdItem = p3Items.find(i => String(i.name).toLowerCase().includes('ipd') || String(i.name).includes('ผู้ป่วยใน'));
     const opdVal = opdItem && opdItem.actual !== null ? Number(opdItem.actual) : 1038;
@@ -434,18 +425,18 @@ function renderTPSSubCharts(catMap, indicators) {
         });
     }
 
-    // 2. กราฟ LC/MC (รื้อฟื้นกลับมาพร้อมข้อมูลจริง 1.3.1.3 - 1.3.1.6)
-    const lcItem = p3Items.find(i => String(i.name).toLowerCase().includes('lc') || String(i.name).includes('แรงงาน'));
-    const mcDrugItem = p3Items.find(i => String(i.name).toLowerCase().includes('mc ยา') || String(i.name).includes('เวชภัณฑ์ยา'));
-    const mcSciItem = p3Items.find(i => String(i.name).toLowerCase().includes('วิทยาศาสตร์') || String(i.code).includes('1.3.1.5'));
-    const mcMedItem = p3Items.find(i => String(i.name).toLowerCase().includes('มิใช่ยา') || String(i.name).includes('วัสดุการแพทย์') || String(i.code).includes('1.3.1.6'));
+    // กราฟ 1.3 LC/MC 4 ตัว (1.3.1.3 ถึง 1.3.1.6)
+    const lcItem = p3Items.find(i => String(i.code).includes('1.3.1.3') || String(i.name).toLowerCase().includes('lc') || String(i.name).includes('แรงงาน'));
+    const mcDrugItem = p3Items.find(i => String(i.code).includes('1.3.1.4') || String(i.name).toLowerCase().includes('mc ยา') || String(i.name).includes('เวชภัณฑ์ยา'));
+    const mcSciItem = p3Items.find(i => String(i.code).includes('1.3.1.5') || String(i.name).includes('วัสดุวิทยาศาสตร์'));
+    const mcMedItem = p3Items.find(i => String(i.code).includes('1.3.1.6') || String(i.name).includes('มิใช่ยา') || String(i.name).includes('วัสดุการแพทย์'));
 
-    const lcVal = lcItem ? Number(lcItem.actual) || 0 : 51.39;
-    const mcDrugVal = mcDrugItem ? Number(mcDrugItem.actual) || 0 : 14.30;
-    const mcSciVal = mcSciItem ? Number(mcSciItem.actual) || 0 : 5.82;
-    const mcMedVal = mcMedItem ? Number(mcMedItem.actual) || 0 : 7.59;
+    const lcVal = lcItem && lcItem.actual !== null ? Number(lcItem.actual) : 0;
+    const mcDrugVal = mcDrugItem && mcDrugItem.actual !== null ? Number(mcDrugItem.actual) : 0;
+    const mcSciVal = mcSciItem && mcSciItem.actual !== null ? Number(mcSciItem.actual) : 0;
+    const mcMedVal = mcMedItem && mcMedItem.actual !== null ? Number(mcMedItem.actual) : 0;
 
-    // ฟังก์ชันดึงค่ากลางจากคอลัมน์เกณฑ์
+    // ฟังก์ชันดึงค่ากลางจาก Criteria
     const parseMean = (item, fallback) => {
         if(!item || !item.criteria) return fallback;
         const m = String(item.criteria).match(/(\d+(\.\d+)?)/);
@@ -455,7 +446,7 @@ function renderTPSSubCharts(catMap, indicators) {
     if(typeof destroyChart === 'function') destroyChart('tps_p3mc');
     if(typeof ltChart === 'function') {
         ltChart('tps_p3mc', 'bar', { 
-            labels: ['LC แรงงาน', 'MC ยา', 'MC วัสดุวิทย์', 'MC วัสดุแพทย์'], 
+            labels: ['1.3.1.3 LC ค่าแรง', '1.3.1.4 MC ค่ายา', '1.3.1.5 MC วัสดุวิทย์', '1.3.1.6 MC เวชภัณฑ์'], 
             datasets: [
                 { label: 'รพ.เสลภูมิ (%)', data: [lcVal, mcDrugVal, mcSciVal, mcMedVal], backgroundColor: ['rgba(244,63,94,0.8)', 'rgba(244,63,94,0.8)', 'rgba(244,63,94,0.8)', 'rgba(244,63,94,0.8)'], borderRadius: 6 }, 
                 { label: 'ค่ากลาง (%)', data: [parseMean(lcItem, 49.09), parseMean(mcDrugItem, 10.71), parseMean(mcSciItem, 3.37), parseMean(mcMedItem, 5.17)], backgroundColor: 'rgba(245,158,11,0.3)', borderRadius: 6 }
@@ -463,14 +454,14 @@ function renderTPSSubCharts(catMap, indicators) {
         });
     }
 
-    // 🚀 R1 กราฟทำกำไร (เปรียบเทียบ OM และ ROA vs ค่ากลาง)
+    // 🚀 R1 กราฟทำกำไร (อัปเดตใหม่ - เปรียบเทียบ OM และ ROA vs ค่ากลาง)
     const r1Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.1'));
-    const omItem = r1Items.find(i => String(i.name).toLowerCase().includes('om') || String(i.name).toLowerCase().includes('operating') || String(i.name).includes('ดำเนินงาน'));
-    const roaItem = r1Items.find(i => String(i.name).toLowerCase().includes('roa') || String(i.name).toLowerCase().includes('return') || String(i.name).includes('สินทรัพย์'));
+    const omItem = r1Items.find(i => String(i.code).includes('2.1.1') || String(i.name).toLowerCase().includes('om') || String(i.name).includes('ดำเนินงาน'));
+    const roaItem = r1Items.find(i => String(i.code).includes('2.1.2') || String(i.name).toLowerCase().includes('roa') || String(i.name).includes('สินทรัพย์'));
 
     if (omItem || roaItem) {
-        const omVal = omItem ? Number(omItem.actual) || 0 : 0;
-        const roaVal = roaItem ? Number(roaItem.actual) || 0 : 0;
+        const omVal = omItem && omItem.actual !== null ? Number(omItem.actual) : 0;
+        const roaVal = roaItem && roaItem.actual !== null ? Number(roaItem.actual) : 0;
         const omMean = parseMean(omItem, 16.68);
         const roaMean = parseMean(roaItem, 7.23);
 
@@ -486,7 +477,7 @@ function renderTPSSubCharts(catMap, indicators) {
         }
     }
 
-    // 🚀 R2 กราฟสภาพคล่อง
+    // 🚀 R2 กราฟสภาพคล่อง (อัปเดตใหม่)
     const r2Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.2'));
     const r2Valid = r2Items.filter(i => i.actual !== null || i.unit !== '');
     const cashItem = r2Valid.find(i => String(i.name).toLowerCase().includes('cash') || String(i.name).includes('สภาพคล่อง'));
@@ -502,7 +493,7 @@ function renderTPSSubCharts(catMap, indicators) {
 }
 
 // ============================================================
-// 9. ฟังก์ชันเสริมวาดการ์ด KPI (เพิ่มลูกน้ำ และกัน Error)
+// 9. ฟังก์ชันเสริมวาดการ์ด KPI (เพิ่มลูกน้ำให้อ่านง่าย)
 // ============================================================
 function updateSubTabKPIs(panelId, items) {
     const panel = document.getElementById(panelId);
@@ -522,14 +513,12 @@ function updateSubTabKPIs(panelId, items) {
         if (lblEl) lblEl.textContent = ind.name || ind.code || '';
         if (valEl) {
             const actNum = Number(ind.actual);
-            // เพิ่มลูกน้ำ (Comma) ให้ตัวเลขดูง่าย
             const valStr = (!isNaN(actNum) && ind.actual !== null && ind.actual !== '') ? actNum.toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
             valEl.innerHTML = valStr + ' <small>' + (ind.unit || '') + '</small>';
         }
         if (footEl) footEl.textContent = (ind.criteria || '') + (ind.result ? ' | ' + ind.result : '');
         
         if (pillEl) {
-            // ซ่อนป้ายคะแนนถ้าเป็นหมวดการเงิน
             if(ind.maxScore === null || ind.maxScore === undefined || ind.maxScore === 0) {
                  pillEl.style.display = 'none';
             } else {
@@ -539,11 +528,10 @@ function updateSubTabKPIs(panelId, items) {
             }
         }
         
-        // ใส่สีให้การ์ด
         if((ind.maxScore || 0) > 0) {
             card.className = 'nt-kpi ' + ((ind.score || 0) >= (ind.maxScore || 1) ? 'c-green' : (ind.score || 0) > 0 ? 'c-amber' : 'c-red');
         } else {
-            card.className = 'nt-kpi c-blue'; // สีพื้นฐานสำหรับข้อมูลการเงิน
+            card.className = 'nt-kpi c-blue'; 
         }
     });
 }
