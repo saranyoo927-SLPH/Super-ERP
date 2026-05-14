@@ -16,28 +16,28 @@ function injectPremiumCSS() {
             position: relative !important;
             display: flex !important;
             flex-direction: column !important;
-            justify-content: space-between !important;
+            justify-content: flex-start !important; /* จัดเรียงจากบนลงล่าง */
             background: #ffffff !important;
-            border-radius: 24px !important; /* โค้งมนละมุนขึ้น */
-            border: 1px solid rgba(226, 232, 240, 0.6) !important;
-            box-shadow: 0 10px 40px -10px rgba(15, 23, 42, 0.06) !important; /* Soft Drop Shadow */
-            padding: 24px 28px !important; /* เพิ่มช่องว่างด้านข้างให้หายใจ */
-            min-height: 180px !important; /* บังคับความสูงขั้นต่ำให้เท่ากันหมด */
+            border-radius: 20px !important; 
+            border: 1px solid rgba(226, 232, 240, 0.8) !important;
+            box-shadow: 0 4px 20px -10px rgba(15, 23, 42, 0.05) !important; 
+            padding: 24px 24px 20px 24px !important; 
+            min-height: 180px !important; 
             overflow: hidden !important;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
             z-index: 1 !important;
         }
 
         /* ล้างขอบสีทึบด้านบนของของเดิมทิ้ง */
         .nt-kpi.c-green, .nt-kpi.c-red, .nt-kpi.c-amber, .nt-kpi.c-blue {
-            border-top-color: rgba(226, 232, 240, 0.6) !important;
+            border-top-color: rgba(226, 232, 240, 0.8) !important;
             border-top-width: 1px !important;
         }
 
         /* Hover Effect: ยกการ์ดสมูทๆ */
         .nt-kpi:hover {
-            transform: translateY(-5px) !important;
-            box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.12) !important;
+            transform: translateY(-4px) !important;
+            box-shadow: 0 16px 32px -12px rgba(15, 23, 42, 0.1) !important;
             border-color: rgba(203, 213, 225, 0.8) !important;
         }
 
@@ -48,35 +48,36 @@ function injectPremiumCSS() {
         .nt-lbl {
             color: #475569 !important;
             font-weight: 600 !important;
-            font-size: 0.95rem !important;
-            line-height: 1.4 !important;
-            max-width: calc(100% - 60px) !important; /* กันที่ให้ Pill มุมขวา เสมอ */
+            font-size: 0.9rem !important;
+            line-height: 1.5 !important;
+            max-width: calc(100% - 50px) !important; 
             display: -webkit-box !important;
-            -webkit-line-clamp: 2 !important; /* บังคับไม่เกิน 2 บรรทัด ถ้ายาวไปให้ใส่ ... */
+            -webkit-line-clamp: 2 !important; 
             -webkit-box-orient: vertical !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
-            margin-bottom: 16px !important;
+            margin-bottom: 12px !important;
+            min-height: 2.8em !important; /* จัดความสูงหัวข้อให้เท่ากัน Card จะได้ไม่โย้เย้ */
         }
         
         /* สไตล์สำหรับรหัสข้อ (เช่น 1.3.1.1) ที่แยกออกมา */
         .nt-lbl-code {
             color: #94a3b8 !important;
             font-weight: 500 !important;
-            font-size: 0.85rem !important;
+            font-size: 0.8rem !important;
             display: block !important;
-            margin-bottom: 2px !important;
+            margin-bottom: 4px !important;
             letter-spacing: 0.02em !important;
         }
 
-        /* Value (ตัวเลขหลัก) ใหญ่ เด่นชัด กลางการ์ด */
+        /* Value (ตัวเลขหลัก) ใหญ่ เด่นชัด */
         .nt-val {
             font-weight: 800 !important;
-            font-size: 2.2rem !important;
+            font-size: 2.4rem !important; /* ขยายขนาดให้อลังการแบบ Dribbble */
             color: #0f172a !important;
-            letter-spacing: -0.03em !important; /* บีบเลขให้ดูแพง */
+            letter-spacing: -0.04em !important; 
             font-variant-numeric: tabular-nums !important;
-            margin: auto 0 !important; /* ดันให้อยู่ตรงกลางพื้นที่ว่างเสมอ */
+            margin: 0 0 16px 0 !important; 
             display: flex !important;
             align-items: baseline !important;
             flex-wrap: wrap !important;
@@ -98,8 +99,8 @@ function injectPremiumCSS() {
             position: absolute !important;
             top: 24px !important;
             right: 24px !important;
-            padding: 4px 10px !important;
-            border-radius: 8px !important;
+            padding: 4px 8px !important;
+            border-radius: 6px !important;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
             font-size: 0.75rem !important;
             font-weight: 700 !important;
@@ -114,7 +115,7 @@ function injectPremiumCSS() {
 
         /* Footer เกณฑ์ด้านล่างสุด ตัดเส้นออก ใช้พื้นที่ว่างแทน */
         .nt-foot {
-            margin-top: 16px !important;
+            margin-top: auto !important; /* ดันลงล่างสุดเสมอ */
             padding-top: 0 !important;
             color: #94a3b8 !important;
             font-size: 0.8rem !important;
@@ -286,7 +287,8 @@ function buildCategoryMap(indicators) {
         const n = String(ind.name || '').toLowerCase();
 
         let targetCat = cats.cost; 
-        if (c.startsWith('1.1') || n.includes('planfin') || n.includes('แผน')) targetCat = cats.planfin;
+        if (c.startsWith('2.1') || n.includes('กำไร') || n.includes('margin') || n.includes('roa') || n.includes('ebitda')) targetCat = cats.profit; // ย้าย 2.1 ขึ้นมากรองก่อน เพื่อดึง 2.1.2 ออกจาก Asset
+        else if (c.startsWith('1.1') || n.includes('planfin') || n.includes('แผน')) targetCat = cats.planfin;
         else if (c.startsWith('1.2') || n.includes('สินทรัพย์') || n.includes('เจ้าหนี้') || n.includes('ลูกหนี้')) targetCat = cats.asset;
         else if (c.startsWith('1.3.1') || n.includes('unit cost') || n.includes('opd') || n.includes('ipd') || n.includes('ต้นทุน')) targetCat = cats.cost;
         else if (c.startsWith('1.3.2') || n.includes('งบทดลอง') || n.includes('บัญชี')) targetCat = cats.accounting;
@@ -603,24 +605,28 @@ function renderTPSSubCharts(catMap, indicators) {
             p2Items.forEach((ind, index) => {
                 let name = String(ind.name || ind.code);
                 let title = name;
+                let nameUpper = name.toUpperCase();
+
                 if(name.includes('เจ้าหนี้')) title = 'ระยะเวลาชำระหนี้ (เจ้าหนี้)';
-                else if(name.includes('UC') || name.includes('บัตรทอง')) title = 'ระยะเวลาเก็บหนี้ (UC)';
-                else if(name.includes('ขรก') || name.includes('เบิกจ่ายตรง')) title = 'ระยะเวลาเก็บหนี้ (ขรก.)';
-                else if(name.includes('คงคลัง') || name.includes('สินค้า')) title = 'ระยะเวลาสำรอง (วัสดุฯ)';
+                else if(nameUpper.includes('UC') || name.includes('บัตรทอง')) title = 'ระยะเวลาเก็บหนี้ (UC)';
+                else if(name.includes('ขรก') || name.includes('ข้าราชการ') || name.includes('เบิกจ่ายตรง')) title = 'ระยะเวลาเก็บหนี้ (ข้าราชการ)';
+                else if(name.includes('คงคลัง') || name.includes('สินค้า') || nameUpper.includes('INVENTORY')) title = 'ระยะเวลาสำรอง (วัสดุฯ)';
                 else title = name.substring(0, 20);
 
                 let val = safeParse(ind.actual) || 0;
                 
                 // บังคับค่าเกณฑ์ (Limit) สำหรับกราฟ P2 ให้ตรงกับใน Card 100%
-                let limit = parseMean(ind, 60);
+                let limit = 60; // ค่าเริ่มต้น
                 if (title.includes('เจ้าหนี้')) {
                     limit = 180;
                 } else if (title.includes('UC') || title.includes('บัตรทอง')) {
                     limit = 60;
-                } else if (title.includes('ขรก') || title.includes('เบิกจ่ายตรง')) {
+                } else if (title.includes('ข้าราชการ') || title.includes('ขรก') || title.includes('เบิกจ่ายตรง')) {
                     limit = 60;
                 } else if (title.includes('สำรอง') || title.includes('คงคลัง') || title.includes('สินค้า')) {
                     limit = 60;
+                } else {
+                    limit = parseMean(ind, 60);
                 }
 
                 const wrapper = document.createElement('div');
