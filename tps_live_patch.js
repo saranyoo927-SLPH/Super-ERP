@@ -188,11 +188,9 @@ function applyTPSLiveData(data) {
 }
 
 // ============================================================
-// 3. HELPER: จัดกลุ่ม indicators → categories
+// 3. HELPER: จัดกลุ่ม indicators -> categories (อัปเดตใหม่)
 // ============================================================
 function buildCategoryMap(indicators) {
-    // แมป indicators เข้ากลุ่มตาม code/name pattern
-    // GAS returns: code, name, actual, unit, criteria, score, maxScore, result
     const cats = {
         planfin: { name: '1.1 บริหารแผน Planfin', score: 0, maxScore: 0, items: [] },
         asset: { name: '1.2 บริหารสินทรัพย์', score: 0, maxScore: 0, items: [] },
@@ -203,50 +201,45 @@ function buildCategoryMap(indicators) {
         liquidity: { name: '2.2 สภาพคล่อง', score: 0, maxScore: 0, items: [] }
     };
 
+    // 1. แยกไอเทมลงแต่ละกลุ่ม
     indicators.forEach(ind => {
-        const c = (ind.code || '').toLowerCase();
-        const n = (ind.name || '').toLowerCase();
+        const c = String(ind.code || '').toLowerCase();
+        const n = String(ind.name || '').toLowerCase();
 
-        // จัดกลุ่มตาม code pattern ของ TPS
-        if (c.includes('1.1') || n.includes('planfin') || n.includes('แผน')) {
-            cats.planfin.items.push(ind);
-            cats.planfin.score += (ind.score || 0);
-            cats.planfin.maxScore += (ind.maxScore || 0);
-        } else if (c.includes('1.2') || n.includes('สินทรัพย์') || n.includes('เจ้าหนี้') || n.includes('ลูกหนี้') || n.includes('สินค้าคงคลัง')) {
-            cats.asset.items.push(ind);
-            cats.asset.score += (ind.score || 0);
-            cats.asset.maxScore += (ind.maxScore || 0);
-        } else if (n.includes('unit cost') || n.includes('ต้นทุน') || c.includes('1.3.1')) {
-            cats.cost.items.push(ind);
-            cats.cost.score += (ind.score || 0);
-            cats.cost.maxScore += (ind.maxScore || 0);
-        } else if (n.includes('งบทดลอง') || n.includes('บัญชี') || c.includes('1.3.2')) {
-            cats.accounting.items.push(ind);
-            cats.accounting.score += (ind.score || 0);
-            cats.accounting.maxScore += (ind.maxScore || 0);
-        } else if (n.includes('ผลผลิต') || n.includes('ครองเตียง') || n.includes('adjrw') || c.includes('1.3.3')) {
-            cats.output.items.push(ind);
-            cats.output.score += (ind.score || 0);
-            cats.output.maxScore += (ind.maxScore || 0);
-        } else if (c.includes('2.1') || n.includes('กำไร') || n.includes('margin') || n.includes('roa') || n.includes('ebitda')) {
-            cats.profit.items.push(ind);
-            cats.profit.score += (ind.score || 0);
-            cats.profit.maxScore += (ind.maxScore || 0);
-        } else if (c.includes('2.2') || n.includes('สภาพคล่อง') || n.includes('nwc') || n.includes('cash ratio')) {
-            cats.liquidity.items.push(ind);
-            cats.liquidity.score += (ind.score || 0);
-            cats.liquidity.maxScore += (ind.maxScore || 0);
-        } else {
-            // ถ้าจัดกลุ่มไม่ได้ → ใส่ cost (1.3) เป็น default
-            cats.cost.items.push(ind);
-            cats.cost.score += (ind.score || 0);
-            cats.cost.maxScore += (ind.maxScore || 0);
+        let targetCat = null;
+        if (c.startsWith('1.1') || n.includes('planfin') || n.includes('แผน')) targetCat = cats.planfin;
+        else if (c.startsWith('1.2') || n.includes('สินทรัพย์') || n.includes('เจ้าหนี้') || n.includes('ลูกหนี้')) targetCat = cats.asset;
+        else if (c.startsWith('1.3.1') || n.includes('unit cost') || n.includes('opd') || n.includes('ipd') || n.includes('ต้นทุน')) targetCat = cats.cost;
+        else if (c.startsWith('1.3.2') || n.includes('งบทดลอง') || n.includes('บัญชี')) targetCat = cats.accounting;
+        else if (c.startsWith('1.3.3') || n.includes('ผลผลิต') || n.includes('ครองเตียง') || n.includes('adjrw')) targetCat = cats.output;
+        else if (c.startsWith('2.1') || n.includes('กำไร') || n.includes('margin') || n.includes('roa') || n.includes('ebitda')) targetCat = cats.profit;
+        else if (c.startsWith('2.2') || n.includes('สภาพคล่อง') || n.includes('nwc') || n.includes('cash ratio')) targetCat = cats.liquidity;
+        else targetCat = cats.cost; // fallback
+
+        if (targetCat) {
+            targetCat.items.push(ind);
         }
+    });
+
+    // 2. กรองหัวข้อใหญ่ออก ป้องกันการ์ดโดนแย่งที่ และป้องกันคะแนนบวกเบิ้ล
+    Object.values(cats).forEach(cat => {
+        // เลือกเฉพาะข้อย่อยที่มีการกรอกผลงาน (actual) หรือมีหน่วยนับ (unit) หรือมีเกณฑ์ (criteria)
+        const validItems = cat.items.filter(ind => ind.actual !== null || ind.unit !== '' || ind.criteria !== '');
+        
+        let sumScore = 0;
+        let sumMax = 0;
+        validItems.forEach(ind => {
+            sumScore += (ind.score || 0);
+            sumMax += (ind.maxScore || 0);
+        });
+
+        cat.score = sumScore;
+        cat.maxScore = sumMax;
+        cat.items = validItems;
     });
 
     return cats;
 }
-
 // ============================================================
 // 4. UPDATE SCORE BARS (คะแนนแยกหมวด)
 // ============================================================
