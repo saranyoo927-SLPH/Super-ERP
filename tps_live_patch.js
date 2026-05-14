@@ -644,7 +644,7 @@ function renderTPSSubCharts(catMap, indicators) {
                 }
 
                 const wrapper = document.createElement('div');
-                wrapper.style.height = '160px'; // ✨ ขยายความสูงให้กราฟดูเต็มพื้นที่ ไม่แบนจนเกินไป
+                wrapper.style.height = '300px'; // ✨ ขยายความสูงเป็น 300px ให้โปร่งและสวยงามระดับโลก
                 wrapper.style.width = '100%';
                 wrapper.style.position = 'relative';
                 
@@ -653,7 +653,7 @@ function renderTPSSubCharts(catMap, indicators) {
                 customContainerP2.appendChild(wrapper);
 
                 const isGood = val <= limit;
-                // ✨ Dribbble Style Colors (สีสดใสขึ้น และเกณฑ์สีนวลตาขึ้น)
+                // ✨ Dribbble Style Colors
                 const valColor = isGood ? 'rgba(16, 185, 129, 0.9)' : 'rgba(244, 63, 94, 0.9)'; 
                 const limitColor = 'rgba(245, 158, 11, 0.18)'; 
 
@@ -669,8 +669,9 @@ function renderTPSSubCharts(catMap, indicators) {
                                     backgroundColor: valColor, 
                                     borderRadius: 100, // ✨ ทำให้ขอบมนแบบ Pill Shape 100%
                                     borderSkipped: false, // ✨ บังคับให้มนทั้งซ้ายและขวา
-                                    barPercentage: 0.75, // ✨ เพิ่มความหนาของแท่งกราฟให้ดูมีน้ำหนัก สมส่วนกับจอ
-                                    categoryPercentage: 0.85
+                                    barPercentage: 0.4, // ✨ ลดสัดส่วนลงเพื่อไม่ให้แท่งอ้วนเกินไปเมื่อกล่องสูง 300px
+                                    categoryPercentage: 0.6,
+                                    maxBarThickness: 48 // ✨ บังคับความหนาสูงสุดให้เพรียวสวยพอดี
                                 },
                                 { 
                                     label: 'เกณฑ์สูงสุด (วัน)', 
@@ -678,8 +679,9 @@ function renderTPSSubCharts(catMap, indicators) {
                                     backgroundColor: limitColor, 
                                     borderRadius: 100,
                                     borderSkipped: false,
-                                    barPercentage: 0.75, // ✨ เพิ่มความหนาให้เท่ากัน
-                                    categoryPercentage: 0.85
+                                    barPercentage: 0.4,
+                                    categoryPercentage: 0.6,
+                                    maxBarThickness: 48
                                 }
                             ]
                         },
@@ -690,8 +692,8 @@ function renderTPSSubCharts(catMap, indicators) {
                                 legend: { display: false }, 
                                 tooltip: commonPlugins.tooltip,
                                 datalabels: { 
-                                    anchor: 'end', align: 'end', offset: 12, // ✨ ดันตัวเลขออกห่างจากแท่งอีกนิด
-                                    color: '#1e293b', font: { weight: '800', size: 14 } // ✨ ขยายขนาดตัวเลขปลายแท่งให้อ่านง่ายและดูแพงขึ้น
+                                    anchor: 'end', align: 'end', offset: 12, 
+                                    color: '#1e293b', font: { weight: '800', size: 16 } // ✨ ขยายเลขขึ้นอีกนิดให้สมกับกราฟ 300px
                                 }
                             },
                             scales: { 
@@ -699,15 +701,15 @@ function renderTPSSubCharts(catMap, indicators) {
                                     display: true, 
                                     beginAtZero: true, 
                                     grid: { color: 'rgba(226, 232, 240, 0.6)', drawBorder: false, borderDash: [4, 4] }, 
-                                    ticks: { color: '#94a3b8', font: { size: 12 }, padding: 10 } // ✨ ขยายฟอนต์แกน X
+                                    ticks: { color: '#94a3b8', font: { size: 13 }, padding: 12 } // ✨ ขยายฟอนต์และระยะห่าง
                                 }, 
                                 y: { 
                                     display: true, 
                                     grid: { display: false, drawBorder: false }, 
-                                    ticks: { color: '#334155', font: { weight: '700', size: 13 }, padding: 16 } // ✨ ขยายฟอนต์ชื่อหัวข้อแกน Y
+                                    ticks: { color: '#334155', font: { weight: '700', size: 14 }, padding: 16 } // ✨ ขยายฟอนต์แกน Y ให้ชัดเจน
                                 } 
                             },
-                            layout: { padding: { right: 60, top: 15, bottom: 15, left: 10 } } // ✨ เผื่อพื้นที่ด้านขวาเพิ่มเป็น 60px รับกับเลขที่ใหญ่ขึ้น
+                            layout: { padding: { right: 80, top: 40, bottom: 40, left: 10 } } // ✨ เพิ่มระยะขอบบน-ล่างดันให้แท่งอยู่กึ่งกลางสวยๆ เผื่อขวา 80px กันเลขใหญ่ตกขอบ
                         }
                     });
                 }
