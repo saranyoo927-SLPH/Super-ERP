@@ -632,23 +632,24 @@ function renderTPSSubCharts(catMap, indicators) {
                 let title = name;
                 let nameUpper = name.toUpperCase();
 
-                if(name.includes('เจ้าหนี้')) title = 'ระยะเวลาชำระหนี้ (เจ้าหนี้)';
-                else if(nameUpper.includes('UC') || name.includes('บัตรทอง')) title = 'ระยะเวลาเก็บหนี้ (UC)';
-                else if(name.includes('ขรก') || name.includes('ข้าราชการ') || name.includes('เบิกจ่ายตรง')) title = 'ระยะเวลาเก็บหนี้ (ข้าราชการ)';
-                else if(name.includes('คงคลัง') || name.includes('สินค้า') || nameUpper.includes('INVENTORY')) title = 'ระยะเวลาสำรอง (วัสดุฯ)';
+                // 🔥 เปลี่ยนชื่อแกนกราฟ 1.2 ให้เนี๊ยบตามที่ระบุ
+                if(name.startsWith('1.2.1') || name.includes('เจ้าหนี้')) title = 'ระยะเวลาชำระเจ้าหนี้การค้า';
+                else if(name.startsWith('1.2.2') || nameUpper.includes('UC') || name.includes('บัตรทอง')) title = 'ระยะเรียกเก็บหนี้สิทธิ UC';
+                else if(name.startsWith('1.2.3') || name.includes('ขรก') || name.includes('ข้าราชการ') || name.includes('เบิกจ่ายตรง')) title = 'ระยะเรียกเก็บหนี้สิทธิ OFC';
+                else if(name.startsWith('1.2.4') || name.includes('คงคลัง') || name.includes('สินค้า') || nameUpper.includes('INVENTORY')) title = 'การบริหารสินคงคลัง';
                 else title = name.substring(0, 20);
 
                 let val = safeParse(ind.actual) || 0;
                 
-                // บังคับค่าเกณฑ์ (Limit) สำหรับกราฟ P2 ให้ตรงกับใน Card 100%
+                // 🔥 บังคับค่าเกณฑ์ (Limit) สำหรับกราฟ P2 ให้ตรงกับชื่อใหม่ 100%
                 let limit = 60; // ค่าเริ่มต้น
                 if (title.includes('เจ้าหนี้')) {
                     limit = 180;
-                } else if (title.includes('UC') || title.includes('บัตรทอง')) {
+                } else if (title.includes('UC')) {
                     limit = 60;
-                } else if (title.includes('ข้าราชการ') || title.includes('ขรก') || title.includes('เบิกจ่ายตรง')) {
+                } else if (title.includes('OFC')) {
                     limit = 60;
-                } else if (title.includes('สำรอง') || title.includes('คงคลัง') || title.includes('สินค้า')) {
+                } else if (title.includes('คงคลัง')) {
                     limit = 60;
                 } else {
                     limit = parseMean(ind, 60);
