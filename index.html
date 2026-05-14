@@ -2694,17 +2694,19 @@ renderAll();
 try { lucide.createIcons(); } catch(e) { console.log('lucide not available'); }
 // ===== ERP MODULE =====
 // ==================== CONFIGURATION ====================
-// ★★★ ใส่ URL ของ Google Apps Script Web App ที่ deploy แล้วตรงนี้ ★★★
 const GS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyyYZaFAU-z5qAs8ZO2TtrfxyRHSMrsVV1QeOyN-xW0wYtWAWnRPqNCiEYLbY9V3yBJYQ/exec';
-// NHSO Billing API (Sheet: 1RA1fHBfmC1x...) — ดึงข้อมูลกองทุนบัตรทอง 17 key
 const NHSO_BILLING_URL = 'https://script.google.com/macros/s/AKfycbyArHIuQ3DJzu2sanQz88GgaMqz-r6C84YfCfcZr-QV8kCk8gX1ykW6yn70iSppcVLI/exec';
 const BILLING_SHEET_ID = '1RA1fHBfmC1xnkvtPWxtk23PlCP132L-tMqHY-cNoYUM';
 const KPI_SHEET_ID = '16rt6MCNZLIDgS3scM79LmQ_gWAZlRpOPgQ-3xkoAnWM';
+
+// ✅ อัปเดต URL และ Sheet ID ของ TPS ให้ถูกต้อง
 const TPS__WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz5crl4ztfJmbtGL9uZr5Zieyr2ILQ2rY4cskDpN1henYWer89iVwAgNQPptZV_hWRbSw/exec';
 const TPS_SHEET_ID = '1yfjMsHAHTiDxpYgb2MvcI-k_KKBlvCkiUQnQPH-tEl0';
+
 const KPI_SHEET_NAME = 'KPI69';
 const BUDGET_SHEET_NAME = 'Budget Control';
-const API_KEY = ''; // ใส่ API Key ถ้ามี (optional สำหรับ public sheets)
+const API_KEY = ''; 
+
 function getSheetURL(sheetId, sheetName) {
     return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
 }
