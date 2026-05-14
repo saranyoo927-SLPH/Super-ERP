@@ -373,7 +373,7 @@ function updateTPSSubTabs(catMap, indicators) {
 }
 
 // ============================================================
-// 8. ✅ วาดกราฟแท็บย่อย (จัดหน้าตาให้สวยงาม สมดุล และลอจิกถูกต้อง 100%)
+// 8. ✅ วาดกราฟแท็บย่อย 
 // ============================================================
 function renderTPSSubCharts(catMap, indicators) {
     // 🔒 P1 กราฟบริหารแผน
@@ -398,44 +398,91 @@ function renderTPSSubCharts(catMap, indicators) {
         }
     }
 
-    // 🔒 P2 กราฟสินทรัพย์ (แนวนอน ให้ข้อความไม่ล้นขอบ)
+    // 🌟 P2 กราฟสินทรัพย์ (แยกกราฟย่อยแต่ละตัวชี้วัด จัด Layout ให้สมดุลสวยงาม)
     const p2Items = catMap.asset.items;
     if (p2Items.length > 0) {
-        const labels = p2Items.map(ind => {
-            let name = String(ind.name || ind.code);
-            if(name.includes('เจ้าหนี้')) return 'เจ้าหนี้การค้า';
-            if(name.includes('UC') || name.includes('บัตรทอง')) return 'ลูกหนี้ UC';
-            if(name.includes('ขรก') || name.includes('เบิกจ่ายตรง')) return 'ลูกหนี้ ขรก.';
-            if(name.includes('คงคลัง') || name.includes('สินค้า')) return 'วัสดุคงคลัง';
-            return name.substring(0, 15) + '...';
-        });
-        
-        const values = p2Items.map(ind => safeParse(ind.actual) || 0);
-        const limits = p2Items.map(ind => parseMean(ind, 60)); 
-        const colors = values.map((v, i) => v <= limits[i] ? 'rgba(16,185,129,0.85)' : 'rgba(244,63,94,0.85)');
+        const origP2Canvas = document.getElementById('tps_p2bar');
+        if (origP2Canvas) {
+            origP2Canvas.style.display = 'none'; 
+            let parent = origP2Canvas.parentElement;
+            
+            let oldCustomP2 = document.getElementById('custom_p2_container');
+            if (oldCustomP2) oldCustomP2.remove();
+            
+            let customContainerP2 = document.createElement('div');
+            customContainerP2.id = 'custom_p2_container';
+            customContainerP2.style.display = 'grid';
+            customContainerP2.style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
+            customContainerP2.style.gap = '16px';
+            customContainerP2.style.width = '100%';
+            customContainerP2.style.marginTop = '15px';
+            customContainerP2.style.paddingBottom = '10px';
+            parent.appendChild(customContainerP2);
 
-        if(typeof destroyChart === 'function') destroyChart('tps_p2bar');
-        if (typeof Chart !== 'undefined' && document.getElementById('tps_p2bar')) {
-            new Chart(document.getElementById('tps_p2bar'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { label: 'ค่าจริง (วัน)', data: values, backgroundColor: colors, borderRadius: 6, maxBarThickness: 30 },
-                        { label: 'เกณฑ์สูงสุด (วัน)', data: limits, type: 'line', borderColor: '#f59e0b', borderWidth: 2, borderDash: [5, 4], pointRadius: 5, fill: false }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    indexAxis: 'y', // กราฟแนวนอน
-                    plugins: { legend: { position: 'bottom' }, tooltip: { mode: 'index', intersect: false } },
-                    scales: { x: { grid: { color: '#f1f5f9' } }, y: { grid: { display: false } } }
+            if(typeof destroyChart === 'function') destroyChart('tps_p2bar');
+
+            p2Items.forEach((ind, index) => {
+                let name = String(ind.name || ind.code);
+                let title = name;
+                // ตั้งชื่อหัวกราฟให้ตรงกับที่คุณต้องการ
+                if(name.includes('เจ้าหนี้')) title = 'ระยะเวลาชำระหนี้ (เจ้าหนี้)';
+                else if(name.includes('UC') || name.includes('บัตรทอง')) title = 'ระยะเวลาเก็บหนี้ (UC)';
+                else if(name.includes('ขรก') || name.includes('เบิกจ่ายตรง')) title = 'ระยะเวลาเก็บหนี้ (ขรก.)';
+                else if(name.includes('คงคลัง') || name.includes('สินค้า')) title = 'ระยะเวลาสำรอง (วัสดุฯ)';
+                else title = name.substring(0, 20);
+
+                let val = safeParse(ind.actual) || 0;
+                let limit = parseMean(ind, 60);
+                // ดักจับเกณฑ์สำหรับเจ้าหนี้ที่อาจจะไม่มีใน criteria
+                if (title.includes('เจ้าหนี้') && (!ind.criteria || !ind.criteria.match(/\d+/))) limit = 180;
+
+                const wrapper = document.createElement('div');
+                wrapper.style.height = '110px'; 
+                wrapper.style.width = '100%';
+                wrapper.style.backgroundColor = '#ffffff';
+                wrapper.style.borderRadius = '12px';
+                wrapper.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.04)';
+                wrapper.style.border = '1px solid #f1f5f9';
+                wrapper.style.padding = '12px 16px';
+                wrapper.style.display = 'flex';
+                wrapper.style.flexDirection = 'column';
+                wrapper.style.justifyContent = 'center';
+                
+                const canvasId = 'p2_chart_' + index;
+                wrapper.innerHTML = `<canvas id="${canvasId}"></canvas>`;
+                customContainerP2.appendChild(wrapper);
+
+                const color = val <= limit ? 'rgba(16,185,129,0.85)' : 'rgba(244,63,94,0.85)';
+                
+                if (typeof Chart !== 'undefined') {
+                    new Chart(document.getElementById(canvasId), {
+                        type: 'bar',
+                        data: {
+                            labels: [title],
+                            datasets: [
+                                { label: 'รพ.เสลภูมิ (วัน)', data: [val], backgroundColor: color, borderRadius: 4, maxBarThickness: 25 },
+                                { label: 'เกณฑ์สูงสุด (วัน)', data: [limit], backgroundColor: 'rgba(245,158,11,0.25)', borderRadius: 4, maxBarThickness: 25 }
+                            ]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            indexAxis: 'y', 
+                            plugins: { 
+                                legend: { display: false }, 
+                                tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8 } 
+                            },
+                            scales: { 
+                                x: { display: true, beginAtZero: true, grid: { color: '#f1f5f9' } }, 
+                                y: { display: true, grid: { display: false } } 
+                            }
+                        }
+                    });
                 }
             });
         }
     }
 
-    // 🚀 P3 กราฟต้นทุน 1.3 
+    // 🔒 P3 กราฟต้นทุน 1.3 
     const p3Items = indicators.filter(i => {
         const code = String(i.code || '').trim();
         const name = String(i.name || '').trim();
@@ -470,7 +517,7 @@ function renderTPSSubCharts(catMap, indicators) {
         });
     }
 
-    // 2. กราฟต้นทุน LC/MC (รวบเป็น 1 กราฟแนวตั้งสวยๆ ทำให้ดูกลมกลืนและประหยัดพื้นที่กว่าแยก 4 กล่อง)
+    // 2. กราฟต้นทุน LC/MC 
     const lcItem = p3Items.find(i => (String(i.code).includes('1.3.1.3') || String(i.name).toLowerCase().includes('lc') || String(i.name).includes('แรงงาน')) && safeParse(i.actual) !== null);
     const mcDrugItem = p3Items.find(i => (String(i.code).includes('1.3.1.4') || String(i.name).includes('ค่ายา') || String(i.name).includes('เวชภัณฑ์ยา')) && safeParse(i.actual) !== null);
     const mcSciItem = p3Items.find(i => (String(i.code).includes('1.3.1.5') || String(i.name).includes('วิทยาศาสตร์')) && safeParse(i.actual) !== null);
@@ -486,56 +533,73 @@ function renderTPSSubCharts(catMap, indicators) {
     const mcSciMean = parseMean(mcSciItem, 3.37);
     const mcMedMean = parseMean(mcMedItem, 5.17);
 
-    // เก็บกวาดกล่อง Custom เก่าออก และแสดง Canvas ตัวหลักที่ดูสวยงาม
     let oldCustom = document.getElementById('custom_mc_container');
     if (oldCustom) oldCustom.remove();
     const origMcCanvas = document.getElementById('tps_p3mc');
-    if (origMcCanvas) origMcCanvas.style.display = 'block';
+    if (origMcCanvas) {
+        origMcCanvas.style.display = 'none'; 
+        let parent = origMcCanvas.parentElement;
+        
+        let customContainer = document.createElement('div');
+        customContainer.id = 'custom_mc_container';
+        customContainer.style.display = 'grid';
+        customContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
+        customContainer.style.gap = '16px';
+        customContainer.style.width = '100%';
+        customContainer.style.marginTop = '15px';
+        customContainer.style.paddingBottom = '10px';
+        parent.appendChild(customContainer);
 
-    if(typeof destroyChart === 'function') destroyChart('tps_p3mc');
-    if (typeof Chart !== 'undefined' && document.getElementById('tps_p3mc')) {
-        new Chart(document.getElementById('tps_p3mc'), {
-            type: 'bar',
-            data: {
-                // จัดหมวดหมู่ 4 อันให้เป็นระเบียบสุดๆ
-                labels: [
-                    ['1.3.1.3', 'LC ค่าแรง'], 
-                    ['1.3.1.4', 'MC ค่ายา'], 
-                    ['1.3.1.5', 'MC วัสดุวิทย์ฯ'], 
-                    ['1.3.1.6', 'MC เวชภัณฑ์ฯ']
-                ],
-                datasets: [
-                    { 
-                        label: 'รพ.เสลภูมิ (%)', 
-                        data: [lcVal, mcDrugVal, mcSciVal, mcMedVal], 
-                        backgroundColor: [
-                            lcVal <= lcMean ? 'rgba(16,185,129,0.85)' : 'rgba(244,63,94,0.85)',
-                            mcDrugVal <= mcDrugMean ? 'rgba(16,185,129,0.85)' : 'rgba(244,63,94,0.85)',
-                            mcSciVal <= mcSciMean ? 'rgba(16,185,129,0.85)' : 'rgba(244,63,94,0.85)',
-                            mcMedVal <= mcMedMean ? 'rgba(16,185,129,0.85)' : 'rgba(244,63,94,0.85)'
-                        ], 
-                        borderRadius: 6,
-                        maxBarThickness: 40
+        const createBar = (id, title, val, mean) => {
+            const wrapper = document.createElement('div');
+            wrapper.style.height = '110px'; 
+            wrapper.style.width = '100%';
+            wrapper.style.backgroundColor = '#ffffff';
+            wrapper.style.borderRadius = '12px';
+            wrapper.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.04)';
+            wrapper.style.border = '1px solid #f1f5f9';
+            wrapper.style.padding = '12px 16px';
+            wrapper.style.display = 'flex';
+            wrapper.style.flexDirection = 'column';
+            wrapper.style.justifyContent = 'center';
+            wrapper.innerHTML = `<canvas id="${id}"></canvas>`;
+            customContainer.appendChild(wrapper);
+
+            const color = val <= mean ? 'rgba(16,185,129,0.85)' : 'rgba(244,63,94,0.85)';
+            
+            if (typeof Chart !== 'undefined') {
+                new Chart(document.getElementById(id), {
+                    type: 'bar',
+                    data: {
+                        labels: [title],
+                        datasets: [
+                            { label: 'รพ.เสลภูมิ (%)', data: [val], backgroundColor: color, borderRadius: 4, maxBarThickness: 25 },
+                            { label: 'ค่ากลาง (%)', data: [mean], backgroundColor: 'rgba(245,158,11,0.25)', borderRadius: 4, maxBarThickness: 25 }
+                        ]
                     },
-                    { 
-                        label: 'ค่ากลาง (%)', 
-                        data: [lcMean, mcDrugMean, mcSciMean, mcMedMean], 
-                        backgroundColor: 'rgba(245,158,11,0.25)', 
-                        borderRadius: 6,
-                        maxBarThickness: 40
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        indexAxis: 'y', 
+                        plugins: { 
+                            legend: { display: false }, 
+                            tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8 } 
+                        },
+                        scales: { 
+                            x: { display: true, beginAtZero: true, grid: { color: '#f1f5f9' } }, 
+                            y: { display: true, grid: { display: false } } 
+                        }
                     }
-                ]
-            },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                plugins: { legend: { position: 'bottom' }, tooltip: { mode: 'index', intersect: false } },
-                scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+                });
             }
-        });
+        };
+
+        createBar('mc_chart_1', '1.3.1.3 LC ค่าแรงบุคลากร', lcVal, lcMean);
+        createBar('mc_chart_2', '1.3.1.4 MC ค่ายา', mcDrugVal, mcDrugMean);
+        createBar('mc_chart_3', '1.3.1.5 MC ค่าวัสดุวิทยาศาสตร์และการแพทย์', mcSciVal, mcSciMean);
+        createBar('mc_chart_4', '1.3.1.6 MC ค่าเวชภัณฑ์มิใช่ยาและวัสดุการแพทย์', mcMedVal, mcMedMean);
     }
 
-    // 🚀 R1 กราฟทำกำไร
+    // 🔒 R1 กราฟทำกำไร
     const r1Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.1'));
     const omItem = r1Items.find(i => (String(i.code).includes('2.1.1') || String(i.name).toLowerCase().includes('om') || String(i.name).includes('ดำเนินงาน')) && safeParse(i.actual) !== null);
     const roaItem = r1Items.find(i => (String(i.code).includes('2.1.2') || String(i.name).toLowerCase().includes('roa') || String(i.name).includes('สินทรัพย์')) && safeParse(i.actual) !== null);
@@ -554,7 +618,7 @@ function renderTPSSubCharts(catMap, indicators) {
             new Chart(document.getElementById('tps_r1bar'), {
                 type: 'bar',
                 data: {
-                    labels: [['Operating Margin', '(%)'], ['Return on Asset', '(%)']], // Label สองบรรทัดสวยๆ
+                    labels: [['Operating Margin', '(%)'], ['Return on Asset', '(%)']], 
                     datasets: [
                         { label: 'รพ.เสลภูมิ', data: [omVal, roaVal], backgroundColor: [omColor, roaColor], borderRadius: 6, maxBarThickness: 50 },
                         { label: 'ค่ากลาง', data: [omMean, roaMean], backgroundColor: 'rgba(245,158,11,0.25)', borderRadius: 6, maxBarThickness: 50 }
@@ -565,7 +629,7 @@ function renderTPSSubCharts(catMap, indicators) {
         }
     }
 
-    // 🚀 R2 กราฟสภาพคล่อง (Cash Ratio)
+    // 🔒 R2 กราฟสภาพคล่อง (Cash Ratio)
     const r2Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.2'));
     const r2Valid = r2Items.filter(i => i.actual !== null || i.unit !== '');
     const cashItem = r2Valid.find(i => (String(i.name).toLowerCase().includes('cash') || String(i.name).includes('สภาพคล่อง')) && safeParse(i.actual) !== null);
@@ -588,7 +652,7 @@ function renderTPSSubCharts(catMap, indicators) {
 }
 
 // ============================================================
-// 9. ฟังก์ชันเสริมวาดการ์ด KPI (จัด Layout ให้สมดุลเท่าๆ กัน)
+// 9. ฟังก์ชันเสริมวาดการ์ด KPI 
 // ============================================================
 function updateSubTabKPIs(panelId, items) {
     const panel = document.getElementById(panelId);
@@ -598,7 +662,6 @@ function updateSubTabKPIs(panelId, items) {
 
     let cards = kpiRow.querySelectorAll('.nt-kpi');
     
-    // 🌟 ระบบเพิ่มการ์ดอัตโนมัติ 
     if (items.length > cards.length && cards.length > 0) {
         const template = cards[0].cloneNode(true);
         for (let i = cards.length; i < items.length; i++) {
@@ -613,7 +676,6 @@ function updateSubTabKPIs(panelId, items) {
             return;
         }
         
-        // จัด Balance ให้ความกว้างการ์ดดูพอดีและเต็มพื้นที่
         card.style.display = 'flex';
         card.style.flex = '1 1 min(250px, 100%)';
 
