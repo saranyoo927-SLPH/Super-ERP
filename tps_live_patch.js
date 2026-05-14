@@ -326,7 +326,7 @@ function renderTPSChartsFromData(catMap, totalScore, totalMax) {
 }
 
 // ============================================================
-// 7. ✅ อัปเดตข้อมูลแท็บย่อย
+// 7. ✅ อัปเดตข้อมูลแท็บย่อย (ผสมผสาน)
 // ============================================================
 function updateTPSSubTabs(catMap, indicators) {
     // 🔒 1.1 บริหารแผน (ล็อค Stable 100%)
@@ -335,7 +335,7 @@ function updateTPSSubTabs(catMap, indicators) {
     // 🔒 1.2 สินทรัพย์ (ล็อค Stable 100%)
     updateSubTabKPIs('tps-p2', catMap.asset.items);
 
-    // 🚀 1.3 บริหารจัดการ
+    // 🚀 1.3 บริหารจัดการ (อัปเดตใหม่: ดึงข้อมูลครบถึง 1.3.1.6 เพื่อนำไปสร้างการ์ดอัตโนมัติ)
     const p3Items = indicators.filter(i => {
         const code = String(i.code || '').trim();
         const name = String(i.name || '').trim();
@@ -344,17 +344,17 @@ function updateTPSSubTabs(catMap, indicators) {
     });
     updateSubTabKPIs('tps-p3', p3Items);
 
-    // 🚀 2.1 ความสามารถในการทำกำไร
+    // 🚀 2.1 ความสามารถในการทำกำไร (อัปเดตใหม่)
     const r1Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.1'));
     const r1Valid = r1Items.filter(i => i.actual !== null || i.unit !== '');
     updateSubTabKPIs('tps-r1', r1Valid);
 
-    // 🚀 2.2 สภาพคล่อง
+    // 🚀 2.2 สภาพคล่อง (อัปเดตใหม่)
     const r2Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.2'));
     const r2Valid = r2Items.filter(i => i.actual !== null || i.unit !== '');
     updateSubTabKPIs('tps-r2', r2Valid);
 
-    // 🚀 ข้อมูลการเงิน
+    // 🚀 ข้อมูลการเงิน (อัปเดตใหม่)
     const finPanel = document.getElementById('tps-fin');
     if (finPanel && indicators) {
         const finItems = indicators.filter(i => {
@@ -374,9 +374,12 @@ function updateTPSSubTabs(catMap, indicators) {
 }
 
 // ============================================================
-// 8. ✅ วาดกราฟแท็บย่อย (อัปเดตกราฟ 1.3 ให้ตรงกับ Card 100%)
+// 8. ✅ วาดกราฟแท็บย่อย (อัปเดตเฉพาะจุด)
 // ============================================================
 function renderTPSSubCharts(catMap, indicators) {
+    // ฟังก์ชันย่อยสำหรับค้นหารหัสตัวชี้วัดแบบเจาะจงเป๊ะๆ ป้องกันการหยิบข้อมูลผิด
+    const getItemByCode = (codePrefix) => indicators.find(i => String(i.code).trim() === codePrefix) || indicators.find(i => String(i.code).trim().startsWith(codePrefix));
+
     // 🔒 P1 กราฟบริหารแผน (ล็อค Stable 100%)
     const p1Items = catMap.planfin.items;
     if (p1Items.length >= 2) {
@@ -395,46 +398,33 @@ function renderTPSSubCharts(catMap, indicators) {
         }
     }
 
-    // 🔒 P2 กราฟสินทรัพย์ (ล็อค Stable 100% ตามคำสั่ง: ไม่แตะต้อง)
+    // 🔒 P2 กราฟสินทรัพย์ (ล็อค Stable 100% ตามคำขอ: ไม่มีการตัดชื่อหรือดัดแปลงกราฟใดๆ)
     const p2Items = catMap.asset.items;
     if (p2Items.length > 0) {
-        const labels = p2Items.map(ind => {
-            let name = String(ind.name || ind.code);
-            if(name.includes('เจ้าหนี้')) return 'เจ้าหนี้การค้า';
-            if(name.includes('UC') || name.includes('บัตรทอง')) return 'ลูกหนี้ UC';
-            if(name.includes('ขรก') || name.includes('เบิกจ่ายตรง')) return 'ลูกหนี้ ขรก.';
-            if(name.includes('คงคลัง') || name.includes('สินค้า')) return 'วัสดุคงคลัง';
-            return name.substring(0, 15) + '...';
+        const labels = p2Items.map(ind => (ind.name || ind.code));
+        const values = p2Items.map(ind => Number(ind.actual) || 0);
+        const limits = p2Items.map(ind => {
+            const m = String(ind.criteria || '').match(/(\d+)/);
+            return m ? parseInt(m[1]) : 60;
         });
-        
-        const values = p2Items.map(ind => safeParse(ind.actual) || 0);
-        const limits = p2Items.map(ind => parseMean(ind, 60)); 
-        const colors = values.map((v, i) => v <= limits[i] ? 'rgba(16,185,129,0.8)' : 'rgba(244,63,94,0.8)');
 
         if(typeof destroyChart === 'function') destroyChart('tps_p2bar');
-        if (typeof Chart !== 'undefined' && document.getElementById('tps_p2bar')) {
-            new Chart(document.getElementById('tps_p2bar'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { label: 'ค่าจริง (วัน)', data: values, backgroundColor: colors, borderRadius: 6 },
-                        { label: 'เกณฑ์สูงสุด (วัน)', data: limits, type: 'line', borderColor: '#f59e0b', borderWidth: 2, borderDash: [5, 4], pointRadius: 5, fill: false }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    indexAxis: 'y', // กราฟแนวนอน
-                    plugins: { legend: { position: 'bottom' } }
-                }
+        if(typeof ltChart === 'function') {
+            ltChart('tps_p2bar', 'bar', {
+                labels: labels,
+                datasets: [
+                    { label: 'ค่าจริง', data: values, backgroundColor: values.map((v, i) => v > limits[i] ? 'rgba(244,63,94,0.8)' : 'rgba(16,185,129,0.8)'), borderRadius: 6 },
+                    { label: 'เกณฑ์สูงสุด', data: limits, type: 'line', borderColor: '#f59e0b', borderWidth: 2, borderDash: [5, 4], pointRadius: 5, pointBackgroundColor: '#f59e0b', fill: false }
+                ]
             });
         }
     }
 
-    // 🚀 P3 กราฟต้นทุน 1.3 
-    // 1. กราฟ Unit Cost (OPD/IPD) ให้ตรงกับ Card เป๊ะๆ โดยจับจากคำในชื่อ (เนื่องจากรหัสใน CSV ขึ้นต้น 1.3.1 เหมือนกันหมด)
-    const opdItem = indicators.find(i => String(i.name).includes('ผู้ป่วยนอก') || String(i.name).toLowerCase().includes('opd'));
-    const ipdItem = indicators.find(i => String(i.name).includes('ผู้ป่วยใน') || String(i.name).toLowerCase().includes('ipd'));
+    // 🚀 P3 กราฟต้นทุน 1.3 (แยก Unit Cost และสร้าง 4 กราฟย่อยให้ LC/MC vs ค่ากลาง)
+    
+    // 1. กราฟ Unit Cost (OPD/IPD) ให้ตรงกับ Card เป๊ะๆ โดยอ้างอิงจากรหัสข้อ 1.3.1.1 และ 1.3.1.2
+    const opdItem = getItemByCode('1.3.1.1');
+    const ipdItem = getItemByCode('1.3.1.2');
     
     const opdVal = opdItem ? (safeParse(opdItem.actual) || 0) : 0;
     const ipdVal = ipdItem ? (safeParse(ipdItem.actual) || 0) : 0;
@@ -445,25 +435,21 @@ function renderTPSSubCharts(catMap, indicators) {
     const ipdColor = ipdVal <= ipdMean ? 'rgba(16,185,129,0.8)' : 'rgba(244,63,94,0.8)';
 
     if(typeof destroyChart === 'function') destroyChart('tps_p3unit');
-    if (typeof Chart !== 'undefined' && document.getElementById('tps_p3unit')) {
-        new Chart(document.getElementById('tps_p3unit'), {
-            type: 'bar',
-            data: {
-                labels: ['OPD (บาท/ครั้ง)', 'IPD (บาท/AdjRW)'],
-                datasets: [
-                    { label: 'รพ.เสลภูมิ', data: [opdVal, ipdVal], backgroundColor: [opdColor, ipdColor], borderRadius: 6 },
-                    { label: 'ค่ากลาง', data: [opdMean, ipdMean], backgroundColor: 'rgba(245,158,11,0.3)', borderRadius: 6 }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+    if(typeof ltChart === 'function') {
+        ltChart('tps_p3unit', 'bar', { 
+            labels: ['OPD (บาท/ครั้ง)', 'IPD (บาท/AdjRW)'], 
+            datasets: [
+                { label: 'รพ.เสลภูมิ', data: [opdVal, ipdVal], backgroundColor: [opdColor, ipdColor], borderRadius: 6 }, 
+                { label: 'ค่ากลาง', data: [opdMean, ipdMean], backgroundColor: 'rgba(245,158,11,0.3)', borderRadius: 6 }
+            ] 
         });
     }
 
-    // 2. แยกกราฟต้นทุน 4 ประเภท (LC, MC ยา, MC วิทย์, MC เวชภัณฑ์) เป็น 4 กราฟย่อยแนวนอน
-    const lcItem = indicators.find(i => String(i.name).toLowerCase().includes('lc') || String(i.name).includes('แรงงาน'));
-    const mcDrugItem = indicators.find(i => String(i.name).includes('ค่ายา') || String(i.name).includes('เวชภัณฑ์ยา'));
-    const mcSciItem = indicators.find(i => String(i.name).includes('วิทยาศาสตร์'));
-    const mcMedItem = indicators.find(i => String(i.name).includes('มิใช่ยา') || String(i.name).includes('วัสดุการแพทย์'));
+    // 2. แยกกราฟต้นทุน 4 ประเภท (LC, MC ยา, MC วิทย์, MC เวชภัณฑ์) เป็น 4 กราฟย่อยๆ ที่ชัดเจนที่สุด
+    const lcItem = getItemByCode('1.3.1.3');
+    const mcDrugItem = getItemByCode('1.3.1.4');
+    const mcSciItem = getItemByCode('1.3.1.5');
+    const mcMedItem = getItemByCode('1.3.1.6');
 
     const lcVal = lcItem ? (safeParse(lcItem.actual) || 0) : 0;
     const mcDrugVal = mcDrugItem ? (safeParse(mcDrugItem.actual) || 0) : 0;
@@ -475,11 +461,13 @@ function renderTPSSubCharts(catMap, indicators) {
     const mcSciMean = parseMean(mcSciItem, 3.37);
     const mcMedMean = parseMean(mcMedItem, 5.17);
 
+    // ค้นหากรอบกราฟเดิม (tps_p3mc) แล้วซ่อนไว้ เพื่อเสก 4 กราฟใหม่ลงไปแทน
     const origMcCanvas = document.getElementById('tps_p3mc');
     if (origMcCanvas) {
         origMcCanvas.style.display = 'none'; 
         let parent = origMcCanvas.parentElement;
         
+        // ลบของเก่าออกเพื่อป้องกันกราฟซ้อนกัน
         let oldCustom = document.getElementById('custom_mc_container');
         if (oldCustom) oldCustom.remove();
         
@@ -492,9 +480,10 @@ function renderTPSSubCharts(catMap, indicators) {
         customContainer.style.marginTop = '10px';
         parent.appendChild(customContainer);
 
+        // ฟังก์ชันวาดกราฟแนวนอนทีละเส้น
         const createBar = (id, title, val, mean) => {
             const wrapper = document.createElement('div');
-            wrapper.style.height = '70px'; 
+            wrapper.style.height = '70px'; // บังคับความสูงเพื่อให้กราฟแต่ละตัวไม่อึดอัด
             wrapper.style.width = '100%';
             wrapper.innerHTML = `<canvas id="${id}"></canvas>`;
             customContainer.appendChild(wrapper);
@@ -513,7 +502,7 @@ function renderTPSSubCharts(catMap, indicators) {
                     },
                     options: {
                         responsive: true, maintainAspectRatio: false,
-                        indexAxis: 'y', // กราฟแนวนอน
+                        indexAxis: 'y', // ทำให้แท่งนอนตะแคง
                         plugins: { legend: { display: false }, tooltip: { enabled: true } },
                         scales: { x: { display: true, beginAtZero: true }, y: { display: true } }
                     }
@@ -521,13 +510,13 @@ function renderTPSSubCharts(catMap, indicators) {
             }
         };
 
-        createBar('mc_chart_1', 'LC ค่าแรงบุคลากร', lcVal, lcMean);
-        createBar('mc_chart_2', 'MC ค่ายา', mcDrugVal, mcDrugMean);
-        createBar('mc_chart_3', 'MC ค่าวัสดุวิทยาศาสตร์และการแพทย์', mcSciVal, mcSciMean);
-        createBar('mc_chart_4', 'MC ค่าเวชภัณฑ์มิใช่ยาและวัสดุการแพทย์', mcMedVal, mcMedMean);
+        createBar('mc_chart_1', '1.3.1.3 LC ค่าแรง', lcVal, lcMean);
+        createBar('mc_chart_2', '1.3.1.4 MC ค่ายา', mcDrugVal, mcDrugMean);
+        createBar('mc_chart_3', '1.3.1.5 MC วัสดุวิทย์ฯ', mcSciVal, mcSciMean);
+        createBar('mc_chart_4', '1.3.1.6 MC เวชภัณฑ์ฯ', mcMedVal, mcMedMean);
     }
 
-    // 🚀 R1 กราฟทำกำไร (OM และ ROA ชนค่ากลาง)
+    // 🚀 R1 กราฟทำกำไร (OM และ ROA ชนค่ากลางชัดเจน - โค้ดเสถียร)
     const r1Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.1'));
     const omItem = r1Items.find(i => String(i.code).includes('2.1.1') || String(i.name).toLowerCase().includes('om') || String(i.name).includes('ดำเนินงาน'));
     const roaItem = r1Items.find(i => String(i.code).includes('2.1.2') || String(i.name).toLowerCase().includes('roa') || String(i.name).includes('สินทรัพย์'));
@@ -557,7 +546,7 @@ function renderTPSSubCharts(catMap, indicators) {
         }
     }
 
-    // 🚀 R2 กราฟสภาพคล่อง (Cash Ratio)
+    // 🚀 R2 กราฟสภาพคล่อง (Cash Ratio - โค้ดเสถียร)
     const r2Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.2'));
     const r2Valid = r2Items.filter(i => i.actual !== null || i.unit !== '');
     const cashItem = r2Valid.find(i => String(i.name).toLowerCase().includes('cash') || String(i.name).includes('สภาพคล่อง'));
@@ -596,12 +585,12 @@ function updateSubTabKPIs(panelId, items) {
         for (let i = cards.length; i < items.length; i++) {
             kpiRow.appendChild(template.cloneNode(true));
         }
-        cards = kpiRow.querySelectorAll('.nt-kpi'); 
+        cards = kpiRow.querySelectorAll('.nt-kpi'); // อัปเดตรายการการ์ดใหม่
     }
 
     cards.forEach((card, i) => {
         if (i >= items.length) {
-            card.style.display = 'none'; 
+            card.style.display = 'none'; // ซ่อนการ์ดที่เหลือถ้าข้อมูลมีน้อยกว่า
             return;
         }
         card.style.display = 'flex';
@@ -615,12 +604,14 @@ function updateSubTabKPIs(panelId, items) {
         if (lblEl) lblEl.textContent = ind.name || ind.code || '';
         if (valEl) {
             const actNum = safeParse(ind.actual);
+            // เพิ่มการใส่ลูกน้ำ (Comma) ให้อ่านง่าย
             const valStr = (actNum !== null) ? actNum.toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
             valEl.innerHTML = valStr + ' <small>' + (ind.unit || '') + '</small>';
         }
         if (footEl) footEl.textContent = (ind.criteria || '') + (ind.result ? ' | ' + ind.result : '');
         
         if (pillEl) {
+            // ซ่อนป้ายคะแนนถ้าเป็นหมวดการเงิน
             if(ind.maxScore === null || ind.maxScore === undefined || ind.maxScore === 0) {
                  pillEl.style.display = 'none';
             } else {
