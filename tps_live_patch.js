@@ -40,11 +40,13 @@ let tpsLiveData = null;
 // 1. LOAD TPS FROM GAS WEB APP
 // ============================================================
 async function loadTPSFromGAS() {
-    // ── Layer 1: GAS Web App (?action=tps) ──
-    if (GS_WEB_APP_URL) {
+    // ── Layer 1: GAS Web App ──
+    // ✅ เปลี่ยนจาก GS_WEB_APP_URL เป็น TPS__WEB_APP_URL
+    if (TPS__WEB_APP_URL) {
         try {
             console.log('🔄 TPS: โหลดจาก GAS Web App...');
-            const resp = await fetch(GS_WEB_APP_URL + '?action=tps', { redirect: 'follow' });
+            // ✅ ใช้ TPS__WEB_APP_URL ในการ fetch
+            const resp = await fetch(TPS__WEB_APP_URL + '?action=tps', { redirect: 'follow' });
             if (!resp.ok) throw new Error('HTTP ' + resp.status);
             const json = await resp.json();
 
@@ -72,7 +74,6 @@ async function loadTPSFromGAS() {
 
         if (!rows || rows.length < 2) throw new Error('ข้อมูลไม่พอ');
 
-        // Parse gviz rows → indicators format เดียวกับ GAS
         const indicators = [];
         for (let i = 1; i < rows.length; i++) {
             const cells = rows[i].c;
@@ -118,7 +119,6 @@ async function loadTPSFromGAS() {
     console.log('TPS: ใช้ hardcoded fallback');
     renderTPSChartsHardcoded();
 }
-
 // ============================================================
 // 2. APPLY TPS LIVE DATA → อัปเดต KPI Cards + กราฟ
 // ============================================================
