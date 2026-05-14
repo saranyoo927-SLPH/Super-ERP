@@ -755,23 +755,65 @@ function renderTPSSubCharts(catMap, indicators) {
 
     if(typeof destroyChart === 'function') destroyChart('tps_p3unit');
     if (typeof Chart !== 'undefined' && document.getElementById('tps_p3unit')) {
-        new Chart(document.getElementById('tps_p3unit'), {
+        let p3unitCanvas = document.getElementById('tps_p3unit');
+        
+        // 🔥 ปลดล็อคความสูงและตั้งค่าให้กราฟ P3Unit ดูสูงโปร่ง
+        let pNode = p3unitCanvas.parentElement;
+        for (let i = 0; i < 4; i++) {
+            if (!pNode || pNode.tagName === 'BODY') break;
+            pNode.style.setProperty('height', 'auto', 'important');
+            pNode = pNode.parentElement;
+        }
+        p3unitCanvas.parentElement.style.height = '350px'; // ✨ เพิ่มความสูงให้ทรงสวย
+
+        new Chart(p3unitCanvas, {
             type: 'bar',
             data: {
                 labels: [['OPD', '(บาท/ครั้ง)'], ['IPD', '(บาท/AdjRW)']], 
                 datasets: [
-                    { label: 'รพ.เสลภูมิ', data: [opdVal, ipdVal], backgroundColor: [opdColor, ipdColor], borderRadius: 8, maxBarThickness: 50 },
-                    { label: 'ค่ากลาง', data: [opdMean, ipdMean], backgroundColor: 'rgba(245,158,11,0.20)', borderRadius: 8, maxBarThickness: 50 }
+                    { 
+                        label: 'รพ.เสลภูมิ', 
+                        data: [opdVal, ipdVal], 
+                        backgroundColor: [opdColor, ipdColor], 
+                        borderRadius: 12, // ✨ ขอบมนด้านบนสวยๆ
+                        borderSkipped: 'bottom',
+                        maxBarThickness: 60,
+                        barPercentage: 0.6
+                    },
+                    { 
+                        label: 'ค่ากลาง', 
+                        data: [opdMean, ipdMean], 
+                        backgroundColor: 'rgba(245,158,11,0.18)', // ✨ สีซอฟต์ลง
+                        borderRadius: 12,
+                        borderSkipped: 'bottom',
+                        maxBarThickness: 60,
+                        barPercentage: 0.6
+                    }
                 ]
             },
             options: { 
                 responsive: true, maintainAspectRatio: false, 
-                plugins: commonPlugins, 
+                plugins: {
+                    legend: commonPlugins.legend,
+                    tooltip: commonPlugins.tooltip,
+                    datalabels: { 
+                        anchor: 'end', align: 'top', offset: 8,
+                        color: '#1e293b', font: { weight: '800', size: 12 },
+                        formatter: (v) => v.toLocaleString('en-US', {maximumFractionDigits: 0}) // ซ่อนจุดทศนิยมให้ดูคลีน
+                    }
+                }, 
                 scales: { 
-                    y: { beginAtZero: true, grid: { color: 'rgba(241, 245, 249, 0.8)', drawBorder: false, borderDash: [5, 5] }, ticks: { color: '#94a3b8', font: { size: 11 } } }, 
-                    x: { grid: { display: false, drawBorder: false }, ticks: { color: '#64748b', font: { weight: '500' } } } 
+                    y: { 
+                        beginAtZero: true, 
+                        grid: { color: 'rgba(226, 232, 240, 0.6)', drawBorder: false, borderDash: [4, 4] }, 
+                        ticks: { color: '#94a3b8', font: { size: 11 }, padding: 10 } 
+                    }, 
+                    x: { 
+                        grid: { display: false, drawBorder: false }, 
+                        ticks: { color: '#334155', font: { weight: '700', size: 12 }, padding: 10 } 
+                    } 
                 },
-                layout: { padding: { top: 20 } }
+                layout: { padding: { top: 35 } } // ✨ เผื่อที่ให้ Datalabels ด้านบน
             }
         });
     }
@@ -797,27 +839,39 @@ function renderTPSSubCharts(catMap, indicators) {
     if (origMcCanvas) {
         origMcCanvas.style.display = 'none'; 
         let parent = origMcCanvas.parentElement;
+
+        // 🔥 FIX: ปลดล็อคความสูงของกล่องแม่ ป้องกันกราฟแถวล่างหาย
+        let pNode = parent;
+        for (let i = 0; i < 6; i++) { 
+            if (!pNode || pNode.tagName === 'BODY') break;
+            pNode.style.setProperty('height', 'auto', 'important');
+            pNode.style.setProperty('max-height', 'none', 'important');
+            pNode.style.setProperty('min-height', 'fit-content', 'important');
+            pNode.style.setProperty('overflow', 'visible', 'important');
+            pNode = pNode.parentElement;
+        }
         
         let customContainer = document.createElement('div');
         customContainer.id = 'custom_mc_container';
-        customContainer.style.display = 'grid';
-        customContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
-        customContainer.style.gap = '24px'; 
+        /* ใช้ CSS Grid แบบ 2x2 จาก injectPremiumCSS อัตโนมัติ */
         customContainer.style.width = '100%';
         customContainer.style.marginTop = '15px';
-        customContainer.style.paddingBottom = '10px';
+        customContainer.style.paddingBottom = '20px';
         parent.appendChild(customContainer);
 
         const createBar = (id, title, val, mean) => {
             const wrapper = document.createElement('div');
-            wrapper.style.height = '120px'; 
+            wrapper.style.height = '160px'; // ✨ ความสูงกำลังดีสำหรับ Grid 2x2 (ไม่ใหญ่ล้นเหมือน P2)
             wrapper.style.width = '100%';
+            wrapper.style.position = 'relative';
             
             const canvasId = 'p3mc_chart_' + id;
             wrapper.innerHTML = `<canvas id="${canvasId}"></canvas>`;
             customContainer.appendChild(wrapper);
 
-            const color = val <= mean ? 'rgba(16,185,129,0.85)' : 'rgba(244,63,94,0.85)';
+            const isGood = val <= mean;
+            const valColor = isGood ? 'rgba(16, 185, 129, 0.9)' : 'rgba(244, 63, 94, 0.9)'; 
+            const limitColor = 'rgba(245, 158, 11, 0.18)'; 
             
             if (typeof Chart !== 'undefined') {
                 new Chart(document.getElementById(canvasId), {
@@ -825,8 +879,26 @@ function renderTPSSubCharts(catMap, indicators) {
                     data: {
                         labels: [title],
                         datasets: [
-                            { label: 'รพ.เสลภูมิ (%)', data: [val], backgroundColor: color, borderRadius: 6, maxBarThickness: 30 },
-                            { label: 'ค่ากลาง (%)', data: [mean], backgroundColor: 'rgba(245,158,11,0.20)', borderRadius: 6, maxBarThickness: 30 }
+                            { 
+                                label: 'รพ.เสลภูมิ (%)', 
+                                data: [val], 
+                                backgroundColor: valColor, 
+                                borderRadius: 100, // ✨ Pill Shape แนวนอน
+                                borderSkipped: false,
+                                barPercentage: 0.5,
+                                categoryPercentage: 0.7,
+                                maxBarThickness: 32 // ควบคุมความอ้วนของแท่ง
+                            },
+                            { 
+                                label: 'ค่ากลาง (%)', 
+                                data: [mean], 
+                                backgroundColor: limitColor, 
+                                borderRadius: 100,
+                                borderSkipped: false,
+                                barPercentage: 0.5,
+                                categoryPercentage: 0.7,
+                                maxBarThickness: 32
+                            }
                         ]
                     },
                     options: {
@@ -835,22 +907,36 @@ function renderTPSSubCharts(catMap, indicators) {
                         plugins: { 
                             legend: { display: false }, 
                             tooltip: commonPlugins.tooltip,
-                            datalabels: { anchor: 'end', align: 'end', color: '#475569', font: { weight: 'bold' } }
+                            datalabels: { 
+                                anchor: 'end', align: 'end', offset: 8, 
+                                color: '#1e293b', font: { weight: '800', size: 12 },
+                                formatter: (v) => v.toLocaleString('en-US', {maximumFractionDigits: 1})
+                            }
                         },
                         scales: { 
-                            x: { display: true, beginAtZero: true, grid: { color: 'rgba(241, 245, 249, 0.8)', drawBorder: false, borderDash: [5, 5] }, ticks: { color: '#94a3b8', font: { size: 11 } } }, 
-                            y: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: '#64748b', font: { weight: '500' } } } 
+                            x: { 
+                                display: true, 
+                                beginAtZero: true, 
+                                grid: { color: 'rgba(226, 232, 240, 0.6)', drawBorder: false, borderDash: [4, 4] }, 
+                                ticks: { color: '#94a3b8', font: { size: 11 }, padding: 8 } 
+                            }, 
+                            y: { 
+                                display: true, 
+                                grid: { display: false, drawBorder: false }, 
+                                ticks: { color: '#334155', font: { weight: '700', size: 12 }, padding: 12 } 
+                            } 
                         },
-                        layout: { padding: { right: 30 } }
+                        layout: { padding: { right: 50, top: 15, bottom: 15, left: 10 } } // กันเลขตกขอบ
                     }
                 });
             }
         };
 
+        // 🔥 ตัดข้อความแกน Y ให้กระชับสวยงาม ไม่เบียดกราฟ
         createBar('mc_chart_1', '1.3.1.3 LC ค่าแรงบุคลากร', lcVal, lcMean);
         createBar('mc_chart_2', '1.3.1.4 MC ค่ายา', mcDrugVal, mcDrugMean);
-        createBar('mc_chart_3', '1.3.1.5 MC ค่าวัสดุวิทยาศาสตร์และการแพทย์', mcSciVal, mcSciMean);
-        createBar('mc_chart_4', '1.3.1.6 MC ค่าเวชภัณฑ์มิใช่ยาและวัสดุการแพทย์', mcMedVal, mcMedMean);
+        createBar('mc_chart_3', '1.3.1.5 MC ค่าวัสดุวิทย์ฯ', mcSciVal, mcSciMean);
+        createBar('mc_chart_4', '1.3.1.6 MC ค่าเวชภัณฑ์ฯ', mcMedVal, mcMedMean);
     }
 
     // R1
