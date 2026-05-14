@@ -141,13 +141,29 @@ function injectPremiumCSS() {
         /* -------------------------------------------
            4. Chart Containers (ปรับให้เข้ากับ Card)
         ------------------------------------------- */
+        /* ✨ จัด Grid ใหม่ให้เป็น 2x2 เสมอในจอคอม และ 1 แถวในจอเล็ก */
+        #custom_p2_container, #custom_mc_container {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 24px !important;
+            align-items: stretch !important;
+        }
+        @media (max-width: 1024px) {
+            #custom_p2_container, #custom_mc_container {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
         #custom_p2_container > div, #custom_mc_container > div {
             background: #ffffff !important;
             border-radius: 24px !important;
             border: 1px solid rgba(226, 232, 240, 0.6) !important;
             box-shadow: 0 10px 40px -10px rgba(15, 23, 42, 0.06) !important;
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease !important;
-            padding: 20px !important;
+            padding: 24px 20px !important; /* ✨ เพิ่มพื้นที่รอบขอบกราฟให้หายใจ */
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
         }
         #custom_p2_container > div:hover, #custom_mc_container > div:hover {
             transform: translateY(-4px) !important;
@@ -592,11 +608,9 @@ function renderTPSSubCharts(catMap, indicators) {
             
             let customContainerP2 = document.createElement('div');
             customContainerP2.id = 'custom_p2_container';
-            customContainerP2.style.display = 'grid';
-            customContainerP2.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
-            customContainerP2.style.gap = '24px'; 
+            /* ลบ inline grid ออก ให้ CSS ด้านบนควบคุมแบบ 2x2 แทน */
             customContainerP2.style.width = '100%';
-            customContainerP2.style.marginTop = '15px';
+            customContainerP2.style.marginTop = '20px';
             customContainerP2.style.paddingBottom = '10px';
             parent.appendChild(customContainerP2);
 
@@ -630,8 +644,9 @@ function renderTPSSubCharts(catMap, indicators) {
                 }
 
                 const wrapper = document.createElement('div');
-                wrapper.style.height = '120px'; 
+                wrapper.style.height = '130px'; // ✨ เพิ่มความสูงให้สวยโปร่ง
                 wrapper.style.width = '100%';
+                wrapper.style.position = 'relative';
                 
                 const canvasId = 'p2_chart_' + index;
                 wrapper.innerHTML = `<canvas id="${canvasId}"></canvas>`;
@@ -654,14 +669,14 @@ function renderTPSSubCharts(catMap, indicators) {
                                     backgroundColor: valColor, 
                                     borderRadius: 100, // ✨ ทำให้ขอบมนแบบ Pill Shape 100%
                                     borderSkipped: false, // ✨ บังคับให้มนทั้งซ้ายและขวา
-                                    barPercentage: 0.65, // ✨ ปรับให้แท่งเพรียวบางลง ดูโปร่งขึ้น
+                                    barPercentage: 0.65, // ✨ ปรับให้แท่งเพรียวบางลง
                                     categoryPercentage: 0.8
                                 },
                                 { 
                                     label: 'เกณฑ์สูงสุด (วัน)', 
                                     data: [limit], 
                                     backgroundColor: limitColor, 
-                                    borderRadius: 100, // ✨ Pill Shape
+                                    borderRadius: 100,
                                     borderSkipped: false,
                                     barPercentage: 0.65,
                                     categoryPercentage: 0.8
@@ -675,24 +690,24 @@ function renderTPSSubCharts(catMap, indicators) {
                                 legend: { display: false }, 
                                 tooltip: commonPlugins.tooltip,
                                 datalabels: { 
-                                    anchor: 'end', align: 'end', offset: 6, // ✨ เขยิบเลขให้ห่างจากแท่งนิดนึง
-                                    color: '#475569', font: { weight: '800', size: 11 } 
+                                    anchor: 'end', align: 'end', offset: 8, // ✨ ดันตัวเลขออกห่างจากแท่งอีกนิด
+                                    color: '#1e293b', font: { weight: '800', size: 12 } 
                                 }
                             },
                             scales: { 
                                 x: { 
                                     display: true, 
                                     beginAtZero: true, 
-                                    grid: { color: 'rgba(226, 232, 240, 0.6)', drawBorder: false, borderDash: [4, 4] }, // ✨ เส้นตารางจางๆ แบบไข่ปลา
+                                    grid: { color: 'rgba(226, 232, 240, 0.6)', drawBorder: false, borderDash: [4, 4] }, 
                                     ticks: { color: '#94a3b8', font: { size: 11 }, padding: 8 } 
                                 }, 
                                 y: { 
                                     display: true, 
                                     grid: { display: false, drawBorder: false }, 
-                                    ticks: { color: '#334155', font: { weight: '700', size: 12 }, padding: 12 } // ✨ ทำหัวข้อแกน Y ให้หนาขึ้นและมีมิติ
+                                    ticks: { color: '#334155', font: { weight: '700', size: 12 }, padding: 16 } // ✨ เพิ่มระยะห่างให้ชื่อหัวข้อ
                                 } 
                             },
-                            layout: { padding: { right: 40, top: 10, bottom: 10 } } // ✨ เพิ่มพื้นที่ขวาให้ Datalabels ไม่ตกขอบ
+                            layout: { padding: { right: 50, top: 10, bottom: 10, left: 10 } } // ✨ เผื่อพื้นที่ด้านขวาถึง 50px ป้องกันตัวเลขตกขอบ 100%
                         }
                     });
                 }
