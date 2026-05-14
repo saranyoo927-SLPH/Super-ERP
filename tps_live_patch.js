@@ -1,6 +1,6 @@
 // ============================================================
-// TPS LIVE DATA PATCH (Premium UI Edition)
-// ล็อคข้อมูล 100% + เพิ่มลูกเล่น CSS / Hover / Data Labels
+// TPS LIVE DATA PATCH (Premium UI/UX Edition)
+// ล็อคข้อมูล 100% + อัปเกรดความสวยงามสไตล์ Apple & Material You
 // ============================================================
 
 // 🌟 1. ระบบเติมความสวยงามอัตโนมัติ (CSS Injection)
@@ -9,38 +9,42 @@ function injectPremiumCSS() {
     const style = document.createElement('style');
     style.id = 'tps-premium-style';
     style.innerHTML = `
-        /* เอฟเฟกต์การ์ด KPI ให้เด้งและมีเงาเวลาเอาเมาส์ชี้ */
+        /* 1. Micro-interactions: เอฟเฟกต์การ์ด KPI สไตล์ Apple (Scale & Smooth Shadow) */
         .nt-kpi {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            border-radius: 12px !important;
-            border: 1px solid #f1f5f9 !important;
+            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease !important;
+            border-radius: 16px !important;
+            border: 1px solid rgba(226, 232, 240, 0.6) !important;
             background: #ffffff !important;
-            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02) !important;
         }
         .nt-kpi:hover {
-            transform: translateY(-5px) !important;
-            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.12) !important;
-            border-color: #e2e8f0 !important;
+            transform: scale(1.015) !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+            border-color: rgba(226, 232, 240, 0.9) !important;
         }
         
-        /* ตกแต่งตัวเลขให้ชัดและหรูหราขึ้น */
+        /* 2. Typography: ตกแต่งตัวเลขให้ชัดและหรูหราขึ้น */
         .nt-val {
             font-weight: 700 !important;
-            font-size: 1.6rem !important;
-            color: #0f172a !important;
-            letter-spacing: -0.02em !important;
-            margin: 6px 0 !important;
+            font-size: 1.75rem !important;
+            color: #111827 !important;
+            letter-spacing: -0.03em !important;
+            margin: 8px 0 !important;
+            display: flex !important;
+            align-items: baseline !important;
         }
         .nt-val small {
             font-weight: 500 !important;
-            font-size: 0.85rem !important;
-            color: #64748b !important;
-            margin-left: 4px !important;
+            font-size: 0.875rem !important;
+            color: #94a3b8 !important;
+            margin-left: 6px !important;
         }
         .nt-lbl {
-            color: #475569 !important;
+            color: #64748b !important;
             font-weight: 600 !important;
-            font-size: 0.95rem !important;
+            font-size: 0.9rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
         }
         .nt-foot {
             color: #94a3b8 !important;
@@ -48,24 +52,41 @@ function injectPremiumCSS() {
             margin-top: auto !important;
             padding-top: 8px !important;
         }
+
+        /* 3. Colors & Badges: ป้ายกำกับ (Pills) แบบ Soft Background */
+        .nt-pill {
+            padding: 4px 10px !important;
+            border-radius: 999px !important;
+            font-size: 0.75rem !important;
+            font-weight: 600 !important;
+        }
+        .nt-pill.good { background: #dcfce7 !important; color: #166534 !important; }
+        .nt-pill.warn { background: #fef3c7 !important; color: #92400e !important; }
+        .nt-pill.bad  { background: #fee2e2 !important; color: #991b1b !important; }
         
         /* เอฟเฟกต์สำหรับกล่องกราฟ 1.2 และ 1.3 */
         #custom_p2_container > div, #custom_mc_container > div {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease !important;
             background: #ffffff !important;
-            border-radius: 14px !important;
-            border: 1px solid #f1f5f9 !important;
-            box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.04) !important;
+            border-radius: 16px !important;
+            border: 1px solid rgba(226, 232, 240, 0.6) !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02) !important;
         }
         #custom_p2_container > div:hover, #custom_mc_container > div:hover {
-            transform: translateY(-4px) !important;
-            box-shadow: 0 14px 24px -8px rgba(0, 0, 0, 0.1) !important;
-            border-color: #cbd5e1 !important;
+            transform: scale(1.015) !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08) !important;
+            border-color: rgba(226, 232, 240, 0.9) !important;
         }
         
-        /* แอนิเมชันหลอดคะแนน */
+        /* 5. UI Shape & Spacing: แอนิเมชันหลอดคะแนน */
+        .erp-card-body .progress-bg {
+            background: #f1f5f9 !important;
+            border-radius: 999px !important;
+            overflow: hidden !important;
+        }
         .erp-card-body .nt-score-fill {
-            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            border-radius: 999px !important;
+            transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
     `;
     document.head.appendChild(style);
@@ -376,14 +397,14 @@ function renderTPSChartsFromData(catMap, totalScore, totalMax) {
             data: {
                 labels: radarLabels,
                 datasets: [
-                    { label: 'คะแนนได้', data: radarScores, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.15)', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#f59e0b', pointHoverBackgroundColor: '#fff', borderJoinStyle: 'round' },
-                    { label: 'คะแนนเต็ม', data: radarMax, borderColor: 'rgba(99,102,241,0.3)', backgroundColor: 'rgba(99,102,241,0.04)', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 3, pointBackgroundColor: 'rgba(99,102,241,0.4)' }
+                    { label: 'คะแนนได้', data: radarScores, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.05)', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#f59e0b', pointHoverBackgroundColor: '#fff', borderJoinStyle: 'round' },
+                    { label: 'คะแนนเต็ม', data: radarMax, borderColor: 'rgba(99,102,241,0.3)', backgroundColor: 'rgba(99,102,241,0.02)', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 3, pointBackgroundColor: 'rgba(99,102,241,0.4)' }
                 ]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, color: '#64748b', boxWidth: 10, padding: 12 } } },
-                scales: { r: { min: 0, max: maxVal, ticks: { display: false, stepSize: 1 } } }
+                scales: { r: { min: 0, max: maxVal, ticks: { display: false, stepSize: 1 }, grid: { color: 'rgba(241, 245, 249, 0.8)', borderDash: [5,5] }, angleLines: { color: 'rgba(241, 245, 249, 0.8)' } } }
             }
         });
     }
@@ -476,7 +497,10 @@ function renderTPSSubCharts(catMap, indicators) {
                 options: { 
                     responsive: true, maintainAspectRatio: false, 
                     plugins: commonPlugins,
-                    scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false } }, x: { grid: { display: false, drawBorder: false } } },
+                    scales: { 
+                        y: { beginAtZero: true, grid: { color: 'rgba(241, 245, 249, 0.8)', drawBorder: false, borderDash: [5, 5] }, ticks: { color: '#94a3b8', font: { size: 11 } } }, 
+                        x: { grid: { display: false, drawBorder: false }, ticks: { color: '#64748b', font: { weight: '500' } } } 
+                    },
                     layout: { padding: { top: 20 } }
                 }
             });
@@ -548,8 +572,8 @@ function renderTPSSubCharts(catMap, indicators) {
                                 datalabels: { anchor: 'end', align: 'end', color: '#475569', font: { weight: 'bold' } }
                             },
                             scales: { 
-                                x: { display: true, beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false } }, 
-                                y: { display: true, grid: { display: false, drawBorder: false } } 
+                                x: { display: true, beginAtZero: true, grid: { color: 'rgba(241, 245, 249, 0.8)', drawBorder: false, borderDash: [5, 5] }, ticks: { color: '#94a3b8', font: { size: 11 } } }, 
+                                y: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: '#64748b', font: { weight: '500' } } } 
                             },
                             layout: { padding: { right: 30 } } // กันเลขล้นขอบขวา
                         }
@@ -592,7 +616,10 @@ function renderTPSSubCharts(catMap, indicators) {
             options: { 
                 responsive: true, maintainAspectRatio: false, 
                 plugins: commonPlugins, 
-                scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false } }, x: { grid: { display: false, drawBorder: false } } },
+                scales: { 
+                    y: { beginAtZero: true, grid: { color: 'rgba(241, 245, 249, 0.8)', drawBorder: false, borderDash: [5, 5] }, ticks: { color: '#94a3b8', font: { size: 11 } } }, 
+                    x: { grid: { display: false, drawBorder: false }, ticks: { color: '#64748b', font: { weight: '500' } } } 
+                },
                 layout: { padding: { top: 20 } }
             }
         });
@@ -660,8 +687,8 @@ function renderTPSSubCharts(catMap, indicators) {
                             datalabels: { anchor: 'end', align: 'end', color: '#475569', font: { weight: 'bold' } }
                         },
                         scales: { 
-                            x: { display: true, beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false } }, 
-                            y: { display: true, grid: { display: false, drawBorder: false } } 
+                            x: { display: true, beginAtZero: true, grid: { color: 'rgba(241, 245, 249, 0.8)', drawBorder: false, borderDash: [5, 5] }, ticks: { color: '#94a3b8', font: { size: 11 } } }, 
+                            y: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: '#64748b', font: { weight: '500' } } } 
                         },
                         layout: { padding: { right: 30 } }
                     }
@@ -703,7 +730,10 @@ function renderTPSSubCharts(catMap, indicators) {
                 options: { 
                     responsive: true, maintainAspectRatio: false, 
                     plugins: commonPlugins, 
-                    scales: { y: { grid: { color: '#f1f5f9', drawBorder: false } }, x: { grid: { display: false, drawBorder: false } } },
+                    scales: { 
+                        y: { grid: { color: 'rgba(241, 245, 249, 0.8)', drawBorder: false, borderDash: [5, 5] }, ticks: { color: '#94a3b8', font: { size: 11 } } }, 
+                        x: { grid: { display: false, drawBorder: false }, ticks: { color: '#64748b', font: { weight: '500' } } } 
+                    },
                     layout: { padding: { top: 20 } }
                 }
             });
@@ -730,7 +760,10 @@ function renderTPSSubCharts(catMap, indicators) {
             options: { 
                 responsive: true, maintainAspectRatio: false, 
                 plugins: commonPlugins, 
-                scales: { y: { grid: { color: '#f1f5f9', drawBorder: false } }, x: { grid: { display: false, drawBorder: false } } },
+                scales: { 
+                    y: { grid: { color: 'rgba(241, 245, 249, 0.8)', drawBorder: false, borderDash: [5, 5] }, ticks: { color: '#94a3b8', font: { size: 11 } } }, 
+                    x: { grid: { display: false, drawBorder: false }, ticks: { color: '#64748b', font: { weight: '500' } } } 
+                },
                 layout: { padding: { top: 20 } }
             }
         });
