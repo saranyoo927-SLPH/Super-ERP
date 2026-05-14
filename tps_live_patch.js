@@ -1,6 +1,6 @@
 // ============================================================
-// TPS LIVE DATA PATCH (Premium UI/UX Edition)
-// ล็อคข้อมูล 100% + อัปเกรดความสวยงามสไตล์ Apple & Material You
+// TPS LIVE DATA PATCH (Super Premium Dribbble UI Edition)
+// ล็อคข้อมูล 100% + ดีไซน์ใหม่หมดจด สไตล์ Soft & Clean UI
 // ============================================================
 
 // 🌟 1. ระบบเติมความสวยงามอัตโนมัติ (CSS Injection)
@@ -9,76 +9,151 @@ function injectPremiumCSS() {
     const style = document.createElement('style');
     style.id = 'tps-premium-style';
     style.innerHTML = `
-        /* 1. Micro-interactions: เอฟเฟกต์การ์ด KPI สไตล์ Apple (Scale & Smooth Shadow) */
+        /* -------------------------------------------
+           1. Main KPI Card - Clean & Airy Design
+        ------------------------------------------- */
         .nt-kpi {
-            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease !important;
-            border-radius: 16px !important;
-            border: 1px solid rgba(226, 232, 240, 0.6) !important;
-            background: #ffffff !important;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02) !important;
-        }
-        .nt-kpi:hover {
-            transform: scale(1.015) !important;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
-            border-color: rgba(226, 232, 240, 0.9) !important;
-        }
-        
-        /* 2. Typography: ตกแต่งตัวเลขให้ชัดและหรูหราขึ้น */
-        .nt-val {
-            font-weight: 700 !important;
-            font-size: 1.75rem !important;
-            color: #111827 !important;
-            letter-spacing: -0.03em !important;
-            margin: 8px 0 !important;
+            position: relative !important;
             display: flex !important;
-            align-items: baseline !important;
-        }
-        .nt-val small {
-            font-weight: 500 !important;
-            font-size: 0.875rem !important;
-            color: #94a3b8 !important;
-            margin-left: 6px !important;
-        }
-        .nt-lbl {
-            color: #64748b !important;
-            font-weight: 600 !important;
-            font-size: 0.9rem !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.05em !important;
-        }
-        .nt-foot {
-            color: #94a3b8 !important;
-            font-size: 0.8rem !important;
-            margin-top: auto !important;
-            padding-top: 8px !important;
+            flex-direction: column !important;
+            background: #ffffff !important;
+            border-radius: 20px !important; /* โค้งมนแบบ Modern UI */
+            border: 1px solid rgba(226, 232, 240, 0.4) !important; /* เส้นขอบบางมากๆ */
+            box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.05) !important; /* เงาฟุ้งและนุ่มนวล */
+            padding: 24px !important; /* เพิ่มพื้นที่ว่าง (Whitespace) ให้ดูไม่อึดอัด */
+            overflow: hidden !important;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+            z-index: 1 !important;
         }
 
-        /* 3. Colors & Badges: ป้ายกำกับ (Pills) แบบ Soft Background */
-        .nt-pill {
-            padding: 4px 10px !important;
-            border-radius: 999px !important;
-            font-size: 0.75rem !important;
-            font-weight: 600 !important;
+        /* ล้างขอบสีทึบด้านบนของของเดิมทิ้ง */
+        .nt-kpi.c-green, .nt-kpi.c-red, .nt-kpi.c-amber, .nt-kpi.c-blue {
+            border-top-color: rgba(226, 232, 240, 0.4) !important;
+            border-top-width: 1px !important;
         }
-        .nt-pill.good { background: #dcfce7 !important; color: #166534 !important; }
-        .nt-pill.warn { background: #fef3c7 !important; color: #92400e !important; }
-        .nt-pill.bad  { background: #fee2e2 !important; color: #991b1b !important; }
-        
-        /* เอฟเฟกต์สำหรับกล่องกราฟ 1.2 และ 1.3 */
+
+        /* Hover Effect: ยกการ์ดขึ้นและเพิ่มเงา */
+        .nt-kpi:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.1) !important;
+            border-color: rgba(226, 232, 240, 0.8) !important;
+        }
+
+        /* เส้น Gradient บางๆ ด้านบน (Ambient Glow) */
+        .nt-kpi::after {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important; left: 0 !important; right: 0 !important;
+            height: 4px !important;
+            opacity: 0.9 !important;
+            transition: opacity 0.3s ease !important;
+        }
+        .nt-kpi.c-green::after { background: linear-gradient(90deg, #10b981, #34d399) !important; }
+        .nt-kpi.c-amber::after { background: linear-gradient(90deg, #f59e0b, #fbbf24) !important; }
+        .nt-kpi.c-red::after { background: linear-gradient(90deg, #ef4444, #f87171) !important; }
+        .nt-kpi.c-blue::after { background: linear-gradient(90deg, #3b82f6, #60a5fa) !important; }
+
+        /* -------------------------------------------
+           2. Typography & Hierarchy
+        ------------------------------------------- */
+        /* Label (หัวข้อ) พร้อมจุดสี (Glowing Dot) แทนไอคอน */
+        .nt-lbl {
+            color: #64748b !important;
+            font-weight: 500 !important;
+            font-size: 0.9rem !important;
+            line-height: 1.4 !important;
+            margin-bottom: 12px !important;
+            display: flex !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+            padding-right: 50px !important; /* เว้นที่ให้ Pill มุมขวา */
+        }
+        .nt-lbl::before {
+            content: '' !important;
+            display: block !important;
+            width: 8px !important;
+            height: 8px !important;
+            min-width: 8px !important;
+            border-radius: 50% !important;
+            margin-top: 6px !important;
+        }
+        .nt-kpi.c-green .nt-lbl::before { background-color: #10b981 !important; box-shadow: 0 0 8px rgba(16,185,129,0.5) !important; }
+        .nt-kpi.c-amber .nt-lbl::before { background-color: #f59e0b !important; box-shadow: 0 0 8px rgba(245,158,11,0.5) !important; }
+        .nt-kpi.c-red .nt-lbl::before { background-color: #ef4444 !important; box-shadow: 0 0 8px rgba(239,68,68,0.5) !important; }
+        .nt-kpi.c-blue .nt-lbl::before { background-color: #3b82f6 !important; box-shadow: 0 0 8px rgba(59,130,246,0.5) !important; }
+
+        /* Value (ตัวเลขหลัก) ใหญ่ เด่นชัด */
+        .nt-val {
+            font-weight: 800 !important;
+            font-size: 2.1rem !important;
+            color: #0f172a !important;
+            letter-spacing: -0.04em !important;
+            margin: 4px 0 16px 0 !important;
+            display: flex !important;
+            align-items: baseline !important;
+            flex-wrap: wrap !important;
+            gap: 6px !important;
+        }
+        .nt-val small {
+            font-weight: 600 !important;
+            font-size: 0.95rem !important;
+            color: #94a3b8 !important;
+            letter-spacing: 0 !important;
+        }
+
+        /* -------------------------------------------
+           3. Badges & Footer
+        ------------------------------------------- */
+        /* Score Pill ลอยอยู่มุมขวาบนแบบ Modern */
+        .nt-pill {
+            position: absolute !important;
+            top: 24px !important;
+            right: 24px !important;
+            padding: 6px 10px !important;
+            border-radius: 10px !important; /* Soft Squircle */
+            font-size: 0.75rem !important;
+            font-weight: 700 !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03) !important;
+            text-align: center !important;
+            min-width: 48px !important;
+            display: flex !important;
+            align-items: baseline !important;
+            justify-content: center !important;
+            gap: 2px !important;
+        }
+        .nt-pill.good { background: #ecfdf5 !important; color: #059669 !important; border: 1px solid #d1fae5 !important; }
+        .nt-pill.warn { background: #fffbeb !important; color: #d97706 !important; border: 1px solid #fef3c7 !important; }
+        .nt-pill.bad  { background: #fef2f2 !important; color: #dc2626 !important; border: 1px solid #fee2e2 !important; }
+
+        /* Footer ตัดด้วยเส้นประจางๆ */
+        .nt-foot {
+            margin-top: auto !important; /* ดันลงล่างสุดเสมอ */
+            padding-top: 12px !important;
+            border-top: 1px dashed #e2e8f0 !important;
+            color: #94a3b8 !important;
+            font-size: 0.75rem !important;
+            font-weight: 500 !important;
+            line-height: 1.5 !important;
+        }
+
+        /* -------------------------------------------
+           4. Chart Containers (ปรับให้เข้ากับ Card)
+        ------------------------------------------- */
         #custom_p2_container > div, #custom_mc_container > div {
-            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease !important;
             background: #ffffff !important;
-            border-radius: 16px !important;
-            border: 1px solid rgba(226, 232, 240, 0.6) !important;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02) !important;
+            border-radius: 20px !important;
+            border: 1px solid rgba(226, 232, 240, 0.4) !important;
+            box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.05) !important;
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease !important;
+            padding: 16px !important; /* เว้นระยะกราฟด้านใน */
         }
         #custom_p2_container > div:hover, #custom_mc_container > div:hover {
-            transform: scale(1.015) !important;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08) !important;
-            border-color: rgba(226, 232, 240, 0.9) !important;
+            transform: translateY(-4px) !important;
+            box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.1) !important;
+            border-color: rgba(226, 232, 240, 0.8) !important;
         }
-        
-        /* 5. UI Shape & Spacing: แอนิเมชันหลอดคะแนน */
+
+        /* 5. Progress Bars */
         .erp-card-body .progress-bg {
             background: #f1f5f9 !important;
             border-radius: 999px !important;
@@ -308,7 +383,7 @@ function updateTPSKpiCards(catMap) {
 
     kpiRow.style.display = 'flex';
     kpiRow.style.flexWrap = 'wrap';
-    kpiRow.style.gap = '16px';
+    kpiRow.style.gap = '20px'; /* ขยายช่องว่างระหว่างการ์ด */
 
     cards.forEach(card => {
         card.style.flex = '1 1 min(240px, 30%)'; 
@@ -340,17 +415,18 @@ function updateTPSKpiCards(catMap) {
 
         if (pillEl) {
             const pct = cat.maxScore > 0 ? (cat.score / cat.maxScore) : 0;
+            
+            // อัปเดตข้อความใน Pill ให้สะอาดตา
+            pillEl.innerHTML = `<span style="font-size:1.1em;">${cat.score}</span><span style="opacity:0.5; font-size:0.85em; margin-left:2px;">/${cat.maxScore}</span>`;
+
             if (pct >= 1) {
                 pillEl.className = 'nt-pill good';
-                pillEl.textContent = '✓ ผ่านครบ';
                 card.className = 'nt-kpi c-green';
             } else if (pct > 0) {
                 pillEl.className = 'nt-pill warn';
-                pillEl.textContent = 'ผ่านบางส่วน';
                 card.className = 'nt-kpi c-amber';
             } else {
                 pillEl.className = 'nt-pill bad';
-                pillEl.textContent = '✗ ไม่ผ่านทุกข้อ';
                 card.className = 'nt-kpi c-red';
             }
         }
@@ -470,10 +546,10 @@ function updateTPSSubTabs(catMap, indicators) {
 // 8. ✅ วาดกราฟแท็บย่อย (อัปเกรด UI: Data Labels & Clean Grid)
 // ============================================================
 function renderTPSSubCharts(catMap, indicators) {
-    // 🌟 ตั้งค่าร่วมสำหรับ Tooltip และ Datalabels (ถ้าระบบมี Plugin)
+    // 🌟 ตั้งค่าร่วมสำหรับ Tooltip และ Datalabels
     const commonPlugins = {
         legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15 } },
-        tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: {size: 13}, bodyFont: {size: 13}, padding: 12, cornerRadius: 8 },
+        tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: {size: 13}, bodyFont: {size: 13}, padding: 12, cornerRadius: 10 },
         datalabels: { anchor: 'end', align: 'end', color: '#334155', font: { weight: 'bold', size: 11 }, formatter: (v) => v.toLocaleString('en-US', {maximumFractionDigits: 1}) }
     };
 
@@ -522,7 +598,7 @@ function renderTPSSubCharts(catMap, indicators) {
             customContainerP2.id = 'custom_p2_container';
             customContainerP2.style.display = 'grid';
             customContainerP2.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
-            customContainerP2.style.gap = '16px';
+            customContainerP2.style.gap = '20px'; /* ขยายระยะห่าง */
             customContainerP2.style.width = '100%';
             customContainerP2.style.marginTop = '15px';
             customContainerP2.style.paddingBottom = '10px';
@@ -575,7 +651,7 @@ function renderTPSSubCharts(catMap, indicators) {
                                 x: { display: true, beginAtZero: true, grid: { color: 'rgba(241, 245, 249, 0.8)', drawBorder: false, borderDash: [5, 5] }, ticks: { color: '#94a3b8', font: { size: 11 } } }, 
                                 y: { display: true, grid: { display: false, drawBorder: false }, ticks: { color: '#64748b', font: { weight: '500' } } } 
                             },
-                            layout: { padding: { right: 30 } } // กันเลขล้นขอบขวา
+                            layout: { padding: { right: 30 } } 
                         }
                     });
                 }
@@ -651,7 +727,7 @@ function renderTPSSubCharts(catMap, indicators) {
         customContainer.id = 'custom_mc_container';
         customContainer.style.display = 'grid';
         customContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
-        customContainer.style.gap = '16px';
+        customContainer.style.gap = '20px'; /* ขยายระยะห่าง */
         customContainer.style.width = '100%';
         customContainer.style.marginTop = '15px';
         customContainer.style.paddingBottom = '10px';
@@ -771,7 +847,7 @@ function renderTPSSubCharts(catMap, indicators) {
 }
 
 // ============================================================
-// 9. ฟังก์ชันเสริมวาดการ์ด KPI 
+// 9. ฟังก์ชันเสริมวาดการ์ด KPI (ปรับปรุงดีไซน์ Badge & Content)
 // ============================================================
 function updateSubTabKPIs(panelId, items) {
     const panel = document.getElementById(panelId);
@@ -791,7 +867,7 @@ function updateSubTabKPIs(panelId, items) {
 
     kpiRow.style.display = 'flex';
     kpiRow.style.flexWrap = 'wrap';
-    kpiRow.style.gap = '16px';
+    kpiRow.style.gap = '24px'; /* เพิ่มช่องไฟ (Spacing) ระหว่างการ์ดให้กว้างขึ้น */
 
     cards.forEach((card, i) => {
         if (i >= items.length) {
@@ -800,7 +876,7 @@ function updateSubTabKPIs(panelId, items) {
         }
         
         card.style.display = 'flex';
-        card.style.flex = '1 1 min(240px, 100%)';
+        card.style.flex = '1 1 min(300px, 100%)'; /* ปรับให้การ์ดไม่หดเล็กเกินไป */
         card.style.margin = '0'; 
 
         const ind = items[i];
@@ -811,19 +887,24 @@ function updateSubTabKPIs(panelId, items) {
         const pillEl = card.querySelector('.nt-pill');
 
         if (lblEl) lblEl.textContent = ind.name || ind.code || '';
+        
         if (valEl) {
             const actNum = safeParse(ind.actual);
             const valStr = (actNum !== null) ? actNum.toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
             valEl.innerHTML = valStr + ' <small>' + (ind.unit || '') + '</small>';
         }
+
         if (footEl) footEl.textContent = (ind.criteria || '') + (ind.result ? ' | ' + ind.result : '');
         
         if (pillEl) {
             if(ind.maxScore === null || ind.maxScore === undefined || ind.maxScore === 0) {
                  pillEl.style.display = 'none';
             } else {
-                 pillEl.style.display = 'inline-block';
-                 pillEl.textContent = (ind.score || 0) + ' / ' + (ind.maxScore || 0) + ' คะแนน';
+                 pillEl.style.display = 'flex'; /* เปิดใช้ Flex สำหรับ Badge */
+                 
+                 // จัดฟอร์แมตตัวเลขใน Pill ให้อ่านง่ายแบบ Modern UI
+                 pillEl.innerHTML = `<span style="font-size:1.15em;">${ind.score || 0}</span><span style="opacity:0.5; font-size:0.85em; margin-left:2px;">/${ind.maxScore || 0}</span>`;
+                 
                  pillEl.className = 'nt-pill ' + ((ind.score || 0) >= (ind.maxScore || 1) ? 'good' : (ind.score || 0) > 0 ? 'warn' : 'bad');
             }
         }
