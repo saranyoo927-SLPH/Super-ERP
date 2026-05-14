@@ -644,7 +644,7 @@ function renderTPSSubCharts(catMap, indicators) {
                 }
 
                 const wrapper = document.createElement('div');
-                wrapper.style.height = '130px'; // ✨ เพิ่มความสูงให้สวยโปร่ง
+                wrapper.style.height = '160px'; // ✨ ขยายความสูงให้กราฟดูเต็มพื้นที่ ไม่แบนจนเกินไป
                 wrapper.style.width = '100%';
                 wrapper.style.position = 'relative';
                 
@@ -669,8 +669,8 @@ function renderTPSSubCharts(catMap, indicators) {
                                     backgroundColor: valColor, 
                                     borderRadius: 100, // ✨ ทำให้ขอบมนแบบ Pill Shape 100%
                                     borderSkipped: false, // ✨ บังคับให้มนทั้งซ้ายและขวา
-                                    barPercentage: 0.65, // ✨ ปรับให้แท่งเพรียวบางลง
-                                    categoryPercentage: 0.8
+                                    barPercentage: 0.75, // ✨ เพิ่มความหนาของแท่งกราฟให้ดูมีน้ำหนัก สมส่วนกับจอ
+                                    categoryPercentage: 0.85
                                 },
                                 { 
                                     label: 'เกณฑ์สูงสุด (วัน)', 
@@ -678,8 +678,8 @@ function renderTPSSubCharts(catMap, indicators) {
                                     backgroundColor: limitColor, 
                                     borderRadius: 100,
                                     borderSkipped: false,
-                                    barPercentage: 0.65,
-                                    categoryPercentage: 0.8
+                                    barPercentage: 0.75, // ✨ เพิ่มความหนาให้เท่ากัน
+                                    categoryPercentage: 0.85
                                 }
                             ]
                         },
@@ -690,8 +690,8 @@ function renderTPSSubCharts(catMap, indicators) {
                                 legend: { display: false }, 
                                 tooltip: commonPlugins.tooltip,
                                 datalabels: { 
-                                    anchor: 'end', align: 'end', offset: 8, // ✨ ดันตัวเลขออกห่างจากแท่งอีกนิด
-                                    color: '#1e293b', font: { weight: '800', size: 12 } 
+                                    anchor: 'end', align: 'end', offset: 12, // ✨ ดันตัวเลขออกห่างจากแท่งอีกนิด
+                                    color: '#1e293b', font: { weight: '800', size: 14 } // ✨ ขยายขนาดตัวเลขปลายแท่งให้อ่านง่ายและดูแพงขึ้น
                                 }
                             },
                             scales: { 
@@ -699,15 +699,15 @@ function renderTPSSubCharts(catMap, indicators) {
                                     display: true, 
                                     beginAtZero: true, 
                                     grid: { color: 'rgba(226, 232, 240, 0.6)', drawBorder: false, borderDash: [4, 4] }, 
-                                    ticks: { color: '#94a3b8', font: { size: 11 }, padding: 8 } 
+                                    ticks: { color: '#94a3b8', font: { size: 12 }, padding: 10 } // ✨ ขยายฟอนต์แกน X
                                 }, 
                                 y: { 
                                     display: true, 
                                     grid: { display: false, drawBorder: false }, 
-                                    ticks: { color: '#334155', font: { weight: '700', size: 12 }, padding: 16 } // ✨ เพิ่มระยะห่างให้ชื่อหัวข้อ
+                                    ticks: { color: '#334155', font: { weight: '700', size: 13 }, padding: 16 } // ✨ ขยายฟอนต์ชื่อหัวข้อแกน Y
                                 } 
                             },
-                            layout: { padding: { right: 50, top: 10, bottom: 10, left: 10 } } // ✨ เผื่อพื้นที่ด้านขวาถึง 50px ป้องกันตัวเลขตกขอบ 100%
+                            layout: { padding: { right: 60, top: 15, bottom: 15, left: 10 } } // ✨ เผื่อพื้นที่ด้านขวาเพิ่มเป็น 60px รับกับเลขที่ใหญ่ขึ้น
                         }
                     });
                 }
