@@ -1,12 +1,83 @@
 // ============================================================
-// TPS LIVE DATA PATCH (Final Reverted Data + Beautiful UI)
-// ข้อมูลดึงตรง 100% ตามต้นฉบับ + จัด Layout กราฟและการ์ดให้สมดุลสวยงาม
+// TPS LIVE DATA PATCH (Premium UI Edition)
+// ล็อคข้อมูล 100% + เพิ่มลูกเล่น CSS / Hover / Data Labels
+// ============================================================
+
+// 🌟 1. ระบบเติมความสวยงามอัตโนมัติ (CSS Injection)
+function injectPremiumCSS() {
+    if (document.getElementById('tps-premium-style')) return;
+    const style = document.createElement('style');
+    style.id = 'tps-premium-style';
+    style.innerHTML = `
+        /* เอฟเฟกต์การ์ด KPI ให้เด้งและมีเงาเวลาเอาเมาส์ชี้ */
+        .nt-kpi {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            border-radius: 12px !important;
+            border: 1px solid #f1f5f9 !important;
+            background: #ffffff !important;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+        }
+        .nt-kpi:hover {
+            transform: translateY(-5px) !important;
+            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.12) !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        /* ตกแต่งตัวเลขให้ชัดและหรูหราขึ้น */
+        .nt-val {
+            font-weight: 700 !important;
+            font-size: 1.6rem !important;
+            color: #0f172a !important;
+            letter-spacing: -0.02em !important;
+            margin: 6px 0 !important;
+        }
+        .nt-val small {
+            font-weight: 500 !important;
+            font-size: 0.85rem !important;
+            color: #64748b !important;
+            margin-left: 4px !important;
+        }
+        .nt-lbl {
+            color: #475569 !important;
+            font-weight: 600 !important;
+            font-size: 0.95rem !important;
+        }
+        .nt-foot {
+            color: #94a3b8 !important;
+            font-size: 0.8rem !important;
+            margin-top: auto !important;
+            padding-top: 8px !important;
+        }
+        
+        /* เอฟเฟกต์สำหรับกล่องกราฟ 1.2 และ 1.3 */
+        #custom_p2_container > div, #custom_mc_container > div {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            background: #ffffff !important;
+            border-radius: 14px !important;
+            border: 1px solid #f1f5f9 !important;
+            box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.04) !important;
+        }
+        #custom_p2_container > div:hover, #custom_mc_container > div:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0 14px 24px -8px rgba(0, 0, 0, 0.1) !important;
+            border-color: #cbd5e1 !important;
+        }
+        
+        /* แอนิเมชันหลอดคะแนน */
+        .erp-card-body .nt-score-fill {
+            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+    `;
+    document.head.appendChild(style);
+}
+// เรียกใช้งานทันที
+injectPremiumCSS();
+
+// ============================================================
+// ตัวแปรและฟังก์ชันดึงข้อมูล (ล็อค 100% ห้ามแก้ไข)
 // ============================================================
 let tpsLiveData = null;
 
-// ============================================================
-// ฟังก์ชันตัวช่วยดึงตัวเลข (ป้องกัน NaN และดึงค่ากลางจากเกณฑ์)
-// ============================================================
 const safeParse = (val) => {
     if(val === null || val === undefined || val === '') return null;
     const clean = String(val).replace(/,/g, '').trim();
@@ -88,7 +159,6 @@ function applyTPSLiveData(data) {
     const sectionHead = document.querySelector('#tab-tps-score .erp-section-head h3');
     if (sectionHead) sectionHead.textContent = '📊 Total Performance Score (Live Data)';
 
-    // 🎯 โครงสร้างภาพรวม (ล็อค 100%)
     const catMap = buildCategoryMap(indicators);
     if(typeof updateScoreBars === 'function') updateScoreBars(catMap, totalScore, totalMax, gi.color);
     if(typeof updateTPSKpiCards === 'function') updateTPSKpiCards(catMap);
@@ -96,7 +166,6 @@ function applyTPSLiveData(data) {
     if(typeof renderTPSChartsFromData === 'function') renderTPSChartsFromData(catMap, totalScore, totalMax);
     if(typeof updateERPOverviewTPS === 'function') updateERPOverviewTPS(totalScore, totalMax, grade, gi, catMap);
     
-    // 🎯 โครงสร้างแท็บย่อย
     if(typeof updateTPSSubTabs === 'function') updateTPSSubTabs(catMap, indicators);
     if(typeof renderTPSSubCharts === 'function') renderTPSSubCharts(catMap, indicators);
 }
@@ -194,7 +263,7 @@ function updateScoreBars(catMap, totalScore, totalMax, gradeColor) {
 }
 
 // ============================================================
-// 5. อัปเดตการ์ด Overview (จัดสมดุลกล่องให้สวยงาม)
+// 5. อัปเดตการ์ด Overview 
 // ============================================================
 function updateTPSKpiCards(catMap) {
     const kpiRow = document.querySelector('#tps-ov .nt-kpi-row');
@@ -216,15 +285,13 @@ function updateTPSKpiCards(catMap) {
         liquidity: catMap.liquidity
     };
 
-    // 🌟 จัด CSS Flex ให้กล่องเรียงตัวกันอย่างสมดุล ไม่บีบอัด
     kpiRow.style.display = 'flex';
     kpiRow.style.flexWrap = 'wrap';
     kpiRow.style.gap = '16px';
 
     cards.forEach(card => {
         card.style.flex = '1 1 min(240px, 30%)'; 
-        card.style.transition = 'transform 0.2s ease';
-        card.style.margin = '0'; // ลบ margin เดิมออกเพื่อใช้ gap แทน
+        card.style.margin = '0'; 
     });
 
     catKeys.forEach((key, i) => {
@@ -292,7 +359,7 @@ function updateGradeTable(totalScore, grade) {
 }
 
 // ============================================================
-// 6. RENDER กราฟหลัก (ปรับขนาดแท่งให้สมดุล)
+// 6. RENDER กราฟหลัก 
 // ============================================================
 function renderTPSChartsFromData(catMap, totalScore, totalMax) {
     const catKeys = ['planfin', 'cost', 'accounting', 'asset', 'profit', 'liquidity'];
@@ -309,8 +376,8 @@ function renderTPSChartsFromData(catMap, totalScore, totalMax) {
             data: {
                 labels: radarLabels,
                 datasets: [
-                    { label: 'คะแนนได้', data: radarScores, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#f59e0b' },
-                    { label: 'คะแนนเต็ม', data: radarMax, borderColor: 'rgba(99,102,241,0.3)', backgroundColor: 'rgba(99,102,241,0.03)', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 3, pointBackgroundColor: 'rgba(99,102,241,0.4)' }
+                    { label: 'คะแนนได้', data: radarScores, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.15)', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#f59e0b', pointHoverBackgroundColor: '#fff', borderJoinStyle: 'round' },
+                    { label: 'คะแนนเต็ม', data: radarMax, borderColor: 'rgba(99,102,241,0.3)', backgroundColor: 'rgba(99,102,241,0.04)', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 3, pointBackgroundColor: 'rgba(99,102,241,0.4)' }
                 ]
             },
             options: {
@@ -330,7 +397,7 @@ function renderTPSChartsFromData(catMap, totalScore, totalMax) {
         ltChart('tps_barScore', 'bar', {
             labels: barLabels,
             datasets: [
-                { label: 'ได้', data: barScores, backgroundColor: 'rgba(245,158,11,0.85)', borderRadius: 6, maxBarThickness: 45 },
+                { label: 'ได้', data: barScores, backgroundColor: 'rgba(245,158,11,0.85)', borderRadius: 6, maxBarThickness: 45, hoverBackgroundColor: 'rgba(245,158,11,1)' },
                 { label: 'เต็ม', data: barMaxes, backgroundColor: 'rgba(99,102,241,0.15)', borderRadius: 6, maxBarThickness: 45 }
             ]
         }, { ytick: { stepSize: 1 } });
@@ -338,7 +405,7 @@ function renderTPSChartsFromData(catMap, totalScore, totalMax) {
 }
 
 // ============================================================
-// 7. ✅ อัปเดตข้อมูลแท็บย่อย (ดึงข้อมูลให้ครบถ้วน ตามเดิม 100%)
+// 7. ✅ อัปเดตข้อมูลแท็บย่อย
 // ============================================================
 function updateTPSSubTabs(catMap, indicators) {
     updateSubTabKPIs('tps-p1', catMap.planfin.items);
@@ -379,9 +446,16 @@ function updateTPSSubTabs(catMap, indicators) {
 }
 
 // ============================================================
-// 8. ✅ วาดกราฟแท็บย่อย (จัด Layout กราฟให้สมดุลสวยงาม)
+// 8. ✅ วาดกราฟแท็บย่อย (อัปเกรด UI: Data Labels & Clean Grid)
 // ============================================================
 function renderTPSSubCharts(catMap, indicators) {
+    // 🌟 ตั้งค่าร่วมสำหรับ Tooltip และ Datalabels (ถ้าระบบมี Plugin)
+    const commonPlugins = {
+        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15 } },
+        tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: {size: 13}, bodyFont: {size: 13}, padding: 12, cornerRadius: 8 },
+        datalabels: { anchor: 'end', align: 'end', color: '#334155', font: { weight: 'bold', size: 11 }, formatter: (v) => v.toLocaleString('en-US', {maximumFractionDigits: 1}) }
+    };
+
     // 🔒 P1 กราฟบริหารแผน
     const p1Items = catMap.planfin.items;
     if (p1Items.length >= 2) {
@@ -399,12 +473,17 @@ function renderTPSSubCharts(catMap, indicators) {
                         { label: 'เกณฑ์ -5%', data: [-5, -5], type: 'line', borderColor: 'rgba(245,158,11,0.5)', borderWidth: 2, borderDash: [6, 4], pointRadius: 4, fill: false }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { mode: 'index', intersect: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    plugins: commonPlugins,
+                    scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false } }, x: { grid: { display: false, drawBorder: false } } },
+                    layout: { padding: { top: 20 } }
+                }
             });
         }
     }
 
-    // 🌟 P2 กราฟสินทรัพย์ (แยกกราฟย่อยแต่ละตัวชี้วัด จัด Layout ให้สมดุลสวยงาม)
+    // 🔒 P2 กราฟสินทรัพย์
     const p2Items = catMap.asset.items;
     if (p2Items.length > 0) {
         const origP2Canvas = document.getElementById('tps_p2bar');
@@ -417,7 +496,6 @@ function renderTPSSubCharts(catMap, indicators) {
             
             let customContainerP2 = document.createElement('div');
             customContainerP2.id = 'custom_p2_container';
-            // 🌟 จัด Grid สวยๆ ให้กล่องไม่เบียดกัน
             customContainerP2.style.display = 'grid';
             customContainerP2.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
             customContainerP2.style.gap = '16px';
@@ -442,17 +520,8 @@ function renderTPSSubCharts(catMap, indicators) {
                 if (title.includes('เจ้าหนี้') && (!ind.criteria || !ind.criteria.match(/\d+/))) limit = 180;
 
                 const wrapper = document.createElement('div');
-                // 🌟 ตกแต่ง Card กราฟให้ดูพรีเมียม
                 wrapper.style.height = '120px'; 
                 wrapper.style.width = '100%';
-                wrapper.style.backgroundColor = '#ffffff';
-                wrapper.style.borderRadius = '12px';
-                wrapper.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.05)';
-                wrapper.style.border = '1px solid #f1f5f9';
-                wrapper.style.padding = '16px';
-                wrapper.style.display = 'flex';
-                wrapper.style.flexDirection = 'column';
-                wrapper.style.justifyContent = 'center';
                 
                 const canvasId = 'p2_chart_' + index;
                 wrapper.innerHTML = `<canvas id="${canvasId}"></canvas>`;
@@ -475,12 +544,14 @@ function renderTPSSubCharts(catMap, indicators) {
                             indexAxis: 'y', 
                             plugins: { 
                                 legend: { display: false }, 
-                                tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8 } 
+                                tooltip: commonPlugins.tooltip,
+                                datalabels: { anchor: 'end', align: 'end', color: '#475569', font: { weight: 'bold' } }
                             },
                             scales: { 
-                                x: { display: true, beginAtZero: true, grid: { color: '#f1f5f9' } }, 
-                                y: { display: true, grid: { display: false } } 
-                            }
+                                x: { display: true, beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false } }, 
+                                y: { display: true, grid: { display: false, drawBorder: false } } 
+                            },
+                            layout: { padding: { right: 30 } } // กันเลขล้นขอบขวา
                         }
                     });
                 }
@@ -496,7 +567,6 @@ function renderTPSSubCharts(catMap, indicators) {
                name.startsWith('1.3.1') || name.startsWith('1.3.2') || name.startsWith('1.3.3');
     });
     
-    // 1. กราฟ Unit Cost (OPD/IPD)
     const opdItem = p3Items.find(i => (String(i.code).includes('1.3.1.1') || String(i.name).includes('ผู้ป่วยนอก') || String(i.name).toLowerCase().includes('opd')) && safeParse(i.actual) !== null);
     const ipdItem = p3Items.find(i => (String(i.code).includes('1.3.1.2') || String(i.name).includes('ผู้ป่วยใน') || String(i.name).toLowerCase().includes('ipd')) && !String(i.name).includes('ครองเตียง') && safeParse(i.actual) !== null);
     
@@ -519,11 +589,15 @@ function renderTPSSubCharts(catMap, indicators) {
                     { label: 'ค่ากลาง', data: [opdMean, ipdMean], backgroundColor: 'rgba(245,158,11,0.20)', borderRadius: 8, maxBarThickness: 50 }
                 ]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { mode: 'index', intersect: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+            options: { 
+                responsive: true, maintainAspectRatio: false, 
+                plugins: commonPlugins, 
+                scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false } }, x: { grid: { display: false, drawBorder: false } } },
+                layout: { padding: { top: 20 } }
+            }
         });
     }
 
-    // 2. กราฟต้นทุน LC/MC (แยก Card แบบสมดุล)
     const lcItem = p3Items.find(i => (String(i.code).includes('1.3.1.3') || String(i.name).toLowerCase().includes('lc') || String(i.name).includes('แรงงาน')) && safeParse(i.actual) !== null);
     const mcDrugItem = p3Items.find(i => (String(i.code).includes('1.3.1.4') || String(i.name).includes('ค่ายา') || String(i.name).includes('เวชภัณฑ์ยา')) && safeParse(i.actual) !== null);
     const mcSciItem = p3Items.find(i => (String(i.code).includes('1.3.1.5') || String(i.name).includes('วิทยาศาสตร์')) && safeParse(i.actual) !== null);
@@ -560,21 +634,15 @@ function renderTPSSubCharts(catMap, indicators) {
             const wrapper = document.createElement('div');
             wrapper.style.height = '120px'; 
             wrapper.style.width = '100%';
-            wrapper.style.backgroundColor = '#ffffff';
-            wrapper.style.borderRadius = '12px';
-            wrapper.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.05)';
-            wrapper.style.border = '1px solid #f1f5f9';
-            wrapper.style.padding = '16px';
-            wrapper.style.display = 'flex';
-            wrapper.style.flexDirection = 'column';
-            wrapper.style.justifyContent = 'center';
-            wrapper.innerHTML = `<canvas id="${id}"></canvas>`;
+            
+            const canvasId = 'p3mc_chart_' + id;
+            wrapper.innerHTML = `<canvas id="${canvasId}"></canvas>`;
             customContainer.appendChild(wrapper);
 
             const color = val <= mean ? 'rgba(16,185,129,0.85)' : 'rgba(244,63,94,0.85)';
             
             if (typeof Chart !== 'undefined') {
-                new Chart(document.getElementById(id), {
+                new Chart(document.getElementById(canvasId), {
                     type: 'bar',
                     data: {
                         labels: [title],
@@ -588,12 +656,14 @@ function renderTPSSubCharts(catMap, indicators) {
                         indexAxis: 'y', 
                         plugins: { 
                             legend: { display: false }, 
-                            tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8 } 
+                            tooltip: commonPlugins.tooltip,
+                            datalabels: { anchor: 'end', align: 'end', color: '#475569', font: { weight: 'bold' } }
                         },
                         scales: { 
-                            x: { display: true, beginAtZero: true, grid: { color: '#f1f5f9' } }, 
-                            y: { display: true, grid: { display: false } } 
-                        }
+                            x: { display: true, beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false } }, 
+                            y: { display: true, grid: { display: false, drawBorder: false } } 
+                        },
+                        layout: { padding: { right: 30 } }
                     }
                 });
             }
@@ -630,7 +700,12 @@ function renderTPSSubCharts(catMap, indicators) {
                         { label: 'ค่ากลาง', data: [omMean, roaMean], backgroundColor: 'rgba(245,158,11,0.20)', borderRadius: 8, maxBarThickness: 50 }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { mode: 'index', intersect: false } }, scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    plugins: commonPlugins, 
+                    scales: { y: { grid: { color: '#f1f5f9', drawBorder: false } }, x: { grid: { display: false, drawBorder: false } } },
+                    layout: { padding: { top: 20 } }
+                }
             });
         }
     }
@@ -652,13 +727,18 @@ function renderTPSSubCharts(catMap, indicators) {
                     { label: 'เกณฑ์ขั้นต่ำ', data: [0.80], type: 'line', borderColor: '#f59e0b', borderDash: [5,4], borderWidth: 2, fill: false }
                 ]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { mode: 'index', intersect: false } }, scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+            options: { 
+                responsive: true, maintainAspectRatio: false, 
+                plugins: commonPlugins, 
+                scales: { y: { grid: { color: '#f1f5f9', drawBorder: false } }, x: { grid: { display: false, drawBorder: false } } },
+                layout: { padding: { top: 20 } }
+            }
         });
     }
 }
 
 // ============================================================
-// 9. ฟังก์ชันเสริมวาดการ์ด KPI (จัด Layout ให้สมดุลเท่าๆ กัน)
+// 9. ฟังก์ชันเสริมวาดการ์ด KPI 
 // ============================================================
 function updateSubTabKPIs(panelId, items) {
     const panel = document.getElementById(panelId);
@@ -668,7 +748,6 @@ function updateSubTabKPIs(panelId, items) {
 
     let cards = kpiRow.querySelectorAll('.nt-kpi');
     
-    // 🌟 ระบบเพิ่มการ์ดอัตโนมัติ 
     if (items.length > cards.length && cards.length > 0) {
         const template = cards[0].cloneNode(true);
         for (let i = cards.length; i < items.length; i++) {
@@ -677,7 +756,6 @@ function updateSubTabKPIs(panelId, items) {
         cards = kpiRow.querySelectorAll('.nt-kpi'); 
     }
 
-    // 🌟 จัดเรียง Card Container ให้เป็นระเบียบ
     kpiRow.style.display = 'flex';
     kpiRow.style.flexWrap = 'wrap';
     kpiRow.style.gap = '16px';
@@ -688,11 +766,9 @@ function updateSubTabKPIs(panelId, items) {
             return;
         }
         
-        // 🌟 ปรับสมดุล Card แต่ละใบให้กระจายน้ำหนักเท่าๆ กัน
         card.style.display = 'flex';
         card.style.flex = '1 1 min(240px, 100%)';
-        card.style.margin = '0'; // ลบ margin เก่าทิ้งเพราะใช้ gap แทน
-        card.style.transition = 'transform 0.2s ease, box-shadow 0.2s ease';
+        card.style.margin = '0'; 
 
         const ind = items[i];
 
