@@ -610,8 +610,18 @@ function renderTPSSubCharts(catMap, indicators) {
                 else title = name.substring(0, 20);
 
                 let val = safeParse(ind.actual) || 0;
+                
+                // บังคับค่าเกณฑ์ (Limit) สำหรับกราฟ P2 ให้ตรงกับใน Card 100%
                 let limit = parseMean(ind, 60);
-                if (title.includes('เจ้าหนี้') && (!ind.criteria || !ind.criteria.match(/\d+/))) limit = 180;
+                if (title.includes('เจ้าหนี้')) {
+                    limit = 180;
+                } else if (title.includes('UC') || title.includes('บัตรทอง')) {
+                    limit = 60;
+                } else if (title.includes('ขรก') || title.includes('เบิกจ่ายตรง')) {
+                    limit = 60;
+                } else if (title.includes('สำรอง') || title.includes('คงคลัง') || title.includes('สินค้า')) {
+                    limit = 60;
+                }
 
                 const wrapper = document.createElement('div');
                 wrapper.style.height = '120px'; 
