@@ -181,6 +181,36 @@ function injectPremiumCSS() {
             border-radius: 999px !important;
             transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
+
+        /* -------------------------------------------
+           6. Specific Layout for 1.3 (P3) - บน 5 ล่าง 4
+        ------------------------------------------- */
+        @media (min-width: 1025px) {
+            #tps-p3 .nt-kpi-row {
+                grid-template-columns: repeat(5, 1fr) !important; /* ✨ บังคับ 5 คอลัมน์ (9 กล่องจะเรียง 5 บน 4 ล่างอัตโนมัติ) */
+                gap: 16px !important; /* ✨ ลดช่องไฟระหว่างกล่องลงเพื่อให้เรียง 5 ใบได้สบายๆ */
+            }
+            #tps-p3 .nt-kpi {
+                padding: 16px 16px 12px 16px !important; /* ✨ ลดขอบในให้มีพื้นที่แสดงข้อมูลเพิ่ม */
+                min-height: 120px !important;
+            }
+            #tps-p3 .nt-val {
+                font-size: 1.5rem !important; /* ✨ ลดขนาดตัวเลขลงให้พอดีกับกล่องที่แคบลง */
+            }
+            #tps-p3 .nt-val small {
+                font-size: 0.85rem !important;
+            }
+            #tps-p3 .nt-lbl {
+                font-size: 0.8rem !important;
+                max-width: calc(100% - 40px) !important;
+            }
+            #tps-p3 .nt-pill {
+                top: 16px !important;
+                right: 16px !important;
+                padding: 2px 6px !important;
+                font-size: 0.7rem !important;
+            }
+        }
     `;
     document.head.appendChild(style);
 }
