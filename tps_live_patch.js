@@ -1,6 +1,6 @@
 // ============================================================
 // TPS LIVE DATA PATCH (Ultimate Dribbble UI Edition)
-// ล็อคข้อมูล 100% + ปรับ Typography และ Spacing เนี๊ยบระดับ Global
+// ล็อคข้อมูล 100% + ปรับ Typography, Spacing และ Layout ระดับ Global
 // ============================================================
 
 // 🌟 1. ระบบเติมความสวยงามอัตโนมัติ (CSS Injection)
@@ -178,7 +178,6 @@ function injectPremiumCSS() {
         ------------------------------------------- */
         @media (min-width: 1025px) {
             #tps-p3 .nt-kpi-row {
-                /* 🔥 ใช้ minmax(0, 1fr) ป้องกันการ์ดขยายจนทะลักหน้าจอ */
                 grid-template-columns: repeat(5, minmax(0, 1fr)) !important; 
                 gap: 12px !important; 
             }
@@ -195,7 +194,7 @@ function injectPremiumCSS() {
             }
             #tps-p3 .nt-lbl {
                 font-size: 0.75rem !important;
-                max-width: calc(100% - 35px) !important; /* เว้นที่ให้ Pill มุมขวา */
+                max-width: calc(100% - 35px) !important;
                 min-height: 2.2em !important;
             }
             #tps-p3 .nt-pill {
@@ -204,6 +203,85 @@ function injectPremiumCSS() {
                 padding: 2px 6px !important;
                 font-size: 0.65rem !important;
             }
+        }
+
+        /* -------------------------------------------
+           7. Specific Layout for 1.3 Charts (P3 Unit vs MC)
+        ------------------------------------------- */
+        @media (min-width: 1025px) {
+            .p3-charts-row {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                gap: 24px !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                align-items: stretch !important;
+            }
+            .p3-charts-row::before, .p3-charts-row::after {
+                display: none !important; 
+            }
+            .p3-unit-col {
+                flex: 0 0 35% !important; 
+                max-width: 35% !important;
+                width: 35% !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .p3-mc-col {
+                flex: 0 0 calc(65% - 24px) !important; 
+                max-width: calc(65% - 24px) !important;
+                width: calc(65% - 24px) !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+
+        /* -------------------------------------------
+           🔥 8. Specific Layout for 2.2 (R2) - การ์ด + กราฟ ในแถวเดียวกัน
+        ------------------------------------------- */
+        #r2_super_wrapper {
+            display: grid !important;
+            grid-template-columns: 1fr !important;
+            gap: 24px !important;
+            align-items: stretch !important;
+            margin-bottom: 24px !important;
+            width: 100% !important;
+        }
+        @media (min-width: 1025px) {
+            #r2_super_wrapper {
+                grid-template-columns: 55% calc(45% - 24px) !important; /* การ์ด 55% : กราฟ 45% */
+            }
+            .r2-kpi-col .nt-kpi-row {
+                grid-template-columns: repeat(2, 1fr) !important; /* บังคับการ์ด 2 กล่องเรียงแนวนอน */
+                gap: 24px !important;
+                height: 100% !important;
+            }
+            .r2-kpi-col .nt-kpi {
+                min-height: 180px !important; /* เพิ่มความสูงให้สวยรับกับกราฟ */
+                margin: 0 !important;
+                justify-content: center !important; 
+            }
+            .r2-kpi-col .nt-val {
+                font-size: 1.6rem !important; /* ปรับขนาดให้พอดีกล่องคู่ */
+            }
+        }
+        .r2-chart-col .erp-card {
+            height: 100% !important;
+            min-height: 180px !important;
+            margin: 0 !important;
+            border-radius: 20px !important;
+            border: 1px solid rgba(226, 232, 240, 0.8) !important;
+            box-shadow: 0 4px 20px -10px rgba(15, 23, 42, 0.05) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            padding: 20px !important;
+            background: #fff !important;
+        }
+        .r2-chart-col .erp-card-body {
+            flex: 1 !important;
+            padding: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
         }
     `;
     document.head.appendChild(style);
@@ -309,7 +387,7 @@ function applyTPSLiveData(data) {
 }
 
 // ============================================================
-// 3. HELPER: จัดกลุ่ม indicators
+// 3. HEL গঠন indicators
 // ============================================================
 function buildCategoryMap(indicators) {
     const cats = {
@@ -549,7 +627,7 @@ function updateTPSSubTabs(catMap, indicators) {
         const code = String(i.code || '').trim();
         const name = String(i.name || '').trim();
         
-        // 🔥 ตัด Card หัวข้อหลักที่ไม่มีค่าจริง (1.3.1 การบริหารต้นทุน... และ 1.3.3 ผลผลิต) ออก
+        // ตัด Card หัวข้อหลักที่ไม่มีค่าจริง
         if (code === '1.3.1' || name.includes('การบริหารต้นทุนและค่าใช้')) return false;
         if (code === '1.3.3' || name.includes('ผลผลิต (PRODUCTIVITY)')) return false;
 
@@ -594,7 +672,9 @@ function renderTPSSubCharts(catMap, indicators) {
         datalabels: { anchor: 'end', align: 'end', color: '#334155', font: { weight: 'bold', size: 11 }, formatter: (v) => v.toLocaleString('en-US', {maximumFractionDigits: 1}) }
     };
 
-    // P1
+    // ----------------------------------------------------
+    // P1 (บริหารแผน)
+    // ----------------------------------------------------
     const p1Items = catMap.planfin.items;
     if (p1Items.length >= 2) {
         const revPct = Number(p1Items[0].actual) || 0;
@@ -624,7 +704,9 @@ function renderTPSSubCharts(catMap, indicators) {
         }
     }
 
-    // P2
+    // ----------------------------------------------------
+    // P2 (บริหารสินทรัพย์)
+    // ----------------------------------------------------
     const p2Items = catMap.asset.items;
     if (p2Items.length > 0) {
         const origP2Canvas = document.getElementById('tps_p2bar');
@@ -632,7 +714,6 @@ function renderTPSSubCharts(catMap, indicators) {
             origP2Canvas.style.display = 'none'; 
             let parent = origP2Canvas.parentElement;
             
-            // 🔥 ปลดล็อคความสูงเฉพาะ Card Body และตัว Card เพื่อดึง 2 กราฟที่หายไปกลับมา (ปลอดภัย 100% ไม่กวนส่วนอื่น)
             let nodeP2 = parent;
             while (nodeP2 && nodeP2.id !== 'tps-p2' && nodeP2.tagName !== 'BODY') {
                 if (nodeP2.classList.contains('erp-card-body') || nodeP2.classList.contains('erp-card') || nodeP2.className.includes('col-')) {
@@ -748,7 +829,9 @@ function renderTPSSubCharts(catMap, indicators) {
         }
     }
 
-    // P3
+    // ----------------------------------------------------
+    // P3 (ต้นทุน / การจัดการ)
+    // ----------------------------------------------------
     const p3Items = indicators.filter(i => {
         const code = String(i.code || '').trim();
         const name = String(i.name || '').trim();
@@ -772,12 +855,10 @@ function renderTPSSubCharts(catMap, indicators) {
         let p3unitCanvas = document.getElementById('tps_p3unit');
         let origMcCanvas = document.getElementById('tps_p3mc');
         
-        // 🔥 จัด Layout สัดส่วน 35% (Unit Cost) : 65% (LC/MC) อย่างปลอดภัย 100% 
         if (p3unitCanvas && origMcCanvas) {
             let leftCol = p3unitCanvas.closest('.col-md-6, .col-lg-6, [class*="col-"]');
             let rightCol = origMcCanvas.closest('.col-md-6, .col-lg-6, [class*="col-"]');
             
-            // เปลี่ยนเฉพาะเมื่อแน่ใจว่าทั้งคู่เป็น Column ที่อยู่ติดกันใน Row เดียวกันเท่านั้น
             if (leftCol && rightCol && leftCol.parentElement === rightCol.parentElement && leftCol.parentElement.classList.contains('row')) {
                 leftCol.style.setProperty('flex', '0 0 35%', 'important');
                 leftCol.style.setProperty('max-width', '35%', 'important');
@@ -786,7 +867,16 @@ function renderTPSSubCharts(catMap, indicators) {
             }
         }
 
-        // 🔥 กำหนดความสูงให้กราฟ Unit Cost ตรงๆ โดยไม่แตะ Parent
+        let nodeP3Unit = p3unitCanvas.parentElement;
+        while (nodeP3Unit && nodeP3Unit.id !== 'tps-p3' && nodeP3Unit.tagName !== 'BODY') {
+            if (nodeP3Unit.classList.contains('erp-card-body') || nodeP3Unit.classList.contains('erp-card') || nodeP3Unit.className.includes('col-')) {
+                nodeP3Unit.style.setProperty('height', 'auto', 'important');
+                nodeP3Unit.style.setProperty('max-height', 'none', 'important');
+                nodeP3Unit.style.setProperty('overflow', 'visible', 'important');
+            }
+            nodeP3Unit = nodeP3Unit.parentElement;
+        }
+
         p3unitCanvas.parentElement.style.height = '320px';
 
         new Chart(p3unitCanvas, {
@@ -798,7 +888,7 @@ function renderTPSSubCharts(catMap, indicators) {
                         label: 'รพ.เสลภูมิ', 
                         data: [opdVal, ipdVal], 
                         backgroundColor: [opdColor, ipdColor], 
-                        borderRadius: 12, // ✨ ขอบมนด้านบนสวยๆ
+                        borderRadius: 12,
                         borderSkipped: 'bottom',
                         maxBarThickness: 60,
                         barPercentage: 0.6
@@ -806,7 +896,7 @@ function renderTPSSubCharts(catMap, indicators) {
                     { 
                         label: 'ค่ากลาง', 
                         data: [opdMean, ipdMean], 
-                        backgroundColor: 'rgba(245,158,11,0.18)', // ✨ สีซอฟต์ลง
+                        backgroundColor: 'rgba(245,158,11,0.18)', 
                         borderRadius: 12,
                         borderSkipped: 'bottom',
                         maxBarThickness: 60,
@@ -863,23 +953,26 @@ function renderTPSSubCharts(catMap, indicators) {
         origMcCanvas.style.display = 'none'; 
         let parent = origMcCanvas.parentElement;
 
-        // 🔥 ปลดล็อคความสูงเฉพาะ Card Body ไม่ทะลุออกไปกวน Dashboard
-        let cardBodyP3 = parent.closest('.erp-card-body');
-        if (cardBodyP3) {
-            cardBodyP3.style.setProperty('height', 'auto', 'important');
-            cardBodyP3.style.setProperty('max-height', 'none', 'important');
-            cardBodyP3.style.setProperty('overflow', 'visible', 'important');
+        let nodeP3 = parent;
+        while (nodeP3 && nodeP3.id !== 'tps-p3' && nodeP3.tagName !== 'BODY') {
+            if (nodeP3.classList.contains('erp-card-body') || nodeP3.classList.contains('erp-card') || nodeP3.className.includes('col-')) {
+                nodeP3.style.setProperty('height', 'auto', 'important');
+                nodeP3.style.setProperty('max-height', 'none', 'important');
+                nodeP3.style.setProperty('overflow', 'visible', 'important');
+            }
+            nodeP3 = nodeP3.parentElement;
         }
         
         let customContainer = document.createElement('div');
         customContainer.id = 'custom_mc_container';
         customContainer.style.width = '100%';
         customContainer.style.marginTop = '0px'; 
+        customContainer.style.paddingBottom = '20px';
         parent.appendChild(customContainer);
 
         const createBar = (id, title, val, mean) => {
             const wrapper = document.createElement('div');
-            wrapper.style.height = '145px'; // ✨ ย่อลงมาเล็กน้อย เพื่อให้ 4 กราฟ (2 แถว) รวมกันความสูงเท่ากับกราฟ Unit Cost พอดี
+            wrapper.style.height = '145px'; 
             wrapper.style.width = '100%';
             wrapper.style.position = 'relative';
             
@@ -944,20 +1037,21 @@ function renderTPSSubCharts(catMap, indicators) {
                                 ticks: { color: '#334155', font: { weight: '700', size: 12 }, padding: 12 } 
                             } 
                         },
-                        layout: { padding: { right: 50, top: 15, bottom: 15, left: 15 } } // ✨ ถ่างด้านซ้าย 15px ป้องกันข้อความชิดขอบตกกรอบ
+                        layout: { padding: { right: 50, top: 15, bottom: 15, left: 10 } } 
                     }
                 });
             }
         };
 
-        // 🔥 เอาตัวเลข 1.3 ออกทั้งหมด และคงชื่อให้กระชับ
         createBar('mc_chart_1', 'LC ค่าแรงบุคลากร', lcVal, lcMean);
         createBar('mc_chart_2', 'MC ค่ายา', mcDrugVal, mcDrugMean);
         createBar('mc_chart_3', 'MC ค่าวัสดุวิทย์ฯ', mcSciVal, mcSciMean);
         createBar('mc_chart_4', 'MC ค่าเวชภัณฑ์ฯ', mcMedVal, mcMedMean);
     }
 
-    // R1
+    // ----------------------------------------------------
+    // R1 (ความสามารถทำกำไร)
+    // ----------------------------------------------------
     const r1Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.1'));
     const omItem = r1Items.find(i => (String(i.code).includes('2.1.1') || String(i.name).toLowerCase().includes('om') || String(i.name).includes('ดำเนินงาน')) && safeParse(i.actual) !== null);
     const roaItem = r1Items.find(i => (String(i.code).includes('2.1.2') || String(i.name).toLowerCase().includes('roa') || String(i.name).includes('สินทรัพย์')) && safeParse(i.actual) !== null);
@@ -995,7 +1089,9 @@ function renderTPSSubCharts(catMap, indicators) {
         }
     }
 
-    // R2
+    // ----------------------------------------------------
+    // 🔥 R2 (สภาพคล่อง) - จัดเรียง 2 การ์ดและกราฟในแถวเดียวกัน 🔥
+    // ----------------------------------------------------
     const r2Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.2'));
     const r2Valid = r2Items.filter(i => i.actual !== null || i.unit !== '');
     const cashItem = r2Valid.find(i => (String(i.name).toLowerCase().includes('cash') || String(i.name).includes('สภาพคล่อง')) && safeParse(i.actual) !== null);
@@ -1003,23 +1099,65 @@ function renderTPSSubCharts(catMap, indicators) {
     
     if(typeof destroyChart === 'function') destroyChart('tps_r2bar');
     if (typeof Chart !== 'undefined' && document.getElementById('tps_r2bar')) {
+        let r2Canvas = document.getElementById('tps_r2bar');
+        let r2Panel = document.getElementById('tps-r2');
+        
+        if (r2Canvas && r2Panel) {
+            // สร้าง Grid wrapper เพื่อดึงเอา การ์ด 2 กล่อง + กราฟ มาเรียงแนวนอน
+            let wrapper = document.getElementById('r2_super_wrapper');
+            if (!wrapper) {
+                wrapper = document.createElement('div');
+                wrapper.id = 'r2_super_wrapper';
+                
+                let kpiRow = r2Panel.querySelector('.nt-kpi-row');
+                let chartCard = r2Canvas.closest('.erp-card');
+                
+                if (kpiRow && chartCard) {
+                    let kpiWrapper = document.createElement('div');
+                    kpiWrapper.className = 'r2-kpi-col';
+                    kpiWrapper.appendChild(kpiRow);
+                    
+                    let chartWrapper = document.createElement('div');
+                    chartWrapper.className = 'r2-chart-col';
+                    chartWrapper.appendChild(chartCard);
+                    
+                    wrapper.appendChild(kpiWrapper);
+                    wrapper.appendChild(chartWrapper);
+                    
+                    r2Panel.insertBefore(wrapper, r2Panel.firstChild);
+                }
+            }
+            
+            // ตั้งค่ากล่องกราฟให้ยืดความสูงพอดีรับกับการ์ดคู่
+            r2Canvas.parentElement.style.setProperty('height', '150px', 'important');
+            r2Canvas.parentElement.style.setProperty('flex', '1', 'important');
+        }
+
         new Chart(document.getElementById('tps_r2bar'), {
             type: 'bar',
             data: {
                 labels: ['Cash Ratio'],
                 datasets: [
-                    { label: 'ค่า', data: [cashVal], backgroundColor: cashVal >= 0.8 ? 'rgba(16,185,129,0.85)' : 'rgba(244,63,94,0.85)', borderRadius: 8, maxBarThickness: 50 },
+                    { label: 'ค่า', data: [cashVal], backgroundColor: cashVal >= 0.8 ? 'rgba(16,185,129,0.85)' : 'rgba(244,63,94,0.85)', borderRadius: 100, borderSkipped: false, maxBarThickness: 32, barPercentage: 0.5, categoryPercentage: 0.7 },
                     { label: 'เกณฑ์ขั้นต่ำ', data: [0.80], type: 'line', borderColor: '#f59e0b', borderDash: [5,4], borderWidth: 2, fill: false }
                 ]
             },
             options: { 
                 responsive: true, maintainAspectRatio: false, 
-                plugins: commonPlugins, 
+                indexAxis: 'y', /* 🔥 เปลี่ยนกราฟเป็นแนวนอน ให้เข้ากับการจัดพื้นที่แนวยาว */
+                plugins: {
+                    legend: { display: false },
+                    tooltip: commonPlugins.tooltip,
+                    datalabels: { 
+                        anchor: 'end', align: 'end', offset: 12, 
+                        color: '#1e293b', font: { weight: '800', size: 14 } 
+                    }
+                }, 
                 scales: { 
-                    y: { grid: { color: 'rgba(241, 245, 249, 0.8)', drawBorder: false, borderDash: [5, 5] }, ticks: { color: '#94a3b8', font: { size: 11 } } }, 
-                    x: { grid: { display: false, drawBorder: false }, ticks: { color: '#64748b', font: { weight: '500' } } } 
+                    x: { beginAtZero: true, grid: { color: 'rgba(226, 232, 240, 0.6)', drawBorder: false, borderDash: [4, 4] }, ticks: { color: '#94a3b8', font: { size: 11 }, padding: 8 } }, 
+                    y: { grid: { display: false, drawBorder: false }, ticks: { color: '#334155', font: { weight: '700', size: 12 }, padding: 12 } } 
                 },
-                layout: { padding: { top: 20 } }
+                layout: { padding: { right: 60, top: 10, bottom: 10, left: 10 } }
             }
         });
     }
