@@ -1311,85 +1311,77 @@ function upgradeAlertBanners(panelId, items) {
 
     // หน่วงเวลาเล็กน้อยเพื่อให้หน้าจอเดิมรันเสร็จก่อน แล้วเราค่อยเข้าไปแปลงโฉม
     setTimeout(() => {
-        const divs = panel.querySelectorAll('div');
-        divs.forEach(div => {
-            const text = div.textContent;
-            // สแกนหากล่องที่มีคำเตือนต่างๆ และเป็นกล่องระดับชั้นในสุด
-            if ((text.includes('⚠') || text.includes('ไม่ผ่าน') || text.includes('เกินเกณฑ์')) && div.children.length <= 2) {
-                
-                if (div.classList.contains('premium-alert')) return; // ข้ามถ้าทำไปแล้ว
-                
-                let targetDiv = div.closest('.alert') || div;
-                if (targetDiv.classList.contains('premium-alert')) return;
-
-                let score = 0;
-                let maxScore = 0;
-                let worstItem = null;
-                let maxOverLimit = -9999;
-
-                // คำนวณจากข้อมูลจริงในปัจจุบัน
-                items.forEach(ind => {
-                    score += Number(ind.score) || 0;
-                    maxScore += Number(ind.maxScore) || 0;
-
-                    let name = String(ind.name || ind.code);
-                    let val = safeParse(ind.actual);
-                    
-                    if (val !== null) {
-                        let limit = parseMean(ind, 60);
-                        if (panelId === 'tps-p2') {
-                            if (name.includes('เจ้าหนี้') || name.startsWith('1.2.1')) limit = 180;
-                            else if (name.toUpperCase().includes('UC') || name.startsWith('1.2.2')) limit = 60;
-                            else if (name.includes('ขรก') || name.includes('ข้าราชการ') || name.startsWith('1.2.3')) limit = 60;
-                            else if (name.includes('คงคลัง') || name.includes('สินค้า') || name.startsWith('1.2.4')) limit = 60;
-                        }
-
-                        let isBad = false;
-                        let diff = 0;
-                        if (panelId === 'tps-p2' || panelId === 'tps-p3') {
-                            if (val > limit) { isBad = true; diff = val - limit; }
-                        } else {
-                            if (val < limit) { isBad = true; diff = limit - val; }
-                        }
-
-                        if (isBad && diff > maxOverLimit) {
-                            maxOverLimit = diff;
-                            worstItem = { ind, val, limit, name };
-                        }
-                    }
-                });
-
-                // วาดกล่องแจ้งเตือนใหม่สไตล์ Dribbble
-                if (score >= maxScore && maxScore > 0) {
-                    targetDiv.className = 'premium-alert success';
-                    targetDiv.innerHTML = `<span class="icon">✨</span> <div><strong>ยอดเยี่ยม!</strong> ผ่านเกณฑ์ทุกตัวชี้วัด (${score}/${maxScore} คะแนน)</div>`;
-                } else if (worstItem) {
-                    let title = worstItem.name;
-                    if (panelId === 'tps-p2') {
-                        if(title.startsWith('1.2.1') || title.includes('เจ้าหนี้')) title = 'ระยะเวลาชำระเจ้าหนี้การค้า';
-                        else if(title.startsWith('1.2.2') || title.toUpperCase().includes('UC') || title.includes('บัตรทอง')) title = 'ระยะเรียกเก็บหนี้สิทธิ UC';
-                        else if(title.startsWith('1.2.3') || title.includes('ขรก') || title.includes('ข้าราชการ')) title = 'ระยะเรียกเก็บหนี้สิทธิ OFC';
-                        else if(title.startsWith('1.2.4') || title.includes('คงคลัง') || title.includes('สินค้า')) title = 'การบริหารสินคงคลัง';
-                    } else if (panelId === 'tps-p3') {
-                        if(title.startsWith('1.3.1.3') || title.includes('LC')) title = 'LC ค่าแรงบุคลากร';
-                        else if(title.startsWith('1.3.1.4') || title.includes('ค่ายา')) title = 'MC ค่ายา';
-                        else if(title.startsWith('1.3.1.5') || title.includes('วิทย์')) title = 'MC ค่าวัสดุวิทย์ฯ';
-                        else if(title.startsWith('1.3.1.6') || title.includes('เวชภัณฑ์')) title = 'MC ค่าเวชภัณฑ์ฯ';
-                    }
-
-                    targetDiv.className = 'premium-alert danger';
-                    let unitStr = worstItem.ind.unit ? worstItem.ind.unit : 'วัน';
-                    if (panelId === 'tps-p2') unitStr = 'วัน';
-
-                    // ดึงค่าจริงจาก Array มารายงาน ป้องกันตัวเลขเพี้ยน 100%
-                    targetDiv.innerHTML = `<span class="icon">🚨</span> <div><strong>ไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน):</strong> ${title} พบค่า <b>${worstItem.val} ${unitStr}</b> (เกินเกณฑ์ที่ ${worstItem.limit} ${unitStr})</div>`;
-                } else {
-                    targetDiv.className = 'premium-alert warn';
-                    targetDiv.innerHTML = `<span class="icon">⚠️</span> <div><strong>แจ้งเตือน:</strong> มีบางตัวชี้วัดไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน)</div>`;
+        const allDivs = panel.querySelectorAll('div');
+        let targetDiv = null;
+        
+        // ค้นหากล่อง Alert เดิมที่มาจากระบบหลังบ้าน
+        for (let i = 0; i < allDivs.length; i++) {
+            let text = allDivs[i].textContent;
+            if ((text.includes('⚠') || text.includes('ไม่ผ่าน') || text.includes('เกินเกณฑ์') || text.includes('ต่ำกว่าเกณฑ์')) && allDivs[i].children.length <= 2) {
+                if (!allDivs[i].classList.contains('premium-alert') && !allDivs[i].classList.contains('nt-pill') && !allDivs[i].classList.contains('nt-lbl')) {
+                    targetDiv = allDivs[i].closest('.alert') || allDivs[i];
+                    break;
                 }
             }
+        }
+
+        if (!targetDiv || targetDiv.classList.contains('premium-alert')) return;
+
+        let score = 0;
+        let maxScore = 0;
+        let failedItems = [];
+
+        // 🔥 เลิกคำนวณเอง ใช้ผลคะแนน (Score vs MaxScore) ที่เซิร์ฟเวอร์ประเมินมาแล้ว การันตีความแม่นยำ 100%
+        items.forEach(ind => {
+            let s = Number(ind.score) || 0;
+            let ms = Number(ind.maxScore) || 0;
+            score += s;
+            maxScore += ms;
+
+            if (ms > 0 && s < ms) {
+                failedItems.push(ind);
+            }
         });
-    }, 200);
+
+        // วาดกล่องแจ้งเตือนใหม่สไตล์ Dribbble
+        if (score >= maxScore && maxScore > 0) {
+            targetDiv.className = 'premium-alert success';
+            targetDiv.innerHTML = `<span class="icon">✨</span> <div><strong>ยอดเยี่ยม!</strong> ผ่านเกณฑ์ทุกตัวชี้วัด (${score}/${maxScore} คะแนน)</div>`;
+        } else if (failedItems.length > 0) {
+            // ดึงตัวที่ไม่ผ่านรายการแรกมาแสดงผล
+            let worstItem = failedItems[0];
+            let title = String(worstItem.name || worstItem.code);
+            let nameUpper = title.toUpperCase();
+
+            // ปรับชื่อให้สวยงามตรงกับการ์ดเป๊ะๆ
+            if (panelId === 'tps-p2') {
+                if(title.startsWith('1.2.1') || title.includes('เจ้าหนี้')) title = 'ระยะเวลาชำระเจ้าหนี้การค้า';
+                else if(title.startsWith('1.2.2') || nameUpper.includes('UC') || title.includes('บัตรทอง')) title = 'ระยะเรียกเก็บหนี้สิทธิ UC';
+                else if(title.startsWith('1.2.3') || title.includes('ขรก') || title.includes('ข้าราชการ') || title.includes('เบิกจ่ายตรง')) title = 'ระยะเรียกเก็บหนี้สิทธิ OFC';
+                else if(title.startsWith('1.2.4') || title.includes('คงคลัง') || title.includes('สินค้า') || nameUpper.includes('INVENTORY')) title = 'การบริหารสินคงคลัง';
+            } else if (panelId === 'tps-p3') {
+                if(title.startsWith('1.3.1.3') || title.includes('LC') || title.includes('แรงงาน')) title = 'LC ค่าแรงบุคลากร';
+                else if(title.startsWith('1.3.1.4') || title.includes('ค่ายา')) title = 'MC ค่ายา';
+                else if(title.startsWith('1.3.1.5') || title.includes('วิทย์')) title = 'MC ค่าวัสดุวิทย์ฯ';
+                else if(title.startsWith('1.3.1.6') || title.includes('เวชภัณฑ์')) title = 'MC ค่าเวชภัณฑ์ฯ';
+                else if(title.startsWith('1.3.1.1') || nameUpper.includes('OPD')) title = 'UNIT COST FOR OP';
+                else if(title.startsWith('1.3.1.2') || nameUpper.includes('IPD')) title = 'UNIT COST FOR IP';
+            } else {
+                title = title.replace(/^([\d\.]+\s)/, ''); // ตัดรหัสข้อออก
+            }
+
+            let actNum = safeParse(worstItem.actual);
+            let valStr = actNum !== null ? actNum.toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
+            let unitStr = worstItem.unit ? worstItem.unit : '';
+            if (panelId === 'tps-p2') unitStr = 'วัน';
+
+            targetDiv.className = 'premium-alert danger';
+            targetDiv.innerHTML = `<span class="icon">🚨</span> <div><strong>ไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน):</strong> ${title} พบค่า <b>${valStr} ${unitStr}</b> <span style="opacity:0.8; font-size:0.95em;">(${worstItem.criteria || 'ต่ำ/สูงกว่าเกณฑ์'})</span></div>`;
+        } else {
+            targetDiv.className = 'premium-alert warn';
+            targetDiv.innerHTML = `<span class="icon">⚠️</span> <div><strong>แจ้งเตือน:</strong> มีบางตัวชี้วัดต้องตรวจสอบ (${score}/${maxScore} คะแนน)</div>`;
+        }
+    }, 300);
 }
 
 function updateERPOverviewTPS(totalScore, totalMax, grade, gi, catMap) {
