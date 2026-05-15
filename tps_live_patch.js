@@ -285,7 +285,7 @@ function injectPremiumCSS() {
         }
 
         /* -------------------------------------------
-           🔥 9. Safe Height Unlockers (ป้องกันกล่องแม่ตัดกราฟ)
+           9. Safe Height Unlockers (ป้องกันกล่องแม่ตัดกราฟ)
         ------------------------------------------- */
         .safe-unlock-card {
             display: flex !important;
@@ -301,6 +301,54 @@ function injectPremiumCSS() {
             max-height: none !important;
             overflow: visible !important;
             padding-bottom: 24px !important; 
+        }
+
+        /* -------------------------------------------
+           🔥 10. Premium Alert Banners (กล่องแจ้งเตือนระดับโลก)
+        ------------------------------------------- */
+        .premium-alert {
+            display: flex !important;
+            align-items: center !important;
+            gap: 16px !important;
+            padding: 16px 24px !important;
+            border-radius: 16px !important;
+            margin-bottom: 24px !important;
+            font-size: 0.95rem !important;
+            font-weight: 500 !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04) !important;
+            border: 1px solid transparent !important;
+            width: 100% !important;
+            animation: slideInPremium 0.4s ease-out forwards !important;
+        }
+        @keyframes slideInPremium {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .premium-alert .icon {
+            font-size: 1.4rem !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        .premium-alert.danger {
+            background: #fff1f2 !important; /* Soft Red */
+            color: #9f1239 !important;
+            border-color: #fecdd3 !important;
+        }
+        .premium-alert.danger b {
+            color: #e11d48 !important;
+            font-weight: 800 !important;
+            font-size: 1.05em !important;
+        }
+        .premium-alert.warn {
+            background: #fffbeb !important; /* Soft Amber */
+            color: #92400e !important;
+            border-color: #fde68a !important;
+        }
+        .premium-alert.success {
+            background: #f0fdf4 !important; /* Soft Green */
+            color: #166534 !important;
+            border-color: #bbf7d0 !important;
         }
     `;
     document.head.appendChild(style);
@@ -679,6 +727,13 @@ function updateTPSSubTabs(catMap, indicators) {
         }
         updateSubTabKPIs('tps-fin', uniqueFinItems);
     }
+
+    // 🔥 สั่งคำนวณและอัปเกรด Alert Banner ใหม่ (ดึงข้อมูลให้ตรง 100%)
+    upgradeAlertBanners('tps-p1', catMap.planfin.items);
+    upgradeAlertBanners('tps-p2', catMap.asset.items);
+    upgradeAlertBanners('tps-p3', p3Items);
+    upgradeAlertBanners('tps-r1', r1Valid);
+    upgradeAlertBanners('tps-r2', r2Valid);
 }
 
 // ============================================================
@@ -1245,6 +1300,96 @@ function updateSubTabKPIs(panelId, items) {
             card.className = 'nt-kpi c-blue'; 
         }
     });
+}
+
+// ============================================================
+// 🔥 10. ฟังก์ชันสแกนและซ่อมแซมกล่องแจ้งเตือนระดับโลก
+// ============================================================
+function upgradeAlertBanners(panelId, items) {
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+
+    // หน่วงเวลาเล็กน้อยเพื่อให้หน้าจอเดิมรันเสร็จก่อน แล้วเราค่อยเข้าไปแปลงโฉม
+    setTimeout(() => {
+        const divs = panel.querySelectorAll('div');
+        divs.forEach(div => {
+            const text = div.textContent;
+            // สแกนหากล่องที่มีคำเตือนต่างๆ และเป็นกล่องระดับชั้นในสุด
+            if ((text.includes('⚠') || text.includes('ไม่ผ่าน') || text.includes('เกินเกณฑ์')) && div.children.length <= 2) {
+                
+                if (div.classList.contains('premium-alert')) return; // ข้ามถ้าทำไปแล้ว
+                
+                let targetDiv = div.closest('.alert') || div;
+                if (targetDiv.classList.contains('premium-alert')) return;
+
+                let score = 0;
+                let maxScore = 0;
+                let worstItem = null;
+                let maxOverLimit = -9999;
+
+                // คำนวณจากข้อมูลจริงในปัจจุบัน
+                items.forEach(ind => {
+                    score += Number(ind.score) || 0;
+                    maxScore += Number(ind.maxScore) || 0;
+
+                    let name = String(ind.name || ind.code);
+                    let val = safeParse(ind.actual);
+                    
+                    if (val !== null) {
+                        let limit = parseMean(ind, 60);
+                        if (panelId === 'tps-p2') {
+                            if (name.includes('เจ้าหนี้') || name.startsWith('1.2.1')) limit = 180;
+                            else if (name.toUpperCase().includes('UC') || name.startsWith('1.2.2')) limit = 60;
+                            else if (name.includes('ขรก') || name.includes('ข้าราชการ') || name.startsWith('1.2.3')) limit = 60;
+                            else if (name.includes('คงคลัง') || name.includes('สินค้า') || name.startsWith('1.2.4')) limit = 60;
+                        }
+
+                        let isBad = false;
+                        let diff = 0;
+                        if (panelId === 'tps-p2' || panelId === 'tps-p3') {
+                            if (val > limit) { isBad = true; diff = val - limit; }
+                        } else {
+                            if (val < limit) { isBad = true; diff = limit - val; }
+                        }
+
+                        if (isBad && diff > maxOverLimit) {
+                            maxOverLimit = diff;
+                            worstItem = { ind, val, limit, name };
+                        }
+                    }
+                });
+
+                // วาดกล่องแจ้งเตือนใหม่สไตล์ Dribbble
+                if (score >= maxScore && maxScore > 0) {
+                    targetDiv.className = 'premium-alert success';
+                    targetDiv.innerHTML = `<span class="icon">✨</span> <div><strong>ยอดเยี่ยม!</strong> ผ่านเกณฑ์ทุกตัวชี้วัด (${score}/${maxScore} คะแนน)</div>`;
+                } else if (worstItem) {
+                    let title = worstItem.name;
+                    if (panelId === 'tps-p2') {
+                        if(title.startsWith('1.2.1') || title.includes('เจ้าหนี้')) title = 'ระยะเวลาชำระเจ้าหนี้การค้า';
+                        else if(title.startsWith('1.2.2') || title.toUpperCase().includes('UC') || title.includes('บัตรทอง')) title = 'ระยะเรียกเก็บหนี้สิทธิ UC';
+                        else if(title.startsWith('1.2.3') || title.includes('ขรก') || title.includes('ข้าราชการ')) title = 'ระยะเรียกเก็บหนี้สิทธิ OFC';
+                        else if(title.startsWith('1.2.4') || title.includes('คงคลัง') || title.includes('สินค้า')) title = 'การบริหารสินคงคลัง';
+                    } else if (panelId === 'tps-p3') {
+                        if(title.startsWith('1.3.1.3') || title.includes('LC')) title = 'LC ค่าแรงบุคลากร';
+                        else if(title.startsWith('1.3.1.4') || title.includes('ค่ายา')) title = 'MC ค่ายา';
+                        else if(title.startsWith('1.3.1.5') || title.includes('วิทย์')) title = 'MC ค่าวัสดุวิทย์ฯ';
+                        else if(title.startsWith('1.3.1.6') || title.includes('เวชภัณฑ์')) title = 'MC ค่าเวชภัณฑ์ฯ';
+                    }
+
+                    targetDiv.className = 'premium-alert danger';
+                    let unitStr = worstItem.ind.unit ? worstItem.ind.unit : 'วัน';
+                    if (panelId === 'tps-p2') unitStr = 'วัน';
+
+                    // ดึงค่าจริงจาก Array มารายงาน ป้องกันตัวเลขเพี้ยน 100%
+                    targetDiv.innerHTML = `<span class="icon">🚨</span> <div><strong>ไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน):</strong> ${title} พบค่า <b>${worstItem.val} ${unitStr}</b> (เกินเกณฑ์ที่ ${worstItem.limit} ${unitStr})</div>`;
+                } else {
+                    targetDiv.className = 'premium-alert warn';
+                    targetDiv.innerHTML = `<span class="icon">⚠️</span> <div><strong>แจ้งเตือน:</strong> มีบางตัวชี้วัดไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน)</div>`;
+                }
+            }
+        });
+    }, 200);
 }
 
 function updateERPOverviewTPS(totalScore, totalMax, grade, gi, catMap) {
