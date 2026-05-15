@@ -237,7 +237,7 @@ function injectPremiumCSS() {
         }
 
         /* -------------------------------------------
-           🔥 8. Specific Layout for 2.2 (R2) - การ์ด + กราฟ ในแถวเดียวกัน
+           8. Specific Layout for 2.2 (R2) - การ์ด + กราฟ ในแถวเดียวกัน
         ------------------------------------------- */
         #r2_super_wrapper {
             display: grid !important;
@@ -249,20 +249,20 @@ function injectPremiumCSS() {
         }
         @media (min-width: 1025px) {
             #r2_super_wrapper {
-                grid-template-columns: 55% calc(45% - 24px) !important; /* การ์ด 55% : กราฟ 45% */
+                grid-template-columns: 55% calc(45% - 24px) !important; 
             }
             .r2-kpi-col .nt-kpi-row {
-                grid-template-columns: repeat(2, 1fr) !important; /* บังคับการ์ด 2 กล่องเรียงแนวนอน */
+                grid-template-columns: repeat(2, 1fr) !important; 
                 gap: 24px !important;
                 height: 100% !important;
             }
             .r2-kpi-col .nt-kpi {
-                min-height: 180px !important; /* เพิ่มความสูงให้สวยรับกับกราฟ */
+                min-height: 180px !important; 
                 margin: 0 !important;
                 justify-content: center !important; 
             }
             .r2-kpi-col .nt-val {
-                font-size: 1.6rem !important; /* ปรับขนาดให้พอดีกล่องคู่ */
+                font-size: 1.6rem !important; 
             }
         }
         .r2-chart-col .erp-card {
@@ -282,6 +282,25 @@ function injectPremiumCSS() {
             padding: 0 !important;
             display: flex !important;
             flex-direction: column !important;
+        }
+
+        /* -------------------------------------------
+           🔥 9. Safe Height Unlockers (ป้องกันกล่องแม่ตัดกราฟ)
+        ------------------------------------------- */
+        .safe-unlock-card {
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100% !important;
+            max-height: none !important;
+            min-height: 100% !important;
+            overflow: visible !important;
+        }
+        .safe-unlock-body {
+            flex: 1 1 auto !important;
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+            padding-bottom: 24px !important; 
         }
     `;
     document.head.appendChild(style);
@@ -387,7 +406,7 @@ function applyTPSLiveData(data) {
 }
 
 // ============================================================
-// 3. HEL গঠন indicators
+// 3. HELPER: จัดกลุ่ม indicators
 // ============================================================
 function buildCategoryMap(indicators) {
     const cats = {
@@ -714,15 +733,11 @@ function renderTPSSubCharts(catMap, indicators) {
             origP2Canvas.style.display = 'none'; 
             let parent = origP2Canvas.parentElement;
             
-            let nodeP2 = parent;
-            while (nodeP2 && nodeP2.id !== 'tps-p2' && nodeP2.tagName !== 'BODY') {
-                if (nodeP2.classList.contains('erp-card-body') || nodeP2.classList.contains('erp-card') || nodeP2.className.includes('col-')) {
-                    nodeP2.style.setProperty('height', 'auto', 'important');
-                    nodeP2.style.setProperty('max-height', 'none', 'important');
-                    nodeP2.style.setProperty('overflow', 'visible', 'important');
-                }
-                nodeP2 = nodeP2.parentElement;
-            }
+            // 🔥 ปลดล็อคความสูงเฉพาะ Card Body และตัว Card เพื่อดึง 2 กราฟที่หายไปกลับมาอย่างปลอดภัย
+            let cBodyP2 = parent.closest('.erp-card-body');
+            let cCardP2 = parent.closest('.erp-card');
+            if(cBodyP2) cBodyP2.classList.add('safe-unlock-body');
+            if(cCardP2) cCardP2.classList.add('safe-unlock-card');
             
             let oldCustomP2 = document.getElementById('custom_p2_container');
             if (oldCustomP2) oldCustomP2.remove();
@@ -867,15 +882,11 @@ function renderTPSSubCharts(catMap, indicators) {
             }
         }
 
-        let nodeP3Unit = p3unitCanvas.parentElement;
-        while (nodeP3Unit && nodeP3Unit.id !== 'tps-p3' && nodeP3Unit.tagName !== 'BODY') {
-            if (nodeP3Unit.classList.contains('erp-card-body') || nodeP3Unit.classList.contains('erp-card') || nodeP3Unit.className.includes('col-')) {
-                nodeP3Unit.style.setProperty('height', 'auto', 'important');
-                nodeP3Unit.style.setProperty('max-height', 'none', 'important');
-                nodeP3Unit.style.setProperty('overflow', 'visible', 'important');
-            }
-            nodeP3Unit = nodeP3Unit.parentElement;
-        }
+        // 🔥 ปลดล็อคกล่องแม่เพื่อให้กราฟ Unit Cost สมบูรณ์
+        let cBodyP3Unit = p3unitCanvas.closest('.erp-card-body');
+        let cCardP3Unit = p3unitCanvas.closest('.erp-card');
+        if(cBodyP3Unit) cBodyP3Unit.classList.add('safe-unlock-body');
+        if(cCardP3Unit) cCardP3Unit.classList.add('safe-unlock-card');
 
         p3unitCanvas.parentElement.style.height = '320px';
 
@@ -953,15 +964,11 @@ function renderTPSSubCharts(catMap, indicators) {
         origMcCanvas.style.display = 'none'; 
         let parent = origMcCanvas.parentElement;
 
-        let nodeP3 = parent;
-        while (nodeP3 && nodeP3.id !== 'tps-p3' && nodeP3.tagName !== 'BODY') {
-            if (nodeP3.classList.contains('erp-card-body') || nodeP3.classList.contains('erp-card') || nodeP3.className.includes('col-')) {
-                nodeP3.style.setProperty('height', 'auto', 'important');
-                nodeP3.style.setProperty('max-height', 'none', 'important');
-                nodeP3.style.setProperty('overflow', 'visible', 'important');
-            }
-            nodeP3 = nodeP3.parentElement;
-        }
+        // 🔥 ปลดล็อคกล่องแม่เพื่อให้กราฟ MC ทั้ง 4 แสดงครบสมบูรณ์
+        let cBodyP3Mc = parent.closest('.erp-card-body');
+        let cCardP3Mc = parent.closest('.erp-card');
+        if(cBodyP3Mc) cBodyP3Mc.classList.add('safe-unlock-body');
+        if(cCardP3Mc) cCardP3Mc.classList.add('safe-unlock-card');
         
         let customContainer = document.createElement('div');
         customContainer.id = 'custom_mc_container';
@@ -1144,7 +1151,7 @@ function renderTPSSubCharts(catMap, indicators) {
             },
             options: { 
                 responsive: true, maintainAspectRatio: false, 
-                indexAxis: 'y', /* 🔥 เปลี่ยนกราฟเป็นแนวนอน ให้เข้ากับการจัดพื้นที่แนวยาว */
+                indexAxis: 'y', 
                 plugins: {
                     legend: { display: false },
                     tooltip: commonPlugins.tooltip,
