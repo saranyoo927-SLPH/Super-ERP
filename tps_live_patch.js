@@ -296,7 +296,8 @@ function injectPremiumCSS() {
         /* -------------------------------------------
            9. Safe Height Unlockers
         ------------------------------------------- */
-        .safe-unlock-card {
+        /* จำกัดขอบเขตการทำงานเฉพาะใน tps-p2 และ tps-p3 เท่านั้น */
+        #tps-p2 .safe-unlock-card, #tps-p3 .safe-unlock-card {
             display: flex !important;
             flex-direction: column !important;
             height: 100% !important;
@@ -304,7 +305,7 @@ function injectPremiumCSS() {
             min-height: 100% !important;
             overflow: visible !important;
         }
-        .safe-unlock-body {
+        #tps-p2 .safe-unlock-body, #tps-p3 .safe-unlock-body {
             flex: 1 1 auto !important;
             height: auto !important;
             max-height: none !important;
@@ -798,7 +799,6 @@ function renderTPSSubCharts(catMap, indicators) {
             origP2Canvas.style.display = 'none'; 
             let parent = origP2Canvas.parentElement;
             
-            // 🔥 ปลดล็อคความสูงเฉพาะ Card Body และตัว Card ป้องกันไปกวนแท็บอื่น
             let cBodyP2 = parent.closest('.erp-card-body');
             let cCardP2 = parent.closest('.erp-card');
             if(cBodyP2) cBodyP2.classList.add('safe-unlock-body');
@@ -947,7 +947,6 @@ function renderTPSSubCharts(catMap, indicators) {
             }
         }
 
-        // 🔥 ปลดล็อคกล่องแม่เพื่อให้กราฟ Unit Cost สมบูรณ์อย่างปลอดภัย
         let cBodyP3Unit = p3unitCanvas.closest('.erp-card-body');
         let cCardP3Unit = p3unitCanvas.closest('.erp-card');
         if(cBodyP3Unit) cBodyP3Unit.classList.add('safe-unlock-body');
@@ -1029,7 +1028,6 @@ function renderTPSSubCharts(catMap, indicators) {
         origMcCanvas.style.display = 'none'; 
         let parent = origMcCanvas.parentElement;
 
-        // 🔥 ปลดล็อคกล่องแม่เพื่อให้กราฟ MC แสดงครบ 100% อย่างปลอดภัย
         let cBodyP3Mc = parent.closest('.erp-card-body');
         let cCardP3Mc = parent.closest('.erp-card');
         if(cBodyP3Mc) cBodyP3Mc.classList.add('safe-unlock-body');
