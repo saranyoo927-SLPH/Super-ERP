@@ -1,18 +1,27 @@
 // ============================================================
-// TPS LIVE DATA PATCH (Ultimate Dribbble UI Edition)
-// ล็อคข้อมูล 100% + ปรับ Typography, Spacing และ Layout ระดับ Global
+// TPS LIVE DATA PATCH (Ultimate Dribbble UI Edition - SAFE MODE)
+// ล็อคข้อมูล 100% + ปกป้องแท็บอื่น 100% (No Global Pollution)
 // ============================================================
 
 // 🌟 1. ระบบเติมความสวยงามอัตโนมัติ (CSS Injection)
 function injectPremiumCSS() {
-    if (document.getElementById('tps-premium-style')) return;
+    if (document.getElementById('tps-premium-style')) {
+        document.getElementById('tps-premium-style').remove(); // เคลียร์ของเก่าทิ้งถ้ามี
+    }
     const style = document.createElement('style');
     style.id = 'tps-premium-style';
+    
+    // ฟังก์ชันสร้าง Prefix เฉพาะแท็บ TPS เพื่อป้องกันไม่ให้ CSS ไปกวนแท็บอื่นเด็ดขาด
+    const S = (selector) => {
+        const tabs = ['#tps-ov', '#tps-p1', '#tps-p2', '#tps-p3', '#tps-r1', '#tps-r2', '#tps-fin'];
+        return tabs.map(tab => `${tab} ${selector}`).join(',\n');
+    };
+
     style.innerHTML = `
         /* -------------------------------------------
            1. Main KPI Card - Clean, Airy & Fixed Layout
         ------------------------------------------- */
-        .nt-kpi {
+        ${S('.nt-kpi')} {
             position: relative !important;
             display: flex !important;
             flex-direction: column !important;
@@ -28,12 +37,12 @@ function injectPremiumCSS() {
             z-index: 1 !important;
         }
 
-        .nt-kpi.c-green, .nt-kpi.c-red, .nt-kpi.c-amber, .nt-kpi.c-blue {
+        ${S('.nt-kpi.c-green')}, ${S('.nt-kpi.c-red')}, ${S('.nt-kpi.c-amber')}, ${S('.nt-kpi.c-blue')} {
             border-top-color: rgba(226, 232, 240, 0.8) !important;
             border-top-width: 1px !important;
         }
 
-        .nt-kpi:hover {
+        ${S('.nt-kpi:hover')} {
             transform: translateY(-4px) !important;
             box-shadow: 0 16px 32px -12px rgba(15, 23, 42, 0.1) !important;
             border-color: rgba(203, 213, 225, 0.8) !important;
@@ -42,7 +51,7 @@ function injectPremiumCSS() {
         /* -------------------------------------------
            2. Typography & Hierarchy (ตัดคำเนี๊ยบๆ)
         ------------------------------------------- */
-        .nt-lbl {
+        ${S('.nt-lbl')} {
             color: #475569 !important;
             font-weight: 600 !important;
             font-size: 0.85rem !important; 
@@ -57,7 +66,7 @@ function injectPremiumCSS() {
             min-height: 2.5em !important; 
         }
         
-        .nt-lbl-code {
+        ${S('.nt-lbl-code')} {
             color: #94a3b8 !important;
             font-weight: 500 !important;
             font-size: 0.75rem !important; 
@@ -66,7 +75,7 @@ function injectPremiumCSS() {
             letter-spacing: 0.02em !important;
         }
 
-        .nt-val {
+        ${S('.nt-val')} {
             font-weight: 800 !important;
             font-size: 1.8rem !important; 
             color: #0f172a !important;
@@ -79,7 +88,7 @@ function injectPremiumCSS() {
             gap: 6px !important;
             line-height: 1 !important;
         }
-        .nt-val small {
+        ${S('.nt-val small')} {
             font-weight: 600 !important;
             font-size: 0.9rem !important; 
             color: #64748b !important;
@@ -89,7 +98,7 @@ function injectPremiumCSS() {
         /* -------------------------------------------
            3. Badges & Footer
         ------------------------------------------- */
-        .nt-pill {
+        ${S('.nt-pill')} {
             position: absolute !important;
             top: 24px !important;
             right: 24px !important;
@@ -103,11 +112,11 @@ function injectPremiumCSS() {
             justify-content: center !important;
             gap: 2px !important;
         }
-        .nt-pill.good { background: #ecfdf5 !important; color: #059669 !important; }
-        .nt-pill.warn { background: #fffbeb !important; color: #d97706 !important; }
-        .nt-pill.bad  { background: #fef2f2 !important; color: #dc2626 !important; }
+        ${S('.nt-pill.good')} { background: #ecfdf5 !important; color: #059669 !important; }
+        ${S('.nt-pill.warn')} { background: #fffbeb !important; color: #d97706 !important; }
+        ${S('.nt-pill.bad')}  { background: #fef2f2 !important; color: #dc2626 !important; }
 
-        .nt-foot {
+        ${S('.nt-foot')} {
             margin-top: auto !important; 
             padding-top: 0 !important;
             color: #94a3b8 !important;
@@ -118,17 +127,17 @@ function injectPremiumCSS() {
             gap: 6px !important;
         }
         
-        .nt-foot::before {
+        ${S('.nt-foot::before')} {
             content: '' !important;
             display: inline-block !important;
             width: 6px !important;
             height: 6px !important;
             border-radius: 50% !important;
         }
-        .nt-kpi.c-green .nt-foot::before { background-color: #10b981 !important; }
-        .nt-kpi.c-amber .nt-foot::before { background-color: #f59e0b !important; }
-        .nt-kpi.c-red .nt-foot::before { background-color: #ef4444 !important; }
-        .nt-kpi.c-blue .nt-foot::before { display: none !important; }
+        ${S('.nt-kpi.c-green .nt-foot::before')} { background-color: #10b981 !important; }
+        ${S('.nt-kpi.c-amber .nt-foot::before')} { background-color: #f59e0b !important; }
+        ${S('.nt-kpi.c-red .nt-foot::before')} { background-color: #ef4444 !important; }
+        ${S('.nt-kpi.c-blue .nt-foot::before')} { display: none !important; }
 
         /* -------------------------------------------
            4. Chart Containers 
@@ -163,18 +172,18 @@ function injectPremiumCSS() {
         }
 
         /* 5. Progress Bars */
-        .erp-card-body .progress-bg {
+        ${S('.erp-card-body .progress-bg')} {
             background: #f1f5f9 !important;
             border-radius: 999px !important;
             overflow: hidden !important;
         }
-        .erp-card-body .nt-score-fill {
+        ${S('.erp-card-body .nt-score-fill')} {
             border-radius: 999px !important;
             transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
 
         /* -------------------------------------------
-           6. Specific Layout for 1.3 (P3) - บน 5 ล่าง 4 (ปลอดภัย 100%)
+           6. Specific Layout for 1.3 (P3) 
         ------------------------------------------- */
         @media (min-width: 1025px) {
             #tps-p3 .nt-kpi-row {
@@ -206,7 +215,7 @@ function injectPremiumCSS() {
         }
 
         /* -------------------------------------------
-           7. Specific Layout for 1.3 Charts (P3 Unit vs MC)
+           7. Specific Layout for 1.3 Charts 
         ------------------------------------------- */
         @media (min-width: 1025px) {
             .p3-charts-row {
@@ -237,7 +246,7 @@ function injectPremiumCSS() {
         }
 
         /* -------------------------------------------
-           8. Specific Layout for 2.2 (R2) - การ์ด + กราฟ ในแถวเดียวกัน
+           8. Specific Layout for 2.2 (R2)
         ------------------------------------------- */
         #r2_super_wrapper {
             display: grid !important;
@@ -285,9 +294,10 @@ function injectPremiumCSS() {
         }
 
         /* -------------------------------------------
-           9. Safe Height Unlockers (ป้องกันกล่องแม่ตัดกราฟ)
+           9. Safe Height Unlockers
         ------------------------------------------- */
-        .safe-unlock-card {
+        /* จำกัดขอบเขตการทำงานเฉพาะใน tps-p2 และ tps-p3 เท่านั้น */
+        #tps-p2 .safe-unlock-card, #tps-p3 .safe-unlock-card {
             display: flex !important;
             flex-direction: column !important;
             height: 100% !important;
@@ -295,7 +305,7 @@ function injectPremiumCSS() {
             min-height: 100% !important;
             overflow: visible !important;
         }
-        .safe-unlock-body {
+        #tps-p2 .safe-unlock-body, #tps-p3 .safe-unlock-body {
             flex: 1 1 auto !important;
             height: auto !important;
             max-height: none !important;
@@ -304,9 +314,9 @@ function injectPremiumCSS() {
         }
 
         /* -------------------------------------------
-           🔥 10. Premium Alert Banners (กล่องแจ้งเตือนระดับโลก)
+           10. Premium Alert Banners
         ------------------------------------------- */
-        .premium-alert {
+        ${S('.premium-alert')} {
             display: flex !important;
             align-items: center !important;
             gap: 16px !important;
@@ -324,29 +334,29 @@ function injectPremiumCSS() {
             from { opacity: 0; transform: translateY(-5px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .premium-alert .icon {
+        ${S('.premium-alert .icon')} {
             font-size: 1.4rem !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
         }
-        .premium-alert.danger {
-            background: #fff1f2 !important; /* Soft Red */
+        ${S('.premium-alert.danger')} {
+            background: #fff1f2 !important; 
             color: #9f1239 !important;
             border-color: #fecdd3 !important;
         }
-        .premium-alert.danger b {
+        ${S('.premium-alert.danger b')} {
             color: #e11d48 !important;
             font-weight: 800 !important;
             font-size: 1.05em !important;
         }
-        .premium-alert.warn {
-            background: #fffbeb !important; /* Soft Amber */
+        ${S('.premium-alert.warn')} {
+            background: #fffbeb !important; 
             color: #92400e !important;
             border-color: #fde68a !important;
         }
-        .premium-alert.success {
-            background: #f0fdf4 !important; /* Soft Green */
+        ${S('.premium-alert.success')} {
+            background: #f0fdf4 !important; 
             color: #166534 !important;
             border-color: #bbf7d0 !important;
         }
@@ -357,29 +367,29 @@ function injectPremiumCSS() {
 injectPremiumCSS();
 
 // ============================================================
-// ตัวแปรและฟังก์ชันดึงข้อมูล (ล็อค 100% ห้ามแก้ไข)
+// ตัวแปรและฟังก์ชันดึงข้อมูล (เปลี่ยนเป็น var/function ป้องกันการพัง)
 // ============================================================
-let tpsLiveData = null;
+var tpsLiveData = null;
 
-const safeParse = (val) => {
+function safeParse(val) {
     if(val === null || val === undefined || val === '') return null;
     const clean = String(val).replace(/,/g, '').trim();
     const n = parseFloat(clean);
     return isNaN(n) ? null : n;
-};
+}
 
-const parseMean = (item, fallback) => {
+function parseMean(item, fallback) {
     if(!item || !item.criteria) return fallback;
     const cleanStr = String(item.criteria).replace(/,/g, '');
     const m = cleanStr.match(/(\d+(\.\d+)?)/);
     return m ? parseFloat(m[1]) : fallback;
-};
+}
 
 // ============================================================
 // 1. LOAD TPS FROM GAS WEB APP
 // ============================================================
 async function loadTPSFromGAS() {
-    if (!TPS__WEB_APP_URL) {
+    if (typeof TPS__WEB_APP_URL === 'undefined' || !TPS__WEB_APP_URL) {
         console.warn('⚠ ไม่พบลิงก์ TPS__WEB_APP_URL');
         renderTPSChartsHardcoded();
         return;
@@ -684,7 +694,7 @@ function renderTPSChartsFromData(catMap, totalScore, totalMax) {
 }
 
 // ============================================================
-// 7. ✅ อัปเดตข้อมูลแท็บย่อย
+// 7. ✅ อัปเดตข้อมูลแท็บย่อย 
 // ============================================================
 function updateTPSSubTabs(catMap, indicators) {
     updateSubTabKPIs('tps-p1', catMap.planfin.items);
@@ -712,12 +722,12 @@ function updateTPSSubTabs(catMap, indicators) {
     updateSubTabKPIs('tps-r2', r2Valid);
 
     const finPanel = document.getElementById('tps-fin');
+    const uniqueFinItems = [];
     if (finPanel && indicators) {
         const finItems = indicators.filter(i => {
             const n = String(i.name).toLowerCase();
             return n.includes('ebitda') || n.includes('nwc') || n.includes('ทุนสำรอง') || n.includes('ni') || n.includes('รายได้สูง (ต่ำ)');
         });
-        const uniqueFinItems = [];
         const finNames = new Set();
         for(const item of finItems) {
             if(!finNames.has(item.name)) {
@@ -728,12 +738,8 @@ function updateTPSSubTabs(catMap, indicators) {
         updateSubTabKPIs('tps-fin', uniqueFinItems);
     }
 
-    // 🔥 สั่งคำนวณและอัปเกรด Alert Banner ใหม่ (ดึงข้อมูลให้ตรง 100%)
-    upgradeAlertBanners('tps-p1', catMap.planfin.items);
-    upgradeAlertBanners('tps-p2', catMap.asset.items);
-    upgradeAlertBanners('tps-p3', p3Items);
-    upgradeAlertBanners('tps-r1', r1Valid);
-    upgradeAlertBanners('tps-r2', r2Valid);
+    // 🔥 สั่งคำนวณและอัปเกรด Alert Banner ใหม่ 100% 
+    upgradeAllAlertBanners(catMap, indicators);
 }
 
 // ============================================================
@@ -788,7 +794,6 @@ function renderTPSSubCharts(catMap, indicators) {
             origP2Canvas.style.display = 'none'; 
             let parent = origP2Canvas.parentElement;
             
-            // 🔥 ปลดล็อคความสูงเฉพาะ Card Body และตัว Card เพื่อดึง 2 กราฟที่หายไปกลับมาอย่างปลอดภัย
             let cBodyP2 = parent.closest('.erp-card-body');
             let cCardP2 = parent.closest('.erp-card');
             if(cBodyP2) cBodyP2.classList.add('safe-unlock-body');
@@ -915,7 +920,7 @@ function renderTPSSubCharts(catMap, indicators) {
     const opdVal = opdItem ? safeParse(opdItem.actual) : 0;
     const ipdVal = ipdItem ? safeParse(ipdItem.actual) : 0;
     const opdMean = parseMean(opdItem, 1010.51);
-    const ipdMean = parseMean(ipdItem, 16120);
+    const opdMean = parseMean(ipdItem, 16120);
 
     const opdColor = opdVal <= opdMean ? 'rgba(16,185,129,0.85)' : 'rgba(244,63,94,0.85)';
     const ipdColor = ipdVal <= ipdMean ? 'rgba(16,185,129,0.85)' : 'rgba(244,63,94,0.85)';
@@ -937,7 +942,6 @@ function renderTPSSubCharts(catMap, indicators) {
             }
         }
 
-        // 🔥 ปลดล็อคกล่องแม่เพื่อให้กราฟ Unit Cost สมบูรณ์
         let cBodyP3Unit = p3unitCanvas.closest('.erp-card-body');
         let cCardP3Unit = p3unitCanvas.closest('.erp-card');
         if(cBodyP3Unit) cBodyP3Unit.classList.add('safe-unlock-body');
@@ -1019,7 +1023,6 @@ function renderTPSSubCharts(catMap, indicators) {
         origMcCanvas.style.display = 'none'; 
         let parent = origMcCanvas.parentElement;
 
-        // 🔥 ปลดล็อคกล่องแม่เพื่อให้กราฟ MC ทั้ง 4 แสดงครบสมบูรณ์
         let cBodyP3Mc = parent.closest('.erp-card-body');
         let cCardP3Mc = parent.closest('.erp-card');
         if(cBodyP3Mc) cBodyP3Mc.classList.add('safe-unlock-body');
@@ -1152,7 +1155,7 @@ function renderTPSSubCharts(catMap, indicators) {
     }
 
     // ----------------------------------------------------
-    // 🔥 R2 (สภาพคล่อง) - จัดเรียง 2 การ์ดและกราฟในแถวเดียวกัน 🔥
+    // 🔥 R2 (สภาพคล่อง) 
     // ----------------------------------------------------
     const r2Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.2'));
     const r2Valid = r2Items.filter(i => i.actual !== null || i.unit !== '');
@@ -1165,7 +1168,6 @@ function renderTPSSubCharts(catMap, indicators) {
         let r2Panel = document.getElementById('tps-r2');
         
         if (r2Canvas && r2Panel) {
-            // สร้าง Grid wrapper เพื่อดึงเอา การ์ด 2 กล่อง + กราฟ มาเรียงแนวนอน
             let wrapper = document.getElementById('r2_super_wrapper');
             if (!wrapper) {
                 wrapper = document.createElement('div');
@@ -1190,7 +1192,6 @@ function renderTPSSubCharts(catMap, indicators) {
                 }
             }
             
-            // ตั้งค่ากล่องกราฟให้ยืดความสูงพอดีรับกับการ์ดคู่
             r2Canvas.parentElement.style.setProperty('height', '150px', 'important');
             r2Canvas.parentElement.style.setProperty('flex', '1', 'important');
         }
@@ -1226,7 +1227,7 @@ function renderTPSSubCharts(catMap, indicators) {
 }
 
 // ============================================================
-// 9. ฟังก์ชันเสริมวาดการ์ด KPI (เนี๊ยบระดับ Dribbble)
+// 9. ฟังก์ชันเสริมวาดการ์ด KPI 
 // ============================================================
 function updateSubTabKPIs(panelId, items) {
     const panel = document.getElementById(panelId);
@@ -1303,93 +1304,175 @@ function updateSubTabKPIs(panelId, items) {
 }
 
 // ============================================================
-// 🔥 10. ฟังก์ชันสแกนและซ่อมแซมกล่องแจ้งเตือนระดับโลก
+// 🔥 10. ฟังก์ชันสแกนและซ่อมแซมกล่องแจ้งเตือนระดับโลก (แม่นยำ 100%)
 // ============================================================
-function upgradeAlertBanners(panelId, items) {
-    const panel = document.getElementById(panelId);
-    if (!panel) return;
 
-    // หน่วงเวลาเล็กน้อยเพื่อให้หน้าจอเดิมรันเสร็จก่อน แล้วเราค่อยเข้าไปแปลงโฉม
-    setTimeout(() => {
-        const divs = panel.querySelectorAll('div');
-        divs.forEach(div => {
-            const text = div.textContent;
-            // สแกนหากล่องที่มีคำเตือนต่างๆ และเป็นกล่องระดับชั้นในสุด
-            if ((text.includes('⚠') || text.includes('ไม่ผ่าน') || text.includes('เกินเกณฑ์')) && div.children.length <= 2) {
-                
-                if (div.classList.contains('premium-alert')) return; // ข้ามถ้าทำไปแล้ว
-                
-                let targetDiv = div.closest('.alert') || div;
-                if (targetDiv.classList.contains('premium-alert')) return;
+function applyAggressiveAlert(panelId, alertHtml, typeClass) {
+    let counts = 0;
+    // ใช้ setInterval เพื่อให้มั่นใจว่ารันหลังจาก Original script ทำงานเสร็จ
+    let interval = setInterval(() => {
+        counts++;
+        if(counts > 10) clearInterval(interval);
 
-                let score = 0;
-                let maxScore = 0;
-                let worstItem = null;
-                let maxOverLimit = -9999;
+        const panel = document.getElementById(panelId);
+        if (!panel) return;
 
-                // คำนวณจากข้อมูลจริงในปัจจุบัน
-                items.forEach(ind => {
-                    score += Number(ind.score) || 0;
-                    maxScore += Number(ind.maxScore) || 0;
-
-                    let name = String(ind.name || ind.code);
-                    let val = safeParse(ind.actual);
-                    
-                    if (val !== null) {
-                        let limit = parseMean(ind, 60);
-                        if (panelId === 'tps-p2') {
-                            if (name.includes('เจ้าหนี้') || name.startsWith('1.2.1')) limit = 180;
-                            else if (name.toUpperCase().includes('UC') || name.startsWith('1.2.2')) limit = 60;
-                            else if (name.includes('ขรก') || name.includes('ข้าราชการ') || name.startsWith('1.2.3')) limit = 60;
-                            else if (name.includes('คงคลัง') || name.includes('สินค้า') || name.startsWith('1.2.4')) limit = 60;
-                        }
-
-                        let isBad = false;
-                        let diff = 0;
-                        if (panelId === 'tps-p2' || panelId === 'tps-p3') {
-                            if (val > limit) { isBad = true; diff = val - limit; }
-                        } else {
-                            if (val < limit) { isBad = true; diff = limit - val; }
-                        }
-
-                        if (isBad && diff > maxOverLimit) {
-                            maxOverLimit = diff;
-                            worstItem = { ind, val, limit, name };
-                        }
-                    }
-                });
-
-                // วาดกล่องแจ้งเตือนใหม่สไตล์ Dribbble
-                if (score >= maxScore && maxScore > 0) {
-                    targetDiv.className = 'premium-alert success';
-                    targetDiv.innerHTML = `<span class="icon">✨</span> <div><strong>ยอดเยี่ยม!</strong> ผ่านเกณฑ์ทุกตัวชี้วัด (${score}/${maxScore} คะแนน)</div>`;
-                } else if (worstItem) {
-                    let title = worstItem.name;
-                    if (panelId === 'tps-p2') {
-                        if(title.startsWith('1.2.1') || title.includes('เจ้าหนี้')) title = 'ระยะเวลาชำระเจ้าหนี้การค้า';
-                        else if(title.startsWith('1.2.2') || title.toUpperCase().includes('UC') || title.includes('บัตรทอง')) title = 'ระยะเรียกเก็บหนี้สิทธิ UC';
-                        else if(title.startsWith('1.2.3') || title.includes('ขรก') || title.includes('ข้าราชการ')) title = 'ระยะเรียกเก็บหนี้สิทธิ OFC';
-                        else if(title.startsWith('1.2.4') || title.includes('คงคลัง') || title.includes('สินค้า')) title = 'การบริหารสินคงคลัง';
-                    } else if (panelId === 'tps-p3') {
-                        if(title.startsWith('1.3.1.3') || title.includes('LC')) title = 'LC ค่าแรงบุคลากร';
-                        else if(title.startsWith('1.3.1.4') || title.includes('ค่ายา')) title = 'MC ค่ายา';
-                        else if(title.startsWith('1.3.1.5') || title.includes('วิทย์')) title = 'MC ค่าวัสดุวิทย์ฯ';
-                        else if(title.startsWith('1.3.1.6') || title.includes('เวชภัณฑ์')) title = 'MC ค่าเวชภัณฑ์ฯ';
-                    }
-
-                    targetDiv.className = 'premium-alert danger';
-                    let unitStr = worstItem.ind.unit ? worstItem.ind.unit : 'วัน';
-                    if (panelId === 'tps-p2') unitStr = 'วัน';
-
-                    // ดึงค่าจริงจาก Array มารายงาน ป้องกันตัวเลขเพี้ยน 100%
-                    targetDiv.innerHTML = `<span class="icon">🚨</span> <div><strong>ไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน):</strong> ${title} พบค่า <b>${worstItem.val} ${unitStr}</b> (เกินเกณฑ์ที่ ${worstItem.limit} ${unitStr})</div>`;
-                } else {
-                    targetDiv.className = 'premium-alert warn';
-                    targetDiv.innerHTML = `<span class="icon">⚠️</span> <div><strong>แจ้งเตือน:</strong> มีบางตัวชี้วัดไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน)</div>`;
-                }
-            }
+        // 1. กำจัด Alert ดั้งเดิมทิ้งให้หมด (ซ่อนอย่างสมบูรณ์)
+        const oldAlerts = panel.querySelectorAll('.alert:not(.premium-alert)');
+        oldAlerts.forEach(a => {
+            a.style.display = 'none';
+            a.style.opacity = '0';
+            a.style.position = 'absolute';
+            a.style.zIndex = '-9999';
         });
-    }, 200);
+
+        // 2. สร้าง/อัปเดต Premium Alert ของเรา
+        let pAlert = panel.querySelector('.premium-alert');
+        if (!pAlert) {
+            pAlert = document.createElement('div');
+            let kpiRow = panel.querySelector('.nt-kpi-row');
+            if (kpiRow && kpiRow.parentNode) {
+                kpiRow.parentNode.insertBefore(pAlert, kpiRow.nextSibling);
+            } else {
+                panel.prepend(pAlert);
+            }
+        }
+
+        pAlert.className = 'premium-alert ' + typeClass;
+        pAlert.innerHTML = alertHtml;
+    }, 300);
+}
+
+function upgradeAllAlertBanners(catMap, indicators) {
+    // ---- 1.1 Planfin ----
+    let p1Cat = catMap.planfin;
+    if (p1Cat && p1Cat.items && p1Cat.items.length >= 2) {
+        let s = p1Cat.score || 0;
+        let ms = p1Cat.maxScore || 0;
+        let v1 = safeParse(p1Cat.items[0].actual);
+        let v2 = safeParse(p1Cat.items[1].actual);
+        let s1 = v1 !== null ? v1.toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
+        let s2 = v2 !== null ? v2.toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
+        
+        if (s >= ms && ms > 0) {
+            applyAggressiveAlert('tps-p1', '<span class="icon">✅</span> <div><strong>ผ่านเต็ม ' + s + '/' + ms + ' คะแนน:</strong> มิติรายได้ ' + s1 + '% และมิติค่าใช้จ่าย ' + s2 + '% อยู่ในเกณฑ์ ±5% ทั้งคู่</div>', 'success');
+        } else {
+            applyAggressiveAlert('tps-p1', '<span class="icon">🚨</span> <div><strong>ไม่ผ่านเกณฑ์ (' + s + '/' + ms + ' คะแนน):</strong> มิติรายได้ ' + s1 + '% และมิติค่าใช้จ่าย ' + s2 + '% (เกณฑ์ ±5%)</div>', 'danger');
+        }
+    }
+
+    // ---- 1.2 Asset ----
+    let p2Cat = catMap.asset;
+    if (p2Cat && p2Cat.items && p2Cat.items.length > 0) {
+        let s = p2Cat.score || 0;
+        let ms = p2Cat.maxScore || 0;
+        if (s >= ms && ms > 0) {
+            applyAggressiveAlert('tps-p2', '<span class="icon">✨</span> <div><strong>ยอดเยี่ยม!</strong> ผ่านเกณฑ์การบริหารสินทรัพย์ทุกตัวชี้วัด (' + s + '/' + ms + ' คะแนน)</div>', 'success');
+        } else {
+            let worstName = '';
+            let worstVal = 0;
+            let worstDiff = -9999;
+            
+            p2Cat.items.forEach(ind => {
+                let title = String(ind.name || ind.code);
+                let nameUpper = title.toUpperCase();
+                let tName = title;
+                
+                if(title.startsWith('1.2.1') || title.includes('เจ้าหนี้')) tName = 'ระยะเวลาชำระเจ้าหนี้การค้า';
+                else if(title.startsWith('1.2.2') || nameUpper.includes('UC') || title.includes('บัตรทอง')) tName = 'ระยะเรียกเก็บหนี้สิทธิ UC';
+                else if(title.startsWith('1.2.3') || title.includes('ขรก') || title.includes('ข้าราชการ') || title.includes('เบิกจ่ายตรง')) tName = 'ระยะเรียกเก็บหนี้สิทธิ OFC';
+                else if(title.startsWith('1.2.4') || title.includes('คงคลัง') || title.includes('สินค้า') || nameUpper.includes('INVENTORY')) tName = 'การบริหารสินคงคลัง';
+                
+                let val = safeParse(ind.actual);
+                if (val !== null) {
+                    let limit = 60;
+                    if (tName.includes('เจ้าหนี้')) limit = 180;
+                    
+                    if (val > limit) {
+                        let diff = val - limit;
+                        if (diff > worstDiff) {
+                            worstDiff = diff;
+                            worstName = tName;
+                            worstVal = val;
+                        }
+                    }
+                }
+            });
+
+            let stateMsg = s === 0 ? 'ไม่ผ่านทุกตัวชี้วัด' : 'ไม่ผ่านเกณฑ์';
+            applyAggressiveAlert('tps-p2', '<span class="icon">⚠</span> <div><strong>' + stateMsg + ' ' + s + '/' + ms + ' คะแนน:</strong> ' + worstName + ' ' + worstVal + ' วัน เกินเกณฑ์มากที่สุด</div>', 'danger');
+        }
+    }
+
+    // ---- 1.3 Cost/Mgt ----
+    let p3Cat = catMap.cost;
+    if (p3Cat) {
+        let s = p3Cat.score || 0; let ms = p3Cat.maxScore || 0;
+        if (ms > 0) {
+            if (s >= ms) applyAggressiveAlert('tps-p3', '<span class="icon">✨</span> <div><strong>ยอดเยี่ยม!</strong> ผ่านเกณฑ์การบริหารจัดการ (' + s + '/' + ms + ' คะแนน)</div>', 'success');
+            else applyAggressiveAlert('tps-p3', '<span class="icon">⚠</span> <div><strong>แจ้งเตือน:</strong> มีตัวชี้วัดที่ต้องปรับปรุงในหมวดการบริหารจัดการ (' + s + '/' + ms + ' คะแนน)</div>', 'warn');
+        }
+    }
+
+    // ---- 2.1 Profit ----
+    if (catMap.profit) {
+        let s = catMap.profit.score || 0; let ms = catMap.profit.maxScore || 0;
+        if (ms > 0) {
+            if (s >= ms) applyAggressiveAlert('tps-r1', '<span class="icon">✨</span> <div><strong>ยอดเยี่ยม!</strong> ผ่านเกณฑ์ความสามารถในการทำกำไร (' + s + '/' + ms + ' คะแนน)</div>', 'success');
+            else applyAggressiveAlert('tps-r1', '<span class="icon">⚠</span> <div><strong>แจ้งเตือน:</strong> ความสามารถในการทำกำไรต่ำกว่าเกณฑ์ (' + s + '/' + ms + ' คะแนน)</div>', 'warn');
+        }
+    }
+
+    // ---- 2.2 Liquidity ----
+    if (catMap.liquidity) {
+        let s = catMap.liquidity.score || 0; let ms = catMap.liquidity.maxScore || 0;
+        if (ms > 0) {
+            if (s >= ms) applyAggressiveAlert('tps-r2', '<span class="icon">✨</span> <div><strong>ยอดเยี่ยม!</strong> สภาพคล่องอยู่ในเกณฑ์ปลอดภัย (' + s + '/' + ms + ' คะแนน)</div>', 'success');
+            else applyAggressiveAlert('tps-r2', '<span class="icon">🚨</span> <div><strong>แจ้งเตือน:</strong> สภาพคล่องทางการเงินต่ำ ควรเฝ้าระวัง (' + s + '/' + ms + ' คะแนน)</div>', 'danger');
+        }
+    }
+
+    // ---- FIN: ข้อมูลการเงิน ----
+    let ebitdaVal = 0, niVal = 0, nwcVal = 0, netMaintVal = 0, cashRatioVal = 0;
+    let ebitdaFound = false, niFound = false, nwcFound = false, netMaintFound = false, cashRatioFound = false;
+
+    indicators.forEach(ind => {
+        let n = String(ind.name).toLowerCase();
+        let val = safeParse(ind.actual);
+        if (val === null) return;
+        
+        if (n.includes('ebitda')) { ebitdaVal = val; ebitdaFound = true; }
+        else if (n === 'ni' || n.includes('รายได้สูง (ต่ำ)') || n.includes('net income')) { niVal = val; niFound = true; }
+        else if (n.includes('nwc') || n.includes('ทุนสำรอง')) { nwcVal = val; nwcFound = true; }
+        else if (n.includes('เงินบำรุง')) { netMaintVal = val; netMaintFound = true; }
+        else if (n.includes('cash ratio') || n.includes('สภาพคล่อง')) { cashRatioVal = val; cashRatioFound = true; }
+    });
+
+    const formatM = (v) => {
+        let formatted = Math.abs(v) > 10000 ? (v / 1000000).toFixed(2) : v.toFixed(2);
+        return (v > 0 ? '+' + formatted : formatted) + ' M';
+    };
+
+    let ebitdaStr = ebitdaFound ? formatM(ebitdaVal) : '-';
+    let niStr = niFound ? formatM(niVal) : '-';
+    let nwcStr = nwcFound ? formatM(nwcVal) : '-';
+    let cashRatioStr = cashRatioFound ? cashRatioVal.toFixed(2) : '-';
+    
+    let niSign = niVal >= 0 ? 'เป็นบวก' : 'ติดลบ';
+    let statusText = (cashRatioVal >= 0.8) ? 'สภาพคล่องดี' : 'สภาพคล่องตึงตัว';
+    
+    let alertClass = (cashRatioVal >= 0.8 && ebitdaVal > 0) ? 'success' : 'warn';
+    if (cashRatioVal < 0.5 || ebitdaVal < 0) alertClass = 'danger';
+    
+    let icon = alertClass === 'success' ? '📊' : alertClass === 'danger' ? '🚨' : '⚠️';
+    
+    let msg = '<span class="icon">' + icon + '</span> <div><strong>สรุปฐานะการเงินปัจจุบัน:</strong> EBITDA <b>' + ebitdaStr + '</b>, NI <b>' + niStr + '</b> ' + niSign + ' NWC <b>' + nwcStr + '</b>';
+    if (netMaintFound) {
+        msg += ' แต่เงินบำรุงสุทธิ <b>' + formatM(netMaintVal) + '</b>';
+    }
+    msg += ' และ Cash Ratio <b>' + cashRatioStr + '</b> ' + statusText + '</div>';
+
+    applyAggressiveAlert('tps-fin', msg, alertClass);
 }
 
 function updateERPOverviewTPS(totalScore, totalMax, grade, gi, catMap) {
