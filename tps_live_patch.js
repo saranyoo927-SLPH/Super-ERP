@@ -993,17 +993,17 @@ function renderTPSSubCharts(catMap, indicators) {
                                 ticks: { color: '#334155', font: { weight: '700', size: 12 }, padding: 12 } 
                             } 
                         },
-                        layout: { padding: { right: 50, top: 15, bottom: 15, left: 0 } } // ✨ ตั้ง left เป็น 0 เพื่อให้กราฟยืดไปซ้ายสุดได้เต็มที่
+                        layout: { padding: { right: 50, top: 15, bottom: 15, left: 10 } } // ✨ เผื่อพื้นที่ด้านซ้าย 10px ป้องกันตัวอักษรตกขอบ
                     }
                 });
             }
         };
 
-        // 🔥 ตัดข้อความแกน Y ให้กระชับสวยงาม ไม่เบียดกราฟ
-        createBar('mc_chart_1', '1.3.1.3 LC ค่าแรงฯ', lcVal, lcMean);
-        createBar('mc_chart_2', '1.3.1.4 MC ค่ายา', mcDrugVal, mcDrugMean);
-        createBar('mc_chart_3', '1.3.1.5 MC วัสดุวิทย์ฯ', mcSciVal, mcSciMean);
-        createBar('mc_chart_4', '1.3.1.6 MC เวชภัณฑ์ฯ', mcMedVal, mcMedMean);
+        // 🔥 ตัดข้อความแกน Y ให้กระชับสวยงาม ไม่เบียดกราฟ และเอาตัวเลข 1.3 ออกทั้งหมด
+        createBar('mc_chart_1', 'LC ค่าแรงบุคลากร', lcVal, lcMean);
+        createBar('mc_chart_2', 'MC ค่ายา', mcDrugVal, mcDrugMean);
+        createBar('mc_chart_3', 'MC ค่าวัสดุวิทย์ฯ', mcSciVal, mcSciMean);
+        createBar('mc_chart_4', 'MC ค่าเวชภัณฑ์ฯ', mcMedVal, mcMedMean);
     }
 
     // R1
