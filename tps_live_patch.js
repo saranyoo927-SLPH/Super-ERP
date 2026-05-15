@@ -694,7 +694,7 @@ function renderTPSChartsFromData(catMap, totalScore, totalMax) {
 }
 
 // ============================================================
-// 7. ✅ อัปเดตข้อมูลแท็บย่อย
+// 7. ✅ อัปเดตข้อมูลแท็บย่อย 
 // ============================================================
 function updateTPSSubTabs(catMap, indicators) {
     updateSubTabKPIs('tps-p1', catMap.planfin.items);
@@ -738,13 +738,8 @@ function updateTPSSubTabs(catMap, indicators) {
         updateSubTabKPIs('tps-fin', uniqueFinItems);
     }
 
-    // 🔥 สั่งคำนวณและอัปเกรด Alert Banner ใหม่ (ดึงข้อมูลให้ตรง 100%)
-    upgradeAlertBanners('tps-p1', catMap.planfin.items);
-    upgradeAlertBanners('tps-p2', catMap.asset.items);
-    upgradeAlertBanners('tps-p3', p3Items);
-    upgradeAlertBanners('tps-r1', r1Valid);
-    upgradeAlertBanners('tps-r2', r2Valid);
-    upgradeAlertBanners('tps-fin', uniqueFinItems);
+    // 🔥 สั่งคำนวณและอัปเกรด Alert Banner ใหม่ 100% 
+    upgradeAllAlertBanners(catMap, indicators);
 }
 
 // ============================================================
@@ -1160,7 +1155,7 @@ function renderTPSSubCharts(catMap, indicators) {
     }
 
     // ----------------------------------------------------
-    // 🔥 R2 (สภาพคล่อง) - จัดเรียง 2 การ์ดและกราฟในแถวเดียวกัน 🔥
+    // 🔥 R2 (สภาพคล่อง) 
     // ----------------------------------------------------
     const r2Items = indicators.filter(i => String(i.code || '').trim().startsWith('2.2'));
     const r2Valid = r2Items.filter(i => i.actual !== null || i.unit !== '');
@@ -1232,7 +1227,7 @@ function renderTPSSubCharts(catMap, indicators) {
 }
 
 // ============================================================
-// 9. ฟังก์ชันเสริมวาดการ์ด KPI
+// 9. ฟังก์ชันเสริมวาดการ์ด KPI 
 // ============================================================
 function updateSubTabKPIs(panelId, items) {
     const panel = document.getElementById(panelId);
@@ -1309,140 +1304,175 @@ function updateSubTabKPIs(panelId, items) {
 }
 
 // ============================================================
-// 🔥 10. ฟังก์ชันสแกนและซ่อมแซมกล่องแจ้งเตือนระดับโลก
+// 🔥 10. ฟังก์ชันสแกนและซ่อมแซมกล่องแจ้งเตือนระดับโลก (แม่นยำ 100%)
 // ============================================================
-function upgradeAlertBanners(panelId, items) {
-    const panel = document.getElementById(panelId);
-    if (!panel) return;
 
-    setTimeout(() => {
-        const allDivs = panel.querySelectorAll('div');
-        let targetDiv = null;
-        
-        for (let i = 0; i < allDivs.length; i++) {
-            let text = allDivs[i].textContent;
-            if ((text.includes('⚠') || text.includes('ไม่ผ่าน') || text.includes('เกินเกณฑ์') || text.includes('ต่ำกว่าเกณฑ์') || text.includes('ผ่านเต็ม') || text.includes('สรุปฐานะการเงิน')) && allDivs[i].children.length <= 2) {
-                if (!allDivs[i].classList.contains('premium-alert') && !allDivs[i].classList.contains('nt-pill') && !allDivs[i].classList.contains('nt-lbl')) {
-                    targetDiv = allDivs[i].closest('.alert') || allDivs[i];
-                    break;
-                }
-            }
-        }
+function applyAggressiveAlert(panelId, alertHtml, typeClass) {
+    let counts = 0;
+    // ใช้ setInterval เพื่อให้มั่นใจว่ารันหลังจาก Original script ทำงานเสร็จ
+    let interval = setInterval(() => {
+        counts++;
+        if(counts > 10) clearInterval(interval);
 
-        if (!targetDiv || targetDiv.classList.contains('premium-alert')) return;
+        const panel = document.getElementById(panelId);
+        if (!panel) return;
 
-        if (panelId === 'tps-fin') {
-            let ebitdaVal = 0, niVal = 0, nwcVal = 0, netMaintVal = 0, cashRatioVal = 0;
-            let ebitdaFound = false, niFound = false, nwcFound = false, netMaintFound = false, cashRatioFound = false;
-
-            if (tpsLiveData && tpsLiveData.indicators) {
-                tpsLiveData.indicators.forEach(ind => {
-                    let n = String(ind.name).toLowerCase();
-                    let val = safeParse(ind.actual);
-                    if (val === null) return;
-                    
-                    if (n.includes('ebitda')) { ebitdaVal = val; ebitdaFound = true; }
-                    else if (n === 'ni' || n.includes('รายได้สูง (ต่ำ)') || n.includes('net income')) { niVal = val; niFound = true; }
-                    else if (n.includes('nwc') || n.includes('ทุนสำรอง')) { nwcVal = val; nwcFound = true; }
-                    else if (n.includes('เงินบำรุง')) { netMaintVal = val; netMaintFound = true; }
-                    else if (n.includes('cash ratio') || n.includes('สภาพคล่อง')) { cashRatioVal = val; cashRatioFound = true; }
-                });
-            }
-
-            const formatM = (v) => {
-                let formatted = Math.abs(v) > 10000 ? (v / 1000000).toFixed(2) : v.toFixed(2);
-                return (v > 0 ? '+' + formatted : formatted) + ' M';
-            };
-
-            let ebitdaStr = ebitdaFound ? formatM(ebitdaVal) : '-';
-            let niStr = niFound ? formatM(niVal) : '-';
-            let nwcStr = nwcFound ? formatM(nwcVal) : '-';
-            let cashRatioStr = cashRatioFound ? cashRatioVal.toFixed(2) : '-';
-            
-            let statusText = (cashRatioVal >= 0.8) ? 'สภาพคล่องอยู่ในเกณฑ์ดี' : 'สภาพคล่องควรเฝ้าระวัง';
-            let alertClass = (cashRatioVal >= 0.8 && ebitdaVal > 0) ? 'premium-alert success' : 'premium-alert warn';
-            if (cashRatioVal < 0.5 || ebitdaVal < 0) alertClass = 'premium-alert danger';
-            
-            let icon = alertClass.includes('success') ? '✅' : alertClass.includes('danger') ? '🚨' : '⚠️';
-            
-            let netMaintPart = netMaintFound ? `เงินบำรุงสุทธิ <b>${formatM(netMaintVal)}</b>, ` : '';
-
-            targetDiv.className = alertClass;
-            targetDiv.innerHTML = `<span class="icon">${icon}</span> <div><strong>สรุปฐานะการเงินปัจจุบัน:</strong> EBITDA <b>${ebitdaStr}</b>, NI <b>${niStr}</b>, NWC <b>${nwcStr}</b>, ${netMaintPart}และ Cash Ratio <b>${cashRatioStr}</b> (${statusText})</div>`;
-            return;
-        }
-
-        let score = 0;
-        let maxScore = 0;
-        let failedItems = [];
-
-        items.forEach(ind => {
-            let s = Number(ind.score) || 0;
-            let ms = Number(ind.maxScore) || 0;
-            score += s;
-            maxScore += ms;
-
-            if (ms > 0 && s < ms) {
-                failedItems.push(ind);
-            }
+        // 1. กำจัด Alert ดั้งเดิมทิ้งให้หมด (ซ่อนอย่างสมบูรณ์)
+        const oldAlerts = panel.querySelectorAll('.alert:not(.premium-alert)');
+        oldAlerts.forEach(a => {
+            a.style.display = 'none';
+            a.style.opacity = '0';
+            a.style.position = 'absolute';
+            a.style.zIndex = '-9999';
         });
 
-        if (score >= maxScore && maxScore > 0) {
-            targetDiv.className = 'premium-alert success';
-            
-            if (panelId === 'tps-p1' && items.length >= 2) {
-                let revAct = safeParse(items[0].actual);
-                let expAct = safeParse(items[1].actual);
-                let v1 = revAct !== null ? revAct.toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
-                let v2 = expAct !== null ? expAct.toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
-                targetDiv.innerHTML = `<span class="icon">✅</span> <div><strong>ผ่านเต็ม ${score}/${maxScore} คะแนน:</strong> มิติรายได้ ${v1}% และมิติค่าใช้จ่าย ${v2}% อยู่ในเกณฑ์ ±5% ทั้งคู่</div>`;
+        // 2. สร้าง/อัปเดต Premium Alert ของเรา
+        let pAlert = panel.querySelector('.premium-alert');
+        if (!pAlert) {
+            pAlert = document.createElement('div');
+            let kpiRow = panel.querySelector('.nt-kpi-row');
+            if (kpiRow && kpiRow.parentNode) {
+                kpiRow.parentNode.insertBefore(pAlert, kpiRow.nextSibling);
             } else {
-                targetDiv.innerHTML = `<span class="icon">✨</span> <div><strong>ยอดเยี่ยม!</strong> ผ่านเกณฑ์ทุกตัวชี้วัด (${score}/${maxScore} คะแนน)</div>`;
+                panel.prepend(pAlert);
             }
-
-        } else if (failedItems.length > 0) {
-            if (panelId === 'tps-p1' && items.length >= 2) {
-                let revAct = safeParse(items[0].actual);
-                let expAct = safeParse(items[1].actual);
-                let v1 = revAct !== null ? revAct.toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
-                let v2 = expAct !== null ? expAct.toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
-                targetDiv.className = 'premium-alert danger';
-                targetDiv.innerHTML = `<span class="icon">🚨</span> <div><strong>ไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน):</strong> มิติรายได้ ${v1}% และมิติค่าใช้จ่าย ${v2}% (เกณฑ์ ±5%)</div>`;
-                return; 
-            }
-
-            let worstItem = failedItems[0];
-            let title = String(worstItem.name || worstItem.code);
-            let nameUpper = title.toUpperCase();
-
-            if (panelId === 'tps-p2') {
-                if(title.startsWith('1.2.1') || title.includes('เจ้าหนี้')) title = 'ระยะเวลาชำระเจ้าหนี้การค้า';
-                else if(title.startsWith('1.2.2') || nameUpper.includes('UC') || title.includes('บัตรทอง')) title = 'ระยะเรียกเก็บหนี้สิทธิ UC';
-                else if(title.startsWith('1.2.3') || title.includes('ขรก') || title.includes('ข้าราชการ') || title.includes('เบิกจ่ายตรง')) title = 'ระยะเรียกเก็บหนี้สิทธิ OFC';
-                else if(title.startsWith('1.2.4') || title.includes('คงคลัง') || title.includes('สินค้า') || nameUpper.includes('INVENTORY')) title = 'การบริหารสินคงคลัง';
-            } else if (panelId === 'tps-p3') {
-                if(title.startsWith('1.3.1.3') || title.includes('LC') || title.includes('แรงงาน')) title = 'LC ค่าแรงบุคลากร';
-                else if(title.startsWith('1.3.1.4') || title.includes('ค่ายา')) title = 'MC ค่ายา';
-                else if(title.startsWith('1.3.1.5') || title.includes('วิทย์')) title = 'MC ค่าวัสดุวิทย์ฯ';
-                else if(title.startsWith('1.3.1.6') || title.includes('เวชภัณฑ์')) title = 'MC ค่าเวชภัณฑ์ฯ';
-                else if(title.startsWith('1.3.1.1') || nameUpper.includes('OPD')) title = 'UNIT COST FOR OP';
-                else if(title.startsWith('1.3.1.2') || nameUpper.includes('IPD')) title = 'UNIT COST FOR IP';
-            } else {
-                title = title.replace(/^([\d\.]+\s)/, ''); 
-            }
-
-            let actNum = safeParse(worstItem.actual);
-            let valStr = actNum !== null ? actNum.toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
-            let unitStr = worstItem.unit ? worstItem.unit : '';
-            if (panelId === 'tps-p2') unitStr = 'วัน';
-
-            targetDiv.className = 'premium-alert danger';
-            targetDiv.innerHTML = `<span class="icon">🚨</span> <div><strong>ไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน):</strong> ${title} พบค่า <b>${valStr} ${unitStr}</b> <span style="opacity:0.8; font-size:0.95em;">(${worstItem.criteria || 'ต่ำ/สูงกว่าเกณฑ์'})</span></div>`;
-        } else {
-            targetDiv.className = 'premium-alert warn';
-            targetDiv.innerHTML = `<span class="icon">⚠️</span> <div><strong>แจ้งเตือน:</strong> มีบางตัวชี้วัดต้องตรวจสอบ (${score}/${maxScore} คะแนน)</div>`;
         }
+
+        pAlert.className = 'premium-alert ' + typeClass;
+        pAlert.innerHTML = alertHtml;
     }, 300);
+}
+
+function upgradeAllAlertBanners(catMap, indicators) {
+    // ---- 1.1 Planfin ----
+    let p1Cat = catMap.planfin;
+    if (p1Cat && p1Cat.items && p1Cat.items.length >= 2) {
+        let s = p1Cat.score || 0;
+        let ms = p1Cat.maxScore || 0;
+        let v1 = safeParse(p1Cat.items[0].actual);
+        let v2 = safeParse(p1Cat.items[1].actual);
+        let s1 = v1 !== null ? v1.toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
+        let s2 = v2 !== null ? v2.toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
+        
+        if (s >= ms && ms > 0) {
+            applyAggressiveAlert('tps-p1', '<span class="icon">✅</span> <div><strong>ผ่านเต็ม ' + s + '/' + ms + ' คะแนน:</strong> มิติรายได้ ' + s1 + '% และมิติค่าใช้จ่าย ' + s2 + '% อยู่ในเกณฑ์ ±5% ทั้งคู่</div>', 'success');
+        } else {
+            applyAggressiveAlert('tps-p1', '<span class="icon">🚨</span> <div><strong>ไม่ผ่านเกณฑ์ (' + s + '/' + ms + ' คะแนน):</strong> มิติรายได้ ' + s1 + '% และมิติค่าใช้จ่าย ' + s2 + '% (เกณฑ์ ±5%)</div>', 'danger');
+        }
+    }
+
+    // ---- 1.2 Asset ----
+    let p2Cat = catMap.asset;
+    if (p2Cat && p2Cat.items && p2Cat.items.length > 0) {
+        let s = p2Cat.score || 0;
+        let ms = p2Cat.maxScore || 0;
+        if (s >= ms && ms > 0) {
+            applyAggressiveAlert('tps-p2', '<span class="icon">✨</span> <div><strong>ยอดเยี่ยม!</strong> ผ่านเกณฑ์การบริหารสินทรัพย์ทุกตัวชี้วัด (' + s + '/' + ms + ' คะแนน)</div>', 'success');
+        } else {
+            let worstName = '';
+            let worstVal = 0;
+            let worstDiff = -9999;
+            
+            p2Cat.items.forEach(ind => {
+                let title = String(ind.name || ind.code);
+                let nameUpper = title.toUpperCase();
+                let tName = title;
+                
+                if(title.startsWith('1.2.1') || title.includes('เจ้าหนี้')) tName = 'ระยะเวลาชำระเจ้าหนี้การค้า';
+                else if(title.startsWith('1.2.2') || nameUpper.includes('UC') || title.includes('บัตรทอง')) tName = 'ระยะเรียกเก็บหนี้สิทธิ UC';
+                else if(title.startsWith('1.2.3') || title.includes('ขรก') || title.includes('ข้าราชการ') || title.includes('เบิกจ่ายตรง')) tName = 'ระยะเรียกเก็บหนี้สิทธิ OFC';
+                else if(title.startsWith('1.2.4') || title.includes('คงคลัง') || title.includes('สินค้า') || nameUpper.includes('INVENTORY')) tName = 'การบริหารสินคงคลัง';
+                
+                let val = safeParse(ind.actual);
+                if (val !== null) {
+                    let limit = 60;
+                    if (tName.includes('เจ้าหนี้')) limit = 180;
+                    
+                    if (val > limit) {
+                        let diff = val - limit;
+                        if (diff > worstDiff) {
+                            worstDiff = diff;
+                            worstName = tName;
+                            worstVal = val;
+                        }
+                    }
+                }
+            });
+
+            let stateMsg = s === 0 ? 'ไม่ผ่านทุกตัวชี้วัด' : 'ไม่ผ่านเกณฑ์';
+            applyAggressiveAlert('tps-p2', '<span class="icon">⚠</span> <div><strong>' + stateMsg + ' ' + s + '/' + ms + ' คะแนน:</strong> ' + worstName + ' ' + worstVal + ' วัน เกินเกณฑ์มากที่สุด</div>', 'danger');
+        }
+    }
+
+    // ---- 1.3 Cost/Mgt ----
+    let p3Cat = catMap.cost;
+    if (p3Cat) {
+        let s = p3Cat.score || 0; let ms = p3Cat.maxScore || 0;
+        if (ms > 0) {
+            if (s >= ms) applyAggressiveAlert('tps-p3', '<span class="icon">✨</span> <div><strong>ยอดเยี่ยม!</strong> ผ่านเกณฑ์การบริหารจัดการ (' + s + '/' + ms + ' คะแนน)</div>', 'success');
+            else applyAggressiveAlert('tps-p3', '<span class="icon">⚠</span> <div><strong>แจ้งเตือน:</strong> มีตัวชี้วัดที่ต้องปรับปรุงในหมวดการบริหารจัดการ (' + s + '/' + ms + ' คะแนน)</div>', 'warn');
+        }
+    }
+
+    // ---- 2.1 Profit ----
+    if (catMap.profit) {
+        let s = catMap.profit.score || 0; let ms = catMap.profit.maxScore || 0;
+        if (ms > 0) {
+            if (s >= ms) applyAggressiveAlert('tps-r1', '<span class="icon">✨</span> <div><strong>ยอดเยี่ยม!</strong> ผ่านเกณฑ์ความสามารถในการทำกำไร (' + s + '/' + ms + ' คะแนน)</div>', 'success');
+            else applyAggressiveAlert('tps-r1', '<span class="icon">⚠</span> <div><strong>แจ้งเตือน:</strong> ความสามารถในการทำกำไรต่ำกว่าเกณฑ์ (' + s + '/' + ms + ' คะแนน)</div>', 'warn');
+        }
+    }
+
+    // ---- 2.2 Liquidity ----
+    if (catMap.liquidity) {
+        let s = catMap.liquidity.score || 0; let ms = catMap.liquidity.maxScore || 0;
+        if (ms > 0) {
+            if (s >= ms) applyAggressiveAlert('tps-r2', '<span class="icon">✨</span> <div><strong>ยอดเยี่ยม!</strong> สภาพคล่องอยู่ในเกณฑ์ปลอดภัย (' + s + '/' + ms + ' คะแนน)</div>', 'success');
+            else applyAggressiveAlert('tps-r2', '<span class="icon">🚨</span> <div><strong>แจ้งเตือน:</strong> สภาพคล่องทางการเงินต่ำ ควรเฝ้าระวัง (' + s + '/' + ms + ' คะแนน)</div>', 'danger');
+        }
+    }
+
+    // ---- FIN: ข้อมูลการเงิน ----
+    let ebitdaVal = 0, niVal = 0, nwcVal = 0, netMaintVal = 0, cashRatioVal = 0;
+    let ebitdaFound = false, niFound = false, nwcFound = false, netMaintFound = false, cashRatioFound = false;
+
+    indicators.forEach(ind => {
+        let n = String(ind.name).toLowerCase();
+        let val = safeParse(ind.actual);
+        if (val === null) return;
+        
+        if (n.includes('ebitda')) { ebitdaVal = val; ebitdaFound = true; }
+        else if (n === 'ni' || n.includes('รายได้สูง (ต่ำ)') || n.includes('net income')) { niVal = val; niFound = true; }
+        else if (n.includes('nwc') || n.includes('ทุนสำรอง')) { nwcVal = val; nwcFound = true; }
+        else if (n.includes('เงินบำรุง')) { netMaintVal = val; netMaintFound = true; }
+        else if (n.includes('cash ratio') || n.includes('สภาพคล่อง')) { cashRatioVal = val; cashRatioFound = true; }
+    });
+
+    const formatM = (v) => {
+        let formatted = Math.abs(v) > 10000 ? (v / 1000000).toFixed(2) : v.toFixed(2);
+        return (v > 0 ? '+' + formatted : formatted) + ' M';
+    };
+
+    let ebitdaStr = ebitdaFound ? formatM(ebitdaVal) : '-';
+    let niStr = niFound ? formatM(niVal) : '-';
+    let nwcStr = nwcFound ? formatM(nwcVal) : '-';
+    let cashRatioStr = cashRatioFound ? cashRatioVal.toFixed(2) : '-';
+    
+    let niSign = niVal >= 0 ? 'เป็นบวก' : 'ติดลบ';
+    let statusText = (cashRatioVal >= 0.8) ? 'สภาพคล่องดี' : 'สภาพคล่องตึงตัว';
+    
+    let alertClass = (cashRatioVal >= 0.8 && ebitdaVal > 0) ? 'success' : 'warn';
+    if (cashRatioVal < 0.5 || ebitdaVal < 0) alertClass = 'danger';
+    
+    let icon = alertClass === 'success' ? '📊' : alertClass === 'danger' ? '🚨' : '⚠️';
+    
+    let msg = '<span class="icon">' + icon + '</span> <div><strong>สรุปฐานะการเงินปัจจุบัน:</strong> EBITDA <b>' + ebitdaStr + '</b>, NI <b>' + niStr + '</b> ' + niSign + ' NWC <b>' + nwcStr + '</b>';
+    if (netMaintFound) {
+        msg += ' แต่เงินบำรุงสุทธิ <b>' + formatM(netMaintVal) + '</b>';
+    }
+    msg += ' และ Cash Ratio <b>' + cashRatioStr + '</b> ' + statusText + '</div>';
+
+    applyAggressiveAlert('tps-fin', msg, alertClass);
 }
 
 function updateERPOverviewTPS(totalScore, totalMax, grade, gi, catMap) {
