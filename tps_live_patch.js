@@ -16,7 +16,7 @@ function injectPremiumCSS() {
             position: relative !important;
             display: flex !important;
             flex-direction: column !important;
-            justify-content: flex-start !important; /* จัดเรียงจากบนลงล่าง */
+            justify-content: flex-start !important;
             background: #ffffff !important;
             border-radius: 20px !important; 
             border: 1px solid rgba(226, 232, 240, 0.8) !important;
@@ -28,13 +28,11 @@ function injectPremiumCSS() {
             z-index: 1 !important;
         }
 
-        /* ล้างขอบสีทึบด้านบนของของเดิมทิ้ง */
         .nt-kpi.c-green, .nt-kpi.c-red, .nt-kpi.c-amber, .nt-kpi.c-blue {
             border-top-color: rgba(226, 232, 240, 0.8) !important;
             border-top-width: 1px !important;
         }
 
-        /* Hover Effect: ยกการ์ดสมูทๆ */
         .nt-kpi:hover {
             transform: translateY(-4px) !important;
             box-shadow: 0 16px 32px -12px rgba(15, 23, 42, 0.1) !important;
@@ -44,7 +42,6 @@ function injectPremiumCSS() {
         /* -------------------------------------------
            2. Typography & Hierarchy (ตัดคำเนี๊ยบๆ)
         ------------------------------------------- */
-        /* Label (หัวข้อ) */
         .nt-lbl {
             color: #475569 !important;
             font-weight: 600 !important;
@@ -60,7 +57,6 @@ function injectPremiumCSS() {
             min-height: 2.5em !important; 
         }
         
-        /* สไตล์สำหรับรหัสข้อ (เช่น 1.3.1.1) ที่แยกออกมา */
         .nt-lbl-code {
             color: #94a3b8 !important;
             font-weight: 500 !important;
@@ -70,7 +66,6 @@ function injectPremiumCSS() {
             letter-spacing: 0.02em !important;
         }
 
-        /* Value (ตัวเลขหลัก) ใหญ่ เด่นชัด */
         .nt-val {
             font-weight: 800 !important;
             font-size: 1.8rem !important; 
@@ -94,7 +89,6 @@ function injectPremiumCSS() {
         /* -------------------------------------------
            3. Badges & Footer
         ------------------------------------------- */
-        /* Score Pill ลอยอยู่มุมขวาบน ขนาดกระทัดรัด */
         .nt-pill {
             position: absolute !important;
             top: 24px !important;
@@ -113,9 +107,8 @@ function injectPremiumCSS() {
         .nt-pill.warn { background: #fffbeb !important; color: #d97706 !important; }
         .nt-pill.bad  { background: #fef2f2 !important; color: #dc2626 !important; }
 
-        /* Footer เกณฑ์ด้านล่างสุด ตัดเส้นออก ใช้พื้นที่ว่างแทน */
         .nt-foot {
-            margin-top: auto !important; /* ดันลงล่างสุดเสมอ */
+            margin-top: auto !important; 
             padding-top: 0 !important;
             color: #94a3b8 !important;
             font-size: 0.8rem !important;
@@ -125,7 +118,6 @@ function injectPremiumCSS() {
             gap: 6px !important;
         }
         
-        /* เพิ่มจุดสีหน้า Footer บอกสถานะ */
         .nt-foot::before {
             content: '' !important;
             display: inline-block !important;
@@ -139,9 +131,8 @@ function injectPremiumCSS() {
         .nt-kpi.c-blue .nt-foot::before { display: none !important; }
 
         /* -------------------------------------------
-           4. Chart Containers (ปรับให้เข้ากับ Card)
+           4. Chart Containers 
         ------------------------------------------- */
-        /* ✨ จัด Grid ใหม่ให้เป็น 2x2 เสมอในจอคอม และ 1 แถวในจอเล็ก (สำหรับหมวด 1.2) */
         #custom_p2_container, #custom_mc_container {
             display: grid !important;
             grid-template-columns: repeat(2, 1fr) !important;
@@ -183,64 +174,35 @@ function injectPremiumCSS() {
         }
 
         /* -------------------------------------------
-           6. Specific Layout for 1.3 (P3) - บน 5 ล่าง 4
+           6. Specific Layout for 1.3 (P3) - บน 5 ล่าง 4 (ปลอดภัย 100%)
         ------------------------------------------- */
         @media (min-width: 1025px) {
             #tps-p3 .nt-kpi-row {
-                grid-template-columns: repeat(5, 1fr) !important; 
-                gap: 16px !important; 
+                /* 🔥 ใช้ minmax(0, 1fr) ป้องกันการ์ดขยายจนทะลักหน้าจอ */
+                grid-template-columns: repeat(5, minmax(0, 1fr)) !important; 
+                gap: 12px !important; 
             }
             #tps-p3 .nt-kpi {
-                padding: 16px 16px 12px 16px !important; 
-                min-height: 120px !important;
+                padding: 14px 12px !important; 
+                min-height: 110px !important;
             }
             #tps-p3 .nt-val {
-                font-size: 1.5rem !important; 
+                font-size: 1.35rem !important; 
+                margin-bottom: 4px !important;
             }
             #tps-p3 .nt-val small {
-                font-size: 0.85rem !important;
+                font-size: 0.8rem !important;
             }
             #tps-p3 .nt-lbl {
-                font-size: 0.8rem !important;
-                max-width: calc(100% - 40px) !important;
+                font-size: 0.75rem !important;
+                max-width: calc(100% - 35px) !important; /* เว้นที่ให้ Pill มุมขวา */
+                min-height: 2.2em !important;
             }
             #tps-p3 .nt-pill {
-                top: 16px !important;
-                right: 16px !important;
+                top: 12px !important;
+                right: 12px !important;
                 padding: 2px 6px !important;
-                font-size: 0.7rem !important;
-            }
-        }
-
-        /* -------------------------------------------
-           7. Specific Layout for 1.3 Charts (P3 Unit vs MC)
-           🔥 บังคับสัดส่วน 32% (ซ้าย) : 68% (ขวา)
-        ------------------------------------------- */
-        @media (min-width: 1025px) {
-            .p3-charts-row {
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                gap: 24px !important;
-                margin-left: 0 !important;
-                margin-right: 0 !important;
-                align-items: stretch !important;
-            }
-            .p3-charts-row::before, .p3-charts-row::after {
-                display: none !important; /* เคลียร์ CSS ขยะของ Bootstrap */
-            }
-            .p3-unit-col {
-                flex: 0 0 32% !important; /* ✨ บีบกล่องซ้ายให้แคบลง */
-                max-width: 32% !important;
-                width: 32% !important;
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-            }
-            .p3-mc-col {
-                flex: 0 0 calc(68% - 24px) !important; /* ✨ ขยายกล่องขวาให้เต็มพื้นที่ที่เหลือ */
-                max-width: calc(68% - 24px) !important;
-                width: calc(68% - 24px) !important;
-                padding-left: 0 !important;
-                padding-right: 0 !important;
+                font-size: 0.65rem !important;
             }
         }
     `;
@@ -670,15 +632,12 @@ function renderTPSSubCharts(catMap, indicators) {
             origP2Canvas.style.display = 'none'; 
             let parent = origP2Canvas.parentElement;
             
-            // 🔥 FIX: ปลดล็อคความสูงของกล่องแม่
-            let pNode = parent;
-            for (let i = 0; i < 6; i++) { 
-                if (!pNode || pNode.tagName === 'BODY') break;
-                pNode.style.setProperty('height', 'auto', 'important');
-                pNode.style.setProperty('max-height', 'none', 'important');
-                pNode.style.setProperty('min-height', 'fit-content', 'important');
-                pNode.style.setProperty('overflow', 'visible', 'important');
-                pNode = pNode.parentElement;
+            // 🔥 ปลดล็อคความสูงเฉพาะ Card Body (ปลอดภัย 100% ไม่พัง Dashboard)
+            let cardBodyP2 = parent.closest('.erp-card-body');
+            if (cardBodyP2) {
+                cardBodyP2.style.setProperty('height', 'auto', 'important');
+                cardBodyP2.style.setProperty('max-height', 'none', 'important');
+                cardBodyP2.style.setProperty('overflow', 'visible', 'important');
             }
             
             let oldCustomP2 = document.getElementById('custom_p2_container');
@@ -810,28 +769,22 @@ function renderTPSSubCharts(catMap, indicators) {
         let p3unitCanvas = document.getElementById('tps_p3unit');
         let origMcCanvas = document.getElementById('tps_p3mc');
         
-        // 🔥 จัด Layout สัดส่วน 32% (Unit Cost) : 68% (LC/MC)
+        // 🔥 จัด Layout สัดส่วน 35% (Unit Cost) : 65% (LC/MC) อย่างปลอดภัย 100% 
         if (p3unitCanvas && origMcCanvas) {
-            let leftCol = p3unitCanvas.closest('[class*="col-"]') || p3unitCanvas.closest('.erp-card')?.parentElement;
-            let rightCol = origMcCanvas.closest('[class*="col-"]') || origMcCanvas.closest('.erp-card')?.parentElement;
+            let leftCol = p3unitCanvas.closest('.col-md-6, .col-lg-6, [class*="col-"]');
+            let rightCol = origMcCanvas.closest('.col-md-6, .col-lg-6, [class*="col-"]');
             
-            if (leftCol && rightCol) {
-                leftCol.classList.add('p3-unit-col');
-                rightCol.classList.add('p3-mc-col');
-                
-                let parentRow = leftCol.parentElement;
-                if(parentRow) parentRow.classList.add('p3-charts-row');
+            // เปลี่ยนเฉพาะเมื่อแน่ใจว่าทั้งคู่เป็น Column ที่อยู่ติดกันใน Row เดียวกันเท่านั้น
+            if (leftCol && rightCol && leftCol.parentElement === rightCol.parentElement && leftCol.parentElement.classList.contains('row')) {
+                leftCol.style.setProperty('flex', '0 0 35%', 'important');
+                leftCol.style.setProperty('max-width', '35%', 'important');
+                rightCol.style.setProperty('flex', '0 0 65%', 'important');
+                rightCol.style.setProperty('max-width', '65%', 'important');
             }
         }
 
-        // 🔥 ปลดล็อคความสูงและตั้งค่าให้กราฟ P3Unit ดูสูงโปร่ง
-        let pNode = p3unitCanvas.parentElement;
-        for (let i = 0; i < 4; i++) {
-            if (!pNode || pNode.tagName === 'BODY') break;
-            pNode.style.setProperty('height', 'auto', 'important');
-            pNode = pNode.parentElement;
-        }
-        p3unitCanvas.parentElement.style.height = '350px'; // ✨ เพิ่มความสูงให้ทรงสวย
+        // 🔥 กำหนดความสูงให้กราฟ Unit Cost ตรงๆ โดยไม่แตะ Parent
+        p3unitCanvas.parentElement.style.height = '320px';
 
         new Chart(p3unitCanvas, {
             type: 'bar',
@@ -866,7 +819,7 @@ function renderTPSSubCharts(catMap, indicators) {
                     datalabels: { 
                         anchor: 'end', align: 'top', offset: 8,
                         color: '#1e293b', font: { weight: '800', size: 12 },
-                        formatter: (v) => v.toLocaleString('en-US', {maximumFractionDigits: 0}) // ซ่อนจุดทศนิยมให้ดูคลีน
+                        formatter: (v) => v.toLocaleString('en-US', {maximumFractionDigits: 0}) 
                     }
                 }, 
                 scales: { 
@@ -880,7 +833,7 @@ function renderTPSSubCharts(catMap, indicators) {
                         ticks: { color: '#334155', font: { weight: '700', size: 12 }, padding: 10 } 
                     } 
                 },
-                layout: { padding: { top: 35 } } // ✨ เผื่อที่ให้ Datalabels ด้านบน
+                layout: { padding: { top: 35 } } 
             }
         });
     }
@@ -907,28 +860,23 @@ function renderTPSSubCharts(catMap, indicators) {
         origMcCanvas.style.display = 'none'; 
         let parent = origMcCanvas.parentElement;
 
-        // 🔥 FIX: ปลดล็อคความสูงของกล่องแม่ ป้องกันกราฟแถวล่างหาย
-        let pNode = parent;
-        for (let i = 0; i < 6; i++) { 
-            if (!pNode || pNode.tagName === 'BODY') break;
-            pNode.style.setProperty('height', 'auto', 'important');
-            pNode.style.setProperty('max-height', 'none', 'important');
-            pNode.style.setProperty('min-height', 'fit-content', 'important');
-            pNode.style.setProperty('overflow', 'visible', 'important');
-            pNode = pNode.parentElement;
+        // 🔥 ปลดล็อคความสูงเฉพาะ Card Body ไม่ทะลุออกไปกวน Dashboard
+        let cardBodyP3 = parent.closest('.erp-card-body');
+        if (cardBodyP3) {
+            cardBodyP3.style.setProperty('height', 'auto', 'important');
+            cardBodyP3.style.setProperty('max-height', 'none', 'important');
+            cardBodyP3.style.setProperty('overflow', 'visible', 'important');
         }
         
         let customContainer = document.createElement('div');
         customContainer.id = 'custom_mc_container';
-        /* ใช้ CSS Grid แบบ 2x2 จาก injectPremiumCSS อัตโนมัติ */
         customContainer.style.width = '100%';
-        customContainer.style.marginTop = '15px';
-        customContainer.style.paddingBottom = '20px';
+        customContainer.style.marginTop = '0px'; 
         parent.appendChild(customContainer);
 
         const createBar = (id, title, val, mean) => {
             const wrapper = document.createElement('div');
-            wrapper.style.height = '160px'; // ✨ ความสูงกำลังดีสำหรับ Grid 2x2 (ไม่ใหญ่ล้นเหมือน P2)
+            wrapper.style.height = '145px'; // ✨ ย่อลงมาเล็กน้อย เพื่อให้ 4 กราฟ (2 แถว) รวมกันความสูงเท่ากับกราฟ Unit Cost พอดี
             wrapper.style.width = '100%';
             wrapper.style.position = 'relative';
             
@@ -950,11 +898,11 @@ function renderTPSSubCharts(catMap, indicators) {
                                 label: 'รพ.เสลภูมิ (%)', 
                                 data: [val], 
                                 backgroundColor: valColor, 
-                                borderRadius: 100, // ✨ Pill Shape แนวนอน
+                                borderRadius: 100, 
                                 borderSkipped: false,
                                 barPercentage: 0.5,
                                 categoryPercentage: 0.7,
-                                maxBarThickness: 32 // ควบคุมความอ้วนของแท่ง
+                                maxBarThickness: 32 
                             },
                             { 
                                 label: 'ค่ากลาง (%)', 
@@ -993,13 +941,13 @@ function renderTPSSubCharts(catMap, indicators) {
                                 ticks: { color: '#334155', font: { weight: '700', size: 12 }, padding: 12 } 
                             } 
                         },
-                        layout: { padding: { right: 50, top: 15, bottom: 15, left: 10 } } // ✨ เผื่อพื้นที่ด้านซ้าย 10px ป้องกันตัวอักษรตกขอบ
+                        layout: { padding: { right: 50, top: 15, bottom: 15, left: 15 } } // ✨ ถ่างด้านซ้าย 15px ป้องกันข้อความชิดขอบตกกรอบ
                     }
                 });
             }
         };
 
-        // 🔥 ตัดข้อความแกน Y ให้กระชับสวยงาม ไม่เบียดกราฟ และเอาตัวเลข 1.3 ออกทั้งหมด
+        // 🔥 เอาตัวเลข 1.3 ออกทั้งหมด และคงชื่อให้กระชับ
         createBar('mc_chart_1', 'LC ค่าแรงบุคลากร', lcVal, lcMean);
         createBar('mc_chart_2', 'MC ค่ายา', mcDrugVal, mcDrugMean);
         createBar('mc_chart_3', 'MC ค่าวัสดุวิทย์ฯ', mcSciVal, mcSciMean);
@@ -1095,7 +1043,7 @@ function updateSubTabKPIs(panelId, items) {
 
     kpiRow.style.display = 'grid';
     kpiRow.style.gridTemplateColumns = 'repeat(auto-fit, minmax(280px, 1fr))';
-    kpiRow.style.gap = '24px'; /* ระยะห่าง Grid เนี๊ยบๆ */
+    kpiRow.style.gap = '24px'; 
 
     cards.forEach((card, i) => {
         if (i >= items.length) {
@@ -1113,22 +1061,18 @@ function updateSubTabKPIs(panelId, items) {
         const footEl = card.querySelector('.nt-foot');
         const pillEl = card.querySelector('.nt-pill');
 
-        // ✨ จัดฟอร์แมตชื่อหัวข้อให้สวยงาม (แยกเลขข้อออกจากชื่อ)
         if (lblEl) {
             let rawName = ind.name || ind.code || '';
             
-            // 🔥 แทนที่ข้อความเฉพาะหมวด 1.2 ให้เนี๊ยบตามต้องการ (เก็บรหัสตัวเลขด้านหน้าไว้)
             if (rawName.startsWith('1.2.1')) rawName = rawName.replace(/^([\d\.]+\s).*/, '$1ระยะเวลาชำระเจ้าหนี้การค้า');
             else if (rawName.startsWith('1.2.2')) rawName = rawName.replace(/^([\d\.]+\s).*/, '$1ระยะเรียกเก็บหนี้สิทธิ UC');
             else if (rawName.startsWith('1.2.3')) rawName = rawName.replace(/^([\d\.]+\s).*/, '$1ระยะเรียกเก็บหนี้สิทธิ OFC');
             else if (rawName.startsWith('1.2.4')) rawName = rawName.replace(/^([\d\.]+\s).*/, '$1การบริหารสินคงคลัง');
 
-            // ใช้ Regex จับคู่ตัวเลขรหัส เช่น 1.3.1.1 และเว้นวรรค
             let formattedName = rawName.replace(/^([\d\.]+\s)/, '<span class="nt-lbl-code">$1</span>');
             lblEl.innerHTML = formattedName;
         }
         
-        // ✨ จัดฟอร์แมตตัวเลขหลัก
         if (valEl) {
             const actNum = safeParse(ind.actual);
             const valStr = (actNum !== null) ? actNum.toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
@@ -1137,7 +1081,6 @@ function updateSubTabKPIs(panelId, items) {
 
         if (footEl) footEl.textContent = (ind.criteria || '') + (ind.result ? ' | ' + ind.result : '');
         
-        // ✨ จัดฟอร์แมตป้ายสถานะ (Pill)
         if (pillEl) {
             if(ind.maxScore === null || ind.maxScore === undefined || ind.maxScore === 0) {
                  pillEl.style.display = 'none';
