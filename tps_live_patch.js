@@ -632,12 +632,15 @@ function renderTPSSubCharts(catMap, indicators) {
             origP2Canvas.style.display = 'none'; 
             let parent = origP2Canvas.parentElement;
             
-            // 🔥 ปลดล็อคความสูงเฉพาะ Card Body (ปลอดภัย 100% ไม่พัง Dashboard)
-            let cardBodyP2 = parent.closest('.erp-card-body');
-            if (cardBodyP2) {
-                cardBodyP2.style.setProperty('height', 'auto', 'important');
-                cardBodyP2.style.setProperty('max-height', 'none', 'important');
-                cardBodyP2.style.setProperty('overflow', 'visible', 'important');
+            // 🔥 ปลดล็อคความสูงเฉพาะ Card Body และตัว Card เพื่อดึง 2 กราฟที่หายไปกลับมา (ปลอดภัย 100% ไม่กวนส่วนอื่น)
+            let nodeP2 = parent;
+            while (nodeP2 && nodeP2.id !== 'tps-p2' && nodeP2.tagName !== 'BODY') {
+                if (nodeP2.classList.contains('erp-card-body') || nodeP2.classList.contains('erp-card') || nodeP2.className.includes('col-')) {
+                    nodeP2.style.setProperty('height', 'auto', 'important');
+                    nodeP2.style.setProperty('max-height', 'none', 'important');
+                    nodeP2.style.setProperty('overflow', 'visible', 'important');
+                }
+                nodeP2 = nodeP2.parentElement;
             }
             
             let oldCustomP2 = document.getElementById('custom_p2_container');
