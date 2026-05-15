@@ -1,18 +1,27 @@
 // ============================================================
-// TPS LIVE DATA PATCH (Ultimate Dribbble UI Edition)
-// ล็อคข้อมูล 100% + ปรับ Typography, Spacing และ Layout ระดับ Global
+// TPS LIVE DATA PATCH (Ultimate Dribbble UI Edition - SAFE MODE)
+// ล็อคข้อมูล 100% + ปกป้องแท็บอื่น 100% (No Global Pollution)
 // ============================================================
 
 // 🌟 1. ระบบเติมความสวยงามอัตโนมัติ (CSS Injection)
 function injectPremiumCSS() {
-    if (document.getElementById('tps-premium-style')) return;
+    if (document.getElementById('tps-premium-style')) {
+        document.getElementById('tps-premium-style').remove(); // เคลียร์ของเก่าทิ้งถ้ามี
+    }
     const style = document.createElement('style');
     style.id = 'tps-premium-style';
+    
+    // ฟังก์ชันสร้าง Prefix เฉพาะแท็บ TPS เพื่อป้องกันไม่ให้ CSS ไปกวนแท็บอื่นเด็ดขาด
+    const S = (selector) => {
+        const tabs = ['#tps-ov', '#tps-p1', '#tps-p2', '#tps-p3', '#tps-r1', '#tps-r2', '#tps-fin'];
+        return tabs.map(tab => `${tab} ${selector}`).join(',\n');
+    };
+
     style.innerHTML = `
         /* -------------------------------------------
            1. Main KPI Card - Clean, Airy & Fixed Layout
         ------------------------------------------- */
-        .nt-kpi {
+        ${S('.nt-kpi')} {
             position: relative !important;
             display: flex !important;
             flex-direction: column !important;
@@ -28,12 +37,12 @@ function injectPremiumCSS() {
             z-index: 1 !important;
         }
 
-        .nt-kpi.c-green, .nt-kpi.c-red, .nt-kpi.c-amber, .nt-kpi.c-blue {
+        ${S('.nt-kpi.c-green')}, ${S('.nt-kpi.c-red')}, ${S('.nt-kpi.c-amber')}, ${S('.nt-kpi.c-blue')} {
             border-top-color: rgba(226, 232, 240, 0.8) !important;
             border-top-width: 1px !important;
         }
 
-        .nt-kpi:hover {
+        ${S('.nt-kpi:hover')} {
             transform: translateY(-4px) !important;
             box-shadow: 0 16px 32px -12px rgba(15, 23, 42, 0.1) !important;
             border-color: rgba(203, 213, 225, 0.8) !important;
@@ -42,7 +51,7 @@ function injectPremiumCSS() {
         /* -------------------------------------------
            2. Typography & Hierarchy (ตัดคำเนี๊ยบๆ)
         ------------------------------------------- */
-        .nt-lbl {
+        ${S('.nt-lbl')} {
             color: #475569 !important;
             font-weight: 600 !important;
             font-size: 0.85rem !important; 
@@ -57,7 +66,7 @@ function injectPremiumCSS() {
             min-height: 2.5em !important; 
         }
         
-        .nt-lbl-code {
+        ${S('.nt-lbl-code')} {
             color: #94a3b8 !important;
             font-weight: 500 !important;
             font-size: 0.75rem !important; 
@@ -66,7 +75,7 @@ function injectPremiumCSS() {
             letter-spacing: 0.02em !important;
         }
 
-        .nt-val {
+        ${S('.nt-val')} {
             font-weight: 800 !important;
             font-size: 1.8rem !important; 
             color: #0f172a !important;
@@ -79,7 +88,7 @@ function injectPremiumCSS() {
             gap: 6px !important;
             line-height: 1 !important;
         }
-        .nt-val small {
+        ${S('.nt-val small')} {
             font-weight: 600 !important;
             font-size: 0.9rem !important; 
             color: #64748b !important;
@@ -89,7 +98,7 @@ function injectPremiumCSS() {
         /* -------------------------------------------
            3. Badges & Footer
         ------------------------------------------- */
-        .nt-pill {
+        ${S('.nt-pill')} {
             position: absolute !important;
             top: 24px !important;
             right: 24px !important;
@@ -103,11 +112,11 @@ function injectPremiumCSS() {
             justify-content: center !important;
             gap: 2px !important;
         }
-        .nt-pill.good { background: #ecfdf5 !important; color: #059669 !important; }
-        .nt-pill.warn { background: #fffbeb !important; color: #d97706 !important; }
-        .nt-pill.bad  { background: #fef2f2 !important; color: #dc2626 !important; }
+        ${S('.nt-pill.good')} { background: #ecfdf5 !important; color: #059669 !important; }
+        ${S('.nt-pill.warn')} { background: #fffbeb !important; color: #d97706 !important; }
+        ${S('.nt-pill.bad')}  { background: #fef2f2 !important; color: #dc2626 !important; }
 
-        .nt-foot {
+        ${S('.nt-foot')} {
             margin-top: auto !important; 
             padding-top: 0 !important;
             color: #94a3b8 !important;
@@ -118,17 +127,17 @@ function injectPremiumCSS() {
             gap: 6px !important;
         }
         
-        .nt-foot::before {
+        ${S('.nt-foot::before')} {
             content: '' !important;
             display: inline-block !important;
             width: 6px !important;
             height: 6px !important;
             border-radius: 50% !important;
         }
-        .nt-kpi.c-green .nt-foot::before { background-color: #10b981 !important; }
-        .nt-kpi.c-amber .nt-foot::before { background-color: #f59e0b !important; }
-        .nt-kpi.c-red .nt-foot::before { background-color: #ef4444 !important; }
-        .nt-kpi.c-blue .nt-foot::before { display: none !important; }
+        ${S('.nt-kpi.c-green .nt-foot::before')} { background-color: #10b981 !important; }
+        ${S('.nt-kpi.c-amber .nt-foot::before')} { background-color: #f59e0b !important; }
+        ${S('.nt-kpi.c-red .nt-foot::before')} { background-color: #ef4444 !important; }
+        ${S('.nt-kpi.c-blue .nt-foot::before')} { display: none !important; }
 
         /* -------------------------------------------
            4. Chart Containers 
@@ -163,18 +172,18 @@ function injectPremiumCSS() {
         }
 
         /* 5. Progress Bars */
-        .erp-card-body .progress-bg {
+        ${S('.erp-card-body .progress-bg')} {
             background: #f1f5f9 !important;
             border-radius: 999px !important;
             overflow: hidden !important;
         }
-        .erp-card-body .nt-score-fill {
+        ${S('.erp-card-body .nt-score-fill')} {
             border-radius: 999px !important;
             transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
 
         /* -------------------------------------------
-           6. Specific Layout for 1.3 (P3) - บน 5 ล่าง 4 (ปลอดภัย 100%)
+           6. Specific Layout for 1.3 (P3) 
         ------------------------------------------- */
         @media (min-width: 1025px) {
             #tps-p3 .nt-kpi-row {
@@ -206,7 +215,7 @@ function injectPremiumCSS() {
         }
 
         /* -------------------------------------------
-           7. Specific Layout for 1.3 Charts (P3 Unit vs MC)
+           7. Specific Layout for 1.3 Charts 
         ------------------------------------------- */
         @media (min-width: 1025px) {
             .p3-charts-row {
@@ -237,7 +246,7 @@ function injectPremiumCSS() {
         }
 
         /* -------------------------------------------
-           8. Specific Layout for 2.2 (R2) - การ์ด + กราฟ ในแถวเดียวกัน
+           8. Specific Layout for 2.2 (R2)
         ------------------------------------------- */
         #r2_super_wrapper {
             display: grid !important;
@@ -285,7 +294,7 @@ function injectPremiumCSS() {
         }
 
         /* -------------------------------------------
-           9. Safe Height Unlockers (ป้องกันกล่องแม่ตัดกราฟ)
+           9. Safe Height Unlockers
         ------------------------------------------- */
         .safe-unlock-card {
             display: flex !important;
@@ -304,9 +313,9 @@ function injectPremiumCSS() {
         }
 
         /* -------------------------------------------
-           🔥 10. Premium Alert Banners (กล่องแจ้งเตือนระดับโลก)
+           10. Premium Alert Banners
         ------------------------------------------- */
-        .premium-alert {
+        ${S('.premium-alert')} {
             display: flex !important;
             align-items: center !important;
             gap: 16px !important;
@@ -324,28 +333,28 @@ function injectPremiumCSS() {
             from { opacity: 0; transform: translateY(-5px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .premium-alert .icon {
+        ${S('.premium-alert .icon')} {
             font-size: 1.4rem !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
         }
-        .premium-alert.danger {
+        ${S('.premium-alert.danger')} {
             background: #fff1f2 !important; 
             color: #9f1239 !important;
             border-color: #fecdd3 !important;
         }
-        .premium-alert.danger b {
+        ${S('.premium-alert.danger b')} {
             color: #e11d48 !important;
             font-weight: 800 !important;
             font-size: 1.05em !important;
         }
-        .premium-alert.warn {
+        ${S('.premium-alert.warn')} {
             background: #fffbeb !important; 
             color: #92400e !important;
             border-color: #fde68a !important;
         }
-        .premium-alert.success {
+        ${S('.premium-alert.success')} {
             background: #f0fdf4 !important; 
             color: #166534 !important;
             border-color: #bbf7d0 !important;
@@ -357,29 +366,29 @@ function injectPremiumCSS() {
 injectPremiumCSS();
 
 // ============================================================
-// ตัวแปรและฟังก์ชันดึงข้อมูล (ล็อค 100% ห้ามแก้ไข)
+// ตัวแปรและฟังก์ชันดึงข้อมูล (เปลี่ยนเป็น var/function ป้องกันการพัง)
 // ============================================================
-let tpsLiveData = null;
+var tpsLiveData = null;
 
-const safeParse = (val) => {
+function safeParse(val) {
     if(val === null || val === undefined || val === '') return null;
     const clean = String(val).replace(/,/g, '').trim();
     const n = parseFloat(clean);
     return isNaN(n) ? null : n;
-};
+}
 
-const parseMean = (item, fallback) => {
+function parseMean(item, fallback) {
     if(!item || !item.criteria) return fallback;
     const cleanStr = String(item.criteria).replace(/,/g, '');
     const m = cleanStr.match(/(\d+(\.\d+)?)/);
     return m ? parseFloat(m[1]) : fallback;
-};
+}
 
 // ============================================================
 // 1. LOAD TPS FROM GAS WEB APP
 // ============================================================
 async function loadTPSFromGAS() {
-    if (!TPS__WEB_APP_URL) {
+    if (typeof TPS__WEB_APP_URL === 'undefined' || !TPS__WEB_APP_URL) {
         console.warn('⚠ ไม่พบลิงก์ TPS__WEB_APP_URL');
         renderTPSChartsHardcoded();
         return;
@@ -734,7 +743,6 @@ function updateTPSSubTabs(catMap, indicators) {
     upgradeAlertBanners('tps-p3', p3Items);
     upgradeAlertBanners('tps-r1', r1Valid);
     upgradeAlertBanners('tps-r2', r2Valid);
-    // 🔥 เพิ่มคำสั่งเรียกสำหรับแท็บ 'ข้อมูลการเงิน' ด้วย
     upgradeAlertBanners('tps-fin', uniqueFinItems);
 }
 
@@ -790,15 +798,11 @@ function renderTPSSubCharts(catMap, indicators) {
             origP2Canvas.style.display = 'none'; 
             let parent = origP2Canvas.parentElement;
             
-            let nodeP2 = parent;
-            while (nodeP2 && nodeP2.id !== 'tps-p2' && nodeP2.tagName !== 'BODY') {
-                if (nodeP2.classList.contains('erp-card-body') || nodeP2.classList.contains('erp-card') || nodeP2.className.includes('col-')) {
-                    nodeP2.style.setProperty('height', 'auto', 'important');
-                    nodeP2.style.setProperty('max-height', 'none', 'important');
-                    nodeP2.style.setProperty('overflow', 'visible', 'important');
-                }
-                nodeP2 = nodeP2.parentElement;
-            }
+            // 🔥 ปลดล็อคความสูงเฉพาะ Card Body และตัว Card ป้องกันไปกวนแท็บอื่น
+            let cBodyP2 = parent.closest('.erp-card-body');
+            let cCardP2 = parent.closest('.erp-card');
+            if(cBodyP2) cBodyP2.classList.add('safe-unlock-body');
+            if(cCardP2) cCardP2.classList.add('safe-unlock-card');
             
             let oldCustomP2 = document.getElementById('custom_p2_container');
             if (oldCustomP2) oldCustomP2.remove();
@@ -943,15 +947,11 @@ function renderTPSSubCharts(catMap, indicators) {
             }
         }
 
-        let nodeP3Unit = p3unitCanvas.parentElement;
-        while (nodeP3Unit && nodeP3Unit.id !== 'tps-p3' && nodeP3Unit.tagName !== 'BODY') {
-            if (nodeP3Unit.classList.contains('erp-card-body') || nodeP3Unit.classList.contains('erp-card') || nodeP3Unit.className.includes('col-')) {
-                nodeP3Unit.style.setProperty('height', 'auto', 'important');
-                nodeP3Unit.style.setProperty('max-height', 'none', 'important');
-                nodeP3Unit.style.setProperty('overflow', 'visible', 'important');
-            }
-            nodeP3Unit = nodeP3Unit.parentElement;
-        }
+        // 🔥 ปลดล็อคกล่องแม่เพื่อให้กราฟ Unit Cost สมบูรณ์อย่างปลอดภัย
+        let cBodyP3Unit = p3unitCanvas.closest('.erp-card-body');
+        let cCardP3Unit = p3unitCanvas.closest('.erp-card');
+        if(cBodyP3Unit) cBodyP3Unit.classList.add('safe-unlock-body');
+        if(cCardP3Unit) cCardP3Unit.classList.add('safe-unlock-card');
 
         p3unitCanvas.parentElement.style.height = '320px';
 
@@ -1029,15 +1029,11 @@ function renderTPSSubCharts(catMap, indicators) {
         origMcCanvas.style.display = 'none'; 
         let parent = origMcCanvas.parentElement;
 
-        let nodeP3 = parent;
-        while (nodeP3 && nodeP3.id !== 'tps-p3' && nodeP3.tagName !== 'BODY') {
-            if (nodeP3.classList.contains('erp-card-body') || nodeP3.classList.contains('erp-card') || nodeP3.className.includes('col-')) {
-                nodeP3.style.setProperty('height', 'auto', 'important');
-                nodeP3.style.setProperty('max-height', 'none', 'important');
-                nodeP3.style.setProperty('overflow', 'visible', 'important');
-            }
-            nodeP3 = nodeP3.parentElement;
-        }
+        // 🔥 ปลดล็อคกล่องแม่เพื่อให้กราฟ MC แสดงครบ 100% อย่างปลอดภัย
+        let cBodyP3Mc = parent.closest('.erp-card-body');
+        let cCardP3Mc = parent.closest('.erp-card');
+        if(cBodyP3Mc) cBodyP3Mc.classList.add('safe-unlock-body');
+        if(cCardP3Mc) cCardP3Mc.classList.add('safe-unlock-card');
         
         let customContainer = document.createElement('div');
         customContainer.id = 'custom_mc_container';
@@ -1238,7 +1234,7 @@ function renderTPSSubCharts(catMap, indicators) {
 }
 
 // ============================================================
-// 9. ฟังก์ชันเสริมวาดการ์ด KPI (เนี๊ยบระดับ Dribbble)
+// 9. ฟังก์ชันเสริมวาดการ์ด KPI
 // ============================================================
 function updateSubTabKPIs(panelId, items) {
     const panel = document.getElementById(panelId);
@@ -1321,15 +1317,12 @@ function upgradeAlertBanners(panelId, items) {
     const panel = document.getElementById(panelId);
     if (!panel) return;
 
-    // หน่วงเวลาเล็กน้อยเพื่อให้หน้าจอเดิมรันเสร็จก่อน แล้วเราค่อยเข้าไปแปลงโฉม
     setTimeout(() => {
         const allDivs = panel.querySelectorAll('div');
         let targetDiv = null;
         
-        // ค้นหากล่อง Alert เดิมที่มาจากระบบหลังบ้าน
         for (let i = 0; i < allDivs.length; i++) {
             let text = allDivs[i].textContent;
-            // 🔥 เพิ่มคำว่า 'สรุปฐานะการเงิน' และ 'ผ่านเต็ม' เพื่อให้จับกล่องแจ้งเตือนครอบคลุมขึ้น
             if ((text.includes('⚠') || text.includes('ไม่ผ่าน') || text.includes('เกินเกณฑ์') || text.includes('ต่ำกว่าเกณฑ์') || text.includes('ผ่านเต็ม') || text.includes('สรุปฐานะการเงิน')) && allDivs[i].children.length <= 2) {
                 if (!allDivs[i].classList.contains('premium-alert') && !allDivs[i].classList.contains('nt-pill') && !allDivs[i].classList.contains('nt-lbl')) {
                     targetDiv = allDivs[i].closest('.alert') || allDivs[i];
@@ -1340,12 +1333,10 @@ function upgradeAlertBanners(panelId, items) {
 
         if (!targetDiv || targetDiv.classList.contains('premium-alert')) return;
 
-        // 🔥 เงื่อนไขพิเศษสำหรับการคำนวณแท็บ "ข้อมูลการเงิน" (tps-fin) ใหม่ทั้งหมด
         if (panelId === 'tps-fin') {
             let ebitdaVal = 0, niVal = 0, nwcVal = 0, netMaintVal = 0, cashRatioVal = 0;
             let ebitdaFound = false, niFound = false, nwcFound = false, netMaintFound = false, cashRatioFound = false;
 
-            // ค้นหาจากตัวชี้วัดทั้งหมดในภาพรวม
             if (tpsLiveData && tpsLiveData.indicators) {
                 tpsLiveData.indicators.forEach(ind => {
                     let n = String(ind.name).toLowerCase();
@@ -1401,7 +1392,6 @@ function upgradeAlertBanners(panelId, items) {
         if (score >= maxScore && maxScore > 0) {
             targetDiv.className = 'premium-alert success';
             
-            // ✨ เงื่อนไขพิเศษสำหรับ 1.1 บริหารแผน (ให้ข้อความตรงกับ Card เป๊ะ)
             if (panelId === 'tps-p1' && items.length >= 2) {
                 let revAct = safeParse(items[0].actual);
                 let expAct = safeParse(items[1].actual);
@@ -1413,7 +1403,6 @@ function upgradeAlertBanners(panelId, items) {
             }
 
         } else if (failedItems.length > 0) {
-            // ✨ เงื่อนไขพิเศษเมื่อไม่ผ่านสำหรับ 1.1 บริหารแผน
             if (panelId === 'tps-p1' && items.length >= 2) {
                 let revAct = safeParse(items[0].actual);
                 let expAct = safeParse(items[1].actual);
