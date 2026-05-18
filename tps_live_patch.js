@@ -285,15 +285,18 @@ function injectPremiumCSS() {
         }
 
         /* -------------------------------------------
-           🔥 9. Safe Height Unlockers (ป้องกันกล่องแม่ตัดกราฟ 1.2)
+           9. Safe Height Unlockers (ป้องกันกล่องแม่ตัดกราฟ)
         ------------------------------------------- */
         .safe-unlock-card {
-            height: auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100% !important;
             max-height: none !important;
             min-height: 100% !important;
             overflow: visible !important;
         }
         .safe-unlock-body {
+            flex: 1 1 auto !important;
             height: auto !important;
             max-height: none !important;
             overflow: visible !important;
@@ -301,7 +304,7 @@ function injectPremiumCSS() {
         }
 
         /* -------------------------------------------
-           10. Premium Alert Banners (กล่องแจ้งเตือนระดับโลก)
+           🔥 10. Premium Alert Banners (กล่องแจ้งเตือนระดับโลก)
         ------------------------------------------- */
         .premium-alert {
             display: flex !important;
@@ -681,7 +684,7 @@ function renderTPSChartsFromData(catMap, totalScore, totalMax) {
 }
 
 // ============================================================
-// 7. ✅ อัปเดตข้อมูลแท็บย่อย (ดึงโค้ดเดิมของคุณที่ทำงานได้ 100%)
+// 7. ✅ อัปเดตข้อมูลแท็บย่อย
 // ============================================================
 function updateTPSSubTabs(catMap, indicators) {
     updateSubTabKPIs('tps-p1', catMap.planfin.items);
@@ -709,12 +712,12 @@ function updateTPSSubTabs(catMap, indicators) {
     updateSubTabKPIs('tps-r2', r2Valid);
 
     const finPanel = document.getElementById('tps-fin');
-    let uniqueFinItems = []; 
     if (finPanel && indicators) {
         const finItems = indicators.filter(i => {
             const n = String(i.name).toLowerCase();
             return n.includes('ebitda') || n.includes('nwc') || n.includes('ทุนสำรอง') || n.includes('ni') || n.includes('รายได้สูง (ต่ำ)');
         });
+        const uniqueFinItems = [];
         const finNames = new Set();
         for(const item of finItems) {
             if(!finNames.has(item.name)) {
@@ -725,19 +728,16 @@ function updateTPSSubTabs(catMap, indicators) {
         updateSubTabKPIs('tps-fin', uniqueFinItems);
     }
 
-    // 🔥 เรียกอัปเดตกล่องแจ้งเตือนใหม่ (ดึงข้อมูลให้ตรงการ์ด 100%)
+    // 🔥 สั่งคำนวณและอัปเกรด Alert Banner ใหม่ (ดึงข้อมูลให้ตรง 100%)
     upgradeAlertBanners('tps-p1', catMap.planfin.items);
     upgradeAlertBanners('tps-p2', catMap.asset.items);
     upgradeAlertBanners('tps-p3', p3Items);
     upgradeAlertBanners('tps-r1', r1Valid);
     upgradeAlertBanners('tps-r2', r2Valid);
-    if (uniqueFinItems && uniqueFinItems.length > 0) {
-        upgradeAlertBanners('tps-fin', uniqueFinItems);
-    }
 }
 
 // ============================================================
-// 8. ✅ วาดกราฟแท็บย่อย (ดึงโค้ดเดิมของคุณที่ทำงานได้ 100%)
+// 8. ✅ วาดกราฟแท็บย่อย
 // ============================================================
 function renderTPSSubCharts(catMap, indicators) {
     const commonPlugins = {
@@ -915,7 +915,7 @@ function renderTPSSubCharts(catMap, indicators) {
     const opdVal = opdItem ? safeParse(opdItem.actual) : 0;
     const ipdVal = ipdItem ? safeParse(ipdItem.actual) : 0;
     const opdMean = parseMean(opdItem, 1010.51);
-    const opdMean = parseMean(ipdItem, 16120);
+    const ipdMean = parseMean(ipdItem, 16120);
 
     const opdColor = opdVal <= opdMean ? 'rgba(16,185,129,0.85)' : 'rgba(244,63,94,0.85)';
     const ipdColor = ipdVal <= ipdMean ? 'rgba(16,185,129,0.85)' : 'rgba(244,63,94,0.85)';
@@ -937,6 +937,7 @@ function renderTPSSubCharts(catMap, indicators) {
             }
         }
 
+        // 🔥 ปลดล็อคกล่องแม่เพื่อให้กราฟ Unit Cost สมบูรณ์
         let cBodyP3Unit = p3unitCanvas.closest('.erp-card-body');
         let cCardP3Unit = p3unitCanvas.closest('.erp-card');
         if(cBodyP3Unit) cBodyP3Unit.classList.add('safe-unlock-body');
@@ -1018,6 +1019,7 @@ function renderTPSSubCharts(catMap, indicators) {
         origMcCanvas.style.display = 'none'; 
         let parent = origMcCanvas.parentElement;
 
+        // 🔥 ปลดล็อคกล่องแม่เพื่อให้กราฟ MC ทั้ง 4 แสดงครบสมบูรณ์
         let cBodyP3Mc = parent.closest('.erp-card-body');
         let cCardP3Mc = parent.closest('.erp-card');
         if(cBodyP3Mc) cBodyP3Mc.classList.add('safe-unlock-body');
@@ -1163,6 +1165,7 @@ function renderTPSSubCharts(catMap, indicators) {
         let r2Panel = document.getElementById('tps-r2');
         
         if (r2Canvas && r2Panel) {
+            // สร้าง Grid wrapper เพื่อดึงเอา การ์ด 2 กล่อง + กราฟ มาเรียงแนวนอน
             let wrapper = document.getElementById('r2_super_wrapper');
             if (!wrapper) {
                 wrapper = document.createElement('div');
@@ -1187,6 +1190,7 @@ function renderTPSSubCharts(catMap, indicators) {
                 }
             }
             
+            // ตั้งค่ากล่องกราฟให้ยืดความสูงพอดีรับกับการ์ดคู่
             r2Canvas.parentElement.style.setProperty('height', '150px', 'important');
             r2Canvas.parentElement.style.setProperty('flex', '1', 'important');
         }
@@ -1222,7 +1226,7 @@ function renderTPSSubCharts(catMap, indicators) {
 }
 
 // ============================================================
-// 9. ฟังก์ชันเสริมวาดการ์ด KPI 
+// 9. ฟังก์ชันเสริมวาดการ์ด KPI (เนี๊ยบระดับ Dribbble)
 // ============================================================
 function updateSubTabKPIs(panelId, items) {
     const panel = document.getElementById(panelId);
@@ -1240,11 +1244,9 @@ function updateSubTabKPIs(panelId, items) {
         cards = kpiRow.querySelectorAll('.nt-kpi'); 
     }
 
-    if (panelId !== 'tps-p3' && panelId !== 'tps-r2') {
-        kpiRow.style.display = 'grid';
-        kpiRow.style.gridTemplateColumns = 'repeat(auto-fit, minmax(280px, 1fr))';
-        kpiRow.style.gap = '24px'; 
-    }
+    kpiRow.style.display = 'grid';
+    kpiRow.style.gridTemplateColumns = 'repeat(auto-fit, minmax(280px, 1fr))';
+    kpiRow.style.gap = '24px'; 
 
     cards.forEach((card, i) => {
         if (i >= items.length) {
@@ -1300,6 +1302,96 @@ function updateSubTabKPIs(panelId, items) {
     });
 }
 
+// ============================================================
+// 🔥 10. ฟังก์ชันสแกนและซ่อมแซมกล่องแจ้งเตือนระดับโลก
+// ============================================================
+function upgradeAlertBanners(panelId, items) {
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+
+    // หน่วงเวลาเล็กน้อยเพื่อให้หน้าจอเดิมรันเสร็จก่อน แล้วเราค่อยเข้าไปแปลงโฉม
+    setTimeout(() => {
+        const divs = panel.querySelectorAll('div');
+        divs.forEach(div => {
+            const text = div.textContent;
+            // สแกนหากล่องที่มีคำเตือนต่างๆ และเป็นกล่องระดับชั้นในสุด
+            if ((text.includes('⚠') || text.includes('ไม่ผ่าน') || text.includes('เกินเกณฑ์')) && div.children.length <= 2) {
+                
+                if (div.classList.contains('premium-alert')) return; // ข้ามถ้าทำไปแล้ว
+                
+                let targetDiv = div.closest('.alert') || div;
+                if (targetDiv.classList.contains('premium-alert')) return;
+
+                let score = 0;
+                let maxScore = 0;
+                let worstItem = null;
+                let maxOverLimit = -9999;
+
+                // คำนวณจากข้อมูลจริงในปัจจุบัน
+                items.forEach(ind => {
+                    score += Number(ind.score) || 0;
+                    maxScore += Number(ind.maxScore) || 0;
+
+                    let name = String(ind.name || ind.code);
+                    let val = safeParse(ind.actual);
+                    
+                    if (val !== null) {
+                        let limit = parseMean(ind, 60);
+                        if (panelId === 'tps-p2') {
+                            if (name.includes('เจ้าหนี้') || name.startsWith('1.2.1')) limit = 180;
+                            else if (name.toUpperCase().includes('UC') || name.startsWith('1.2.2')) limit = 60;
+                            else if (name.includes('ขรก') || name.includes('ข้าราชการ') || name.startsWith('1.2.3')) limit = 60;
+                            else if (name.includes('คงคลัง') || name.includes('สินค้า') || name.startsWith('1.2.4')) limit = 60;
+                        }
+
+                        let isBad = false;
+                        let diff = 0;
+                        if (panelId === 'tps-p2' || panelId === 'tps-p3') {
+                            if (val > limit) { isBad = true; diff = val - limit; }
+                        } else {
+                            if (val < limit) { isBad = true; diff = limit - val; }
+                        }
+
+                        if (isBad && diff > maxOverLimit) {
+                            maxOverLimit = diff;
+                            worstItem = { ind, val, limit, name };
+                        }
+                    }
+                });
+
+                // วาดกล่องแจ้งเตือนใหม่สไตล์ Dribbble
+                if (score >= maxScore && maxScore > 0) {
+                    targetDiv.className = 'premium-alert success';
+                    targetDiv.innerHTML = `<span class="icon">✨</span> <div><strong>ยอดเยี่ยม!</strong> ผ่านเกณฑ์ทุกตัวชี้วัด (${score}/${maxScore} คะแนน)</div>`;
+                } else if (worstItem) {
+                    let title = worstItem.name;
+                    if (panelId === 'tps-p2') {
+                        if(title.startsWith('1.2.1') || title.includes('เจ้าหนี้')) title = 'ระยะเวลาชำระเจ้าหนี้การค้า';
+                        else if(title.startsWith('1.2.2') || title.toUpperCase().includes('UC') || title.includes('บัตรทอง')) title = 'ระยะเรียกเก็บหนี้สิทธิ UC';
+                        else if(title.startsWith('1.2.3') || title.includes('ขรก') || title.includes('ข้าราชการ')) title = 'ระยะเรียกเก็บหนี้สิทธิ OFC';
+                        else if(title.startsWith('1.2.4') || title.includes('คงคลัง') || title.includes('สินค้า')) title = 'การบริหารสินคงคลัง';
+                    } else if (panelId === 'tps-p3') {
+                        if(title.startsWith('1.3.1.3') || title.includes('LC')) title = 'LC ค่าแรงบุคลากร';
+                        else if(title.startsWith('1.3.1.4') || title.includes('ค่ายา')) title = 'MC ค่ายา';
+                        else if(title.startsWith('1.3.1.5') || title.includes('วิทย์')) title = 'MC ค่าวัสดุวิทย์ฯ';
+                        else if(title.startsWith('1.3.1.6') || title.includes('เวชภัณฑ์')) title = 'MC ค่าเวชภัณฑ์ฯ';
+                    }
+
+                    targetDiv.className = 'premium-alert danger';
+                    let unitStr = worstItem.ind.unit ? worstItem.ind.unit : 'วัน';
+                    if (panelId === 'tps-p2') unitStr = 'วัน';
+
+                    // ดึงค่าจริงจาก Array มารายงาน ป้องกันตัวเลขเพี้ยน 100%
+                    targetDiv.innerHTML = `<span class="icon">🚨</span> <div><strong>ไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน):</strong> ${title} พบค่า <b>${worstItem.val} ${unitStr}</b> (เกินเกณฑ์ที่ ${worstItem.limit} ${unitStr})</div>`;
+                } else {
+                    targetDiv.className = 'premium-alert warn';
+                    targetDiv.innerHTML = `<span class="icon">⚠️</span> <div><strong>แจ้งเตือน:</strong> มีบางตัวชี้วัดไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน)</div>`;
+                }
+            }
+        });
+    }, 200);
+}
+
 function updateERPOverviewTPS(totalScore, totalMax, grade, gi, catMap) {
     const allCards = document.querySelectorAll('#tab-erp-overview .ov-sc');
     let tpsCard = null;
@@ -1326,165 +1418,6 @@ function updateERPOverviewTPS(totalScore, totalMax, grade, gi, catMap) {
 
     const scoreText = tpsCard.querySelector('.ov-ring + div');
     if (scoreText) scoreText.textContent = 'คะแนน ' + totalScore + ' / ' + totalMax;
-}
-
-// ============================================================
-// 🔥 10. ฟังก์ชันสแกนและซ่อมแซมกล่องแจ้งเตือนระดับโลก (แก้ไขและปลอดภัย 100%)
-// ============================================================
-function upgradeAlertBanners(panelId, items) {
-    try {
-        const panel = document.getElementById(panelId);
-        if (!panel) return;
-
-        let attempts = 0;
-        let alertInterval = setInterval(() => {
-            attempts++;
-            if (attempts > 10) {
-                clearInterval(alertInterval);
-                return;
-            }
-
-            // ซ่อนกล่องแจ้งเตือนของระบบเดิมทั้งหมดอย่างปลอดภัย
-            const allAlerts = panel.querySelectorAll('.alert');
-            allAlerts.forEach(a => {
-                if (!a.classList.contains('premium-alert')) {
-                    a.style.setProperty('display', 'none', 'important');
-                }
-            });
-
-            // สร้างกล่อง Premium Alert
-            let pAlert = panel.querySelector('.premium-alert');
-            if (!pAlert) {
-                pAlert = document.createElement('div');
-                pAlert.className = 'premium-alert';
-                let kpiRow = panel.querySelector('.nt-kpi-row') || panel.querySelector('.row');
-                if (kpiRow && kpiRow.parentNode) {
-                    kpiRow.parentNode.insertBefore(pAlert, kpiRow);
-                } else {
-                    panel.prepend(pAlert);
-                }
-            }
-
-            // ----------------------------------------------------
-            // ข้อมูลการเงิน (FIN)
-            // ----------------------------------------------------
-            if (panelId === 'tps-fin') {
-                let ebitdaVal = 0, niVal = 0, nwcVal = 0, netMaintVal = 0, cashRatioVal = 0;
-                let ebitdaFound = false, niFound = false, nwcFound = false, netMaintFound = false, cashRatioFound = false;
-
-                if (items && items.length > 0) {
-                    items.forEach(ind => {
-                        let n = String(ind.name || '').toLowerCase();
-                        let val = safeParse(ind.actual);
-                        if (val === null) return;
-                        
-                        if (n.includes('ebitda')) { ebitdaVal = val; ebitdaFound = true; }
-                        else if (n === 'ni' || n.includes('รายได้สูง (ต่ำ)') || n.includes('net income')) { niVal = val; niFound = true; }
-                        else if (n.includes('nwc') || n.includes('ทุนสำรอง')) { nwcVal = val; nwcFound = true; }
-                        else if (n.includes('เงินบำรุง')) { netMaintVal = val; netMaintFound = true; }
-                        else if (n.includes('cash ratio') || n.includes('สภาพคล่อง')) { cashRatioVal = val; cashRatioFound = true; }
-                    });
-                }
-
-                const formatM = (v) => {
-                    let formatted = Math.abs(v) > 10000 ? (v / 1000000).toFixed(2) : v.toFixed(2);
-                    return (v > 0 ? '+' + formatted : formatted) + ' M';
-                };
-
-                let ebitdaStr = ebitdaFound ? formatM(ebitdaVal) : '-';
-                let niStr = niFound ? formatM(niVal) : '-';
-                let nwcStr = nwcFound ? formatM(nwcVal) : '-';
-                let cashRatioStr = cashRatioFound ? cashRatioVal.toFixed(2) : '-';
-                
-                let niSign = niVal >= 0 ? 'เป็นบวก' : 'ติดลบ';
-                let statusText = (cashRatioVal >= 0.8) ? 'สภาพคล่องดี' : 'สภาพคล่องตึงตัว';
-                let alertClass = (cashRatioVal >= 0.8 && ebitdaVal >= 0) ? 'success' : 'warn';
-                if (cashRatioVal < 0.5 || ebitdaVal < 0) alertClass = 'danger';
-                
-                let icon = alertClass === 'success' ? '✅' : alertClass === 'danger' ? '🚨' : '⚠️';
-                let netMaintPart = netMaintFound ? `เงินบำรุงสุทธิ <b>${formatM(netMaintVal)}</b>, ` : '';
-
-                pAlert.className = 'premium-alert ' + alertClass;
-                pAlert.innerHTML = `<span class="icon">${icon}</span> <div><strong>สรุปฐานะการเงินปัจจุบัน:</strong> EBITDA <b>${ebitdaStr}</b>, NI <b>${niStr}</b> ${niSign} NWC <b>${nwcStr}</b>, ${netMaintPart}และ Cash Ratio <b>${cashRatioStr}</b> (${statusText})</div>`;
-                return;
-            }
-
-            // ----------------------------------------------------
-            // แท็บอื่นๆ
-            // ----------------------------------------------------
-            let score = 0;
-            let maxScore = 0;
-            let failedItems = [];
-
-            if (items && items.length > 0) {
-                items.forEach(ind => {
-                    let s = Number(ind.score) || 0;
-                    let ms = Number(ind.maxScore) || 0;
-                    score += s;
-                    maxScore += ms;
-
-                    if (ms > 0 && s < ms) {
-                        failedItems.push(ind);
-                    }
-                });
-            }
-
-            // 1.1 PlanFin (ดึงข้อมูลให้ตรงการ์ด 100%)
-            if (panelId === 'tps-p1' && items && items.length >= 2) {
-                let revItem = items.find(i => String(i.name).includes('รายได้')) || items[0];
-                let expItem = items.find(i => String(i.name).includes('ค่าใช้จ่าย')) || items[1];
-                
-                let s1 = revItem && revItem.actual !== null ? safeParse(revItem.actual).toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
-                let s2 = expItem && expItem.actual !== null ? safeParse(expItem.actual).toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
-                
-                if (score >= maxScore && maxScore > 0) {
-                    pAlert.className = 'premium-alert success';
-                    pAlert.innerHTML = `<span class="icon">✅</span> <div><strong>ผ่านเต็ม ${score}/${maxScore} คะแนน:</strong> มิติรายได้ ${s1}% และมิติค่าใช้จ่าย ${s2}% อยู่ในเกณฑ์ ±5% ทั้งคู่</div>`;
-                } else {
-                    pAlert.className = 'premium-alert danger';
-                    pAlert.innerHTML = `<span class="icon">🚨</span> <div><strong>ไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน):</strong> มิติรายได้ ${s1}% และมิติค่าใช้จ่าย ${s2}% (เกณฑ์ ±5%)</div>`;
-                }
-                return;
-            }
-
-            // กรณีอื่นๆ
-            if (score >= maxScore && maxScore > 0) {
-                pAlert.className = 'premium-alert success';
-                pAlert.innerHTML = `<span class="icon">✨</span> <div><strong>ยอดเยี่ยม!</strong> ผ่านเกณฑ์ทุกตัวชี้วัด (${score}/${maxScore} คะแนน)</div>`;
-            } else if (failedItems.length > 0) {
-                let wItem = failedItems[0];
-                let title = String(wItem.name || wItem.code);
-                let nameUpper = title.toUpperCase();
-                
-                if (panelId === 'tps-p2') {
-                    if(title.startsWith('1.2.1') || title.includes('เจ้าหนี้')) title = 'ระยะเวลาชำระเจ้าหนี้การค้า';
-                    else if(title.startsWith('1.2.2') || nameUpper.includes('UC') || title.includes('บัตรทอง')) title = 'ระยะเรียกเก็บหนี้สิทธิ UC';
-                    else if(title.startsWith('1.2.3') || title.includes('ขรก') || title.includes('ข้าราชการ')) title = 'ระยะเรียกเก็บหนี้สิทธิ OFC';
-                    else if(title.startsWith('1.2.4') || title.includes('คงคลัง') || title.includes('สินค้า')) title = 'การบริหารสินคงคลัง';
-                } else if (panelId === 'tps-p3') {
-                    if(title.startsWith('1.3.1.3') || title.includes('LC') || title.includes('แรงงาน')) title = 'LC ค่าแรงบุคลากร';
-                    else if(title.startsWith('1.3.1.4') || title.includes('ค่ายา')) title = 'MC ค่ายา';
-                    else if(title.startsWith('1.3.1.5') || title.includes('วิทย์')) title = 'MC ค่าวัสดุวิทย์ฯ';
-                    else if(title.startsWith('1.3.1.6') || title.includes('เวชภัณฑ์')) title = 'MC ค่าเวชภัณฑ์ฯ';
-                } else {
-                    title = title.replace(/^([\d\.]+\s)/, ''); 
-                }
-
-                let actNum = safeParse(wItem.actual);
-                let valStr = actNum !== null ? actNum.toLocaleString('en-US', {maximumFractionDigits: 2}) : '-';
-                let unitStr = wItem.unit ? wItem.unit : (panelId === 'tps-p2' ? 'วัน' : '');
-
-                pAlert.className = 'premium-alert danger';
-                pAlert.innerHTML = `<span class="icon">🚨</span> <div><strong>ไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน):</strong> ${title} พบค่า <b>${valStr} ${unitStr}</b> <span style="opacity:0.8; font-size:0.95em;">(${wItem.criteria || 'ต่ำ/สูงกว่าเกณฑ์'})</span></div>`;
-            } else {
-                pAlert.className = 'premium-alert warn';
-                pAlert.innerHTML = `<span class="icon">⚠️</span> <div><strong>แจ้งเตือน:</strong> มีบางตัวชี้วัดต้องตรวจสอบ (${score}/${maxScore} คะแนน)</div>`;
-            }
-
-        }, 200);
-    } catch(e) {
-        console.error("Alert Banners Error:", e);
-    }
 }
 
 function renderTPSChartsHardcoded() {
