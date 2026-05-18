@@ -10,79 +10,83 @@ function injectPremiumCSS() {
     style.id = 'tps-premium-style';
     style.innerHTML = `
         /* -------------------------------------------
-           1. Main KPI Card - Clean, Airy & Fixed Layout
+           1. Main KPI Card - Premium Dribbble UI
         ------------------------------------------- */
         .nt-kpi {
             position: relative !important;
             display: flex !important;
             flex-direction: column !important;
-            justify-content: flex-start !important;
+            justify-content: space-between !important; 
             background: #ffffff !important;
             border-radius: 20px !important; 
             border: 1px solid rgba(226, 232, 240, 0.8) !important;
-            box-shadow: 0 4px 20px -10px rgba(15, 23, 42, 0.05) !important; 
-            padding: 20px 24px 16px 20px !important; 
-            min-height: 140px !important; 
+            box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08) !important; 
+            padding: 24px !important; 
+            min-height: 160px !important; 
             overflow: hidden !important;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
             z-index: 1 !important;
         }
 
-        .nt-kpi.c-green, .nt-kpi.c-red, .nt-kpi.c-amber, .nt-kpi.c-blue {
-            border-top-color: rgba(226, 232, 240, 0.8) !important;
-            border-top-width: 1px !important;
-        }
+        /* ขอบสีด้านบนหนา 4px เพื่อบอกสถานะได้ชัดเจนระดับพรีเมียม */
+        .nt-kpi.c-green { border-top: 4px solid #10b981 !important; }
+        .nt-kpi.c-amber { border-top: 4px solid #f59e0b !important; }
+        .nt-kpi.c-red   { border-top: 4px solid #ef4444 !important; }
+        .nt-kpi.c-blue  { border-top: 4px solid #3b82f6 !important; }
 
         .nt-kpi:hover {
-            transform: translateY(-4px) !important;
-            box-shadow: 0 16px 32px -12px rgba(15, 23, 42, 0.1) !important;
-            border-color: rgba(203, 213, 225, 0.8) !important;
+            transform: translateY(-6px) !important;
+            box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.15) !important;
+            border-color: rgba(203, 213, 225, 1) !important;
         }
 
         /* -------------------------------------------
            2. Typography & Hierarchy (ตัดคำเนี๊ยบๆ)
         ------------------------------------------- */
         .nt-lbl {
-            color: #475569 !important;
+            color: #64748b !important;
             font-weight: 600 !important;
-            font-size: 0.85rem !important; 
+            font-size: 0.95rem !important; 
             line-height: 1.5 !important;
-            max-width: calc(100% - 50px) !important; 
+            max-width: calc(100% - 60px) !important; 
             display: -webkit-box !important;
             -webkit-line-clamp: 2 !important; 
             -webkit-box-orient: vertical !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
-            margin-bottom: 8px !important; 
+            margin-bottom: 12px !important; 
             min-height: 2.5em !important; 
         }
         
         .nt-lbl-code {
-            color: #94a3b8 !important;
-            font-weight: 500 !important;
+            color: #64748b !important;
+            font-weight: 700 !important;
             font-size: 0.75rem !important; 
-            display: block !important;
-            margin-bottom: 2px !important;
-            letter-spacing: 0.02em !important;
+            display: inline-block !important;
+            margin-bottom: 6px !important;
+            letter-spacing: 0.03em !important;
+            background: #f1f5f9 !important;
+            padding: 2px 6px !important;
+            border-radius: 6px !important;
         }
 
         .nt-val {
             font-weight: 800 !important;
-            font-size: 1.8rem !important; 
+            font-size: 2.1rem !important; 
             color: #0f172a !important;
-            letter-spacing: -0.04em !important; 
+            letter-spacing: -0.03em !important; 
             font-variant-numeric: tabular-nums !important;
-            margin: 0 0 12px 0 !important; 
+            margin: 0 0 16px 0 !important; 
             display: flex !important;
             align-items: baseline !important;
             flex-wrap: wrap !important;
-            gap: 6px !important;
+            gap: 8px !important;
             line-height: 1 !important;
         }
         .nt-val small {
             font-weight: 600 !important;
-            font-size: 0.9rem !important; 
-            color: #64748b !important;
+            font-size: 1rem !important; 
+            color: #94a3b8 !important;
             letter-spacing: 0 !important;
         }
 
@@ -93,41 +97,43 @@ function injectPremiumCSS() {
             position: absolute !important;
             top: 24px !important;
             right: 24px !important;
-            padding: 4px 8px !important;
-            border-radius: 6px !important;
+            padding: 6px 10px !important;
+            border-radius: 8px !important;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-            font-size: 0.75rem !important;
+            font-size: 0.8rem !important;
             font-weight: 700 !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
             gap: 2px !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
         }
-        .nt-pill.good { background: #ecfdf5 !important; color: #059669 !important; }
-        .nt-pill.warn { background: #fffbeb !important; color: #d97706 !important; }
-        .nt-pill.bad  { background: #fef2f2 !important; color: #dc2626 !important; }
+        .nt-pill.good { background: #ecfdf5 !important; color: #059669 !important; border: 1px solid #d1fae5 !important; }
+        .nt-pill.warn { background: #fffbeb !important; color: #d97706 !important; border: 1px solid #fef3c7 !important; }
+        .nt-pill.bad  { background: #fef2f2 !important; color: #dc2626 !important; border: 1px solid #fee2e2 !important; }
 
         .nt-foot {
             margin-top: auto !important; 
-            padding-top: 0 !important;
+            padding-top: 12px !important; 
+            border-top: 1px dashed rgba(226, 232, 240, 0.8) !important; 
             color: #94a3b8 !important;
-            font-size: 0.8rem !important;
+            font-size: 0.85rem !important;
             font-weight: 500 !important;
             display: flex !important;
             align-items: center !important;
-            gap: 6px !important;
+            gap: 8px !important;
         }
         
         .nt-foot::before {
             content: '' !important;
             display: inline-block !important;
-            width: 6px !important;
-            height: 6px !important;
+            width: 8px !important;
+            height: 8px !important;
             border-radius: 50% !important;
         }
-        .nt-kpi.c-green .nt-foot::before { background-color: #10b981 !important; }
-        .nt-kpi.c-amber .nt-foot::before { background-color: #f59e0b !important; }
-        .nt-kpi.c-red .nt-foot::before { background-color: #ef4444 !important; }
+        .nt-kpi.c-green .nt-foot::before { background-color: #10b981 !important; box-shadow: 0 0 0 2px rgba(16,185,129,0.2) !important; }
+        .nt-kpi.c-amber .nt-foot::before { background-color: #f59e0b !important; box-shadow: 0 0 0 2px rgba(245,158,11,0.2) !important; }
+        .nt-kpi.c-red .nt-foot::before { background-color: #ef4444 !important; box-shadow: 0 0 0 2px rgba(239,68,68,0.2) !important; }
         .nt-kpi.c-blue .nt-foot::before { display: none !important; }
 
         /* -------------------------------------------
@@ -182,26 +188,31 @@ function injectPremiumCSS() {
                 gap: 12px !important; 
             }
             #tps-p3 .nt-kpi {
-                padding: 14px 12px !important; 
-                min-height: 110px !important;
+                padding: 16px 12px !important; 
+                min-height: 120px !important;
             }
             #tps-p3 .nt-val {
-                font-size: 1.35rem !important; 
-                margin-bottom: 4px !important;
+                font-size: 1.45rem !important; 
+                margin-bottom: 6px !important;
             }
             #tps-p3 .nt-val small {
-                font-size: 0.8rem !important;
+                font-size: 0.85rem !important;
             }
             #tps-p3 .nt-lbl {
-                font-size: 0.75rem !important;
+                font-size: 0.8rem !important;
                 max-width: calc(100% - 35px) !important;
                 min-height: 2.2em !important;
+                margin-bottom: 8px !important;
             }
             #tps-p3 .nt-pill {
-                top: 12px !important;
+                top: 16px !important;
                 right: 12px !important;
                 padding: 2px 6px !important;
                 font-size: 0.65rem !important;
+            }
+            #tps-p3 .nt-foot {
+                padding-top: 8px !important;
+                font-size: 0.75rem !important;
             }
         }
 
@@ -1303,7 +1314,7 @@ function updateSubTabKPIs(panelId, items) {
 }
 
 // ============================================================
-// 🔥 10. ฟังก์ชันสแกนและซ่อมแซมกล่องแจ้งเตือนระดับโลก
+// 🔥 10. ฟังก์ชันสแกนและซ่อมแซมกล่องแจ้งเตือนระดับโลก (แก้ไขแล้ว)
 // ============================================================
 function upgradeAlertBanners(panelId, items) {
     const panel = document.getElementById(panelId);
@@ -1325,36 +1336,24 @@ function upgradeAlertBanners(panelId, items) {
                 let score = 0;
                 let maxScore = 0;
                 let worstItem = null;
-                let maxOverLimit = -9999;
 
-                // คำนวณจากข้อมูลจริงในปัจจุบัน
+                // 🔥 แก้ไขตรรกะการหา worstItem ใหม่ อิงจากคะแนน (score) จริงๆ ที่ได้เทียบกับคะแนนเต็ม ป้องกันการ Hardcode เกณฑ์ผิด
                 items.forEach(ind => {
-                    score += Number(ind.score) || 0;
-                    maxScore += Number(ind.maxScore) || 0;
-
-                    let name = String(ind.name || ind.code);
-                    let val = safeParse(ind.actual);
+                    let s = Number(ind.score) || 0;
+                    let m = Number(ind.maxScore) || 0;
                     
-                    if (val !== null) {
-                        let limit = parseMean(ind, 60);
-                        if (panelId === 'tps-p2') {
-                            if (name.includes('เจ้าหนี้') || name.startsWith('1.2.1')) limit = 180;
-                            else if (name.toUpperCase().includes('UC') || name.startsWith('1.2.2')) limit = 60;
-                            else if (name.includes('ขรก') || name.includes('ข้าราชการ') || name.startsWith('1.2.3')) limit = 60;
-                            else if (name.includes('คงคลัง') || name.includes('สินค้า') || name.startsWith('1.2.4')) limit = 60;
-                        }
+                    score += s;
+                    maxScore += m;
 
-                        let isBad = false;
-                        let diff = 0;
-                        if (panelId === 'tps-p2' || panelId === 'tps-p3') {
-                            if (val > limit) { isBad = true; diff = val - limit; }
-                        } else {
-                            if (val < limit) { isBad = true; diff = limit - val; }
-                        }
-
-                        if (isBad && diff > maxOverLimit) {
-                            maxOverLimit = diff;
-                            worstItem = { ind, val, limit, name };
+                    // ถ้ามีคะแนนเต็ม และได้คะแนน 0 (หรือไม่เต็ม) แปลว่าไม่ผ่านเกณฑ์
+                    if (m > 0 && s < m) {
+                        // เก็บตัวที่ไม่ผ่านตัวแรกไว้แสดงผล
+                        if (!worstItem) {
+                            worstItem = {
+                                ind: ind,
+                                val: ind.actual !== null && ind.actual !== undefined ? ind.actual : '-',
+                                name: String(ind.name || ind.code)
+                            };
                         }
                     }
                 });
@@ -1378,11 +1377,11 @@ function upgradeAlertBanners(panelId, items) {
                     }
 
                     targetDiv.className = 'premium-alert danger';
-                    let unitStr = worstItem.ind.unit ? worstItem.ind.unit : 'วัน';
-                    if (panelId === 'tps-p2') unitStr = 'วัน';
+                    let unitStr = worstItem.ind.unit ? worstItem.ind.unit : '';
+                    let criteriaStr = worstItem.ind.criteria ? worstItem.ind.criteria : 'เกณฑ์ที่กำหนด';
 
-                    // ดึงค่าจริงจาก Array มารายงาน ป้องกันตัวเลขเพี้ยน 100%
-                    targetDiv.innerHTML = `<span class="icon">🚨</span> <div><strong>ไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน):</strong> ${title} พบค่า <b>${worstItem.val} ${unitStr}</b> (เกินเกณฑ์ที่ ${worstItem.limit} ${unitStr})</div>`;
+                    // 🔥 แสดงค่า actual ตรงๆ และใช้ criteria จาก data จริงๆ ไม่มโนตัวเลขขึ้นมาเอง
+                    targetDiv.innerHTML = `<span class="icon">🚨</span> <div><strong>ไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน):</strong> ${title} พบค่า <b>${worstItem.val} ${unitStr}</b> (เกณฑ์: ${criteriaStr})</div>`;
                 } else {
                     targetDiv.className = 'premium-alert warn';
                     targetDiv.innerHTML = `<span class="icon">⚠️</span> <div><strong>แจ้งเตือน:</strong> มีบางตัวชี้วัดไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน)</div>`;
