@@ -534,6 +534,8 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
   background:linear-gradient(160deg,#ffffff,#fafcfe) !important;
   border:1px solid rgba(0,0,0,0.06) !important;
   border-radius:14px !important;
+  position:relative !important;
+  overflow:hidden !important;
   box-shadow:
     0 1px 2px rgba(0,0,0,0.03),
     0 4px 10px rgba(0,0,0,0.04),
@@ -584,13 +586,14 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
     0 16px 36px rgba(0,0,0,0.03),
     inset 0 1px 0 rgba(255,255,255,0.95) !important;
   transition:all 0.45s cubic-bezier(0.25,0.46,0.45,0.94) !important;
-  position:relative;
+  position:relative !important;
+  overflow:hidden !important;
 }
 .hero-card::after{
-  content:'';position:absolute;top:0;left:0;width:60%;height:60%;
+  content:'';position:absolute !important;top:0;left:0;width:60%;height:60%;
   border-radius:20px 0 0 0;
   background:linear-gradient(135deg,rgba(22,163,74,0.03),transparent 50%);
-  pointer-events:none;z-index:0;
+  pointer-events:none !important;z-index:0 !important;
 }
 .hero-card>*{position:relative;z-index:1;}
 .hero-card:hover{
@@ -817,10 +820,14 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 
 /* ── Z-index protection: ::before decorative strips stay below content ── */
 .nt-kpi::before,.billing-kpi::after,.fund-card::before,.erp-fund-card::before,
-.pf-fund-card::before,.compact-card::before,.nt-assess-card::before{z-index:0 !important;pointer-events:none;}
+.pf-fund-card::before,.compact-card::before,.nt-assess-card::before{z-index:0 !important;pointer-events:none !important;}
+.stat-card>*,.erp-stat-card>*,.hero-card>*,
 .nt-kpi>*,.billing-kpi>*,.fund-card>*,.erp-fund-card>*,
 .pf-fund-card>*,.compact-card>*,.nt-assess-card>*,
-.ov-sc>*,.erp-budget-big-card>*,.service-card>*{position:relative;z-index:1;}
+.ov-sc>*,.erp-budget-big-card>*,.service-card>*{position:relative !important;z-index:1 !important;}
+.stat-card::before,.stat-card::after,
+.erp-stat-card::before,.erp-stat-card::after,
+.hero-card::before,.hero-card::after{z-index:0 !important;pointer-events:none !important;}
 
 /* ============================================================
    GREEN PASTEL THEME — กระทรวงสาธารณสุข
