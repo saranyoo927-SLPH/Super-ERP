@@ -1303,7 +1303,7 @@ function updateSubTabKPIs(panelId, items) {
 }
 
 // ============================================================
-// 🔥 10. ฟังก์ชันสแกนและซ่อมแซมกล่องแจ้งเตือนระดับโลก
+// 🔥 10. ฟังก์ชันสแกนและซ่อมแซมกล่องแจ้งเตือนระดับโลก (แก้ไขแล้ว)
 // ============================================================
 function upgradeAlertBanners(panelId, items) {
     const panel = document.getElementById(panelId);
@@ -1325,36 +1325,24 @@ function upgradeAlertBanners(panelId, items) {
                 let score = 0;
                 let maxScore = 0;
                 let worstItem = null;
-                let maxOverLimit = -9999;
 
-                // คำนวณจากข้อมูลจริงในปัจจุบัน
+                // 🔥 แก้ไขตรรกะการหา worstItem ใหม่ อิงจากคะแนน (score) จริงๆ ที่ได้เทียบกับคะแนนเต็ม ป้องกันการ Hardcode เกณฑ์ผิด
                 items.forEach(ind => {
-                    score += Number(ind.score) || 0;
-                    maxScore += Number(ind.maxScore) || 0;
-
-                    let name = String(ind.name || ind.code);
-                    let val = safeParse(ind.actual);
+                    let s = Number(ind.score) || 0;
+                    let m = Number(ind.maxScore) || 0;
                     
-                    if (val !== null) {
-                        let limit = parseMean(ind, 60);
-                        if (panelId === 'tps-p2') {
-                            if (name.includes('เจ้าหนี้') || name.startsWith('1.2.1')) limit = 180;
-                            else if (name.toUpperCase().includes('UC') || name.startsWith('1.2.2')) limit = 60;
-                            else if (name.includes('ขรก') || name.includes('ข้าราชการ') || name.startsWith('1.2.3')) limit = 60;
-                            else if (name.includes('คงคลัง') || name.includes('สินค้า') || name.startsWith('1.2.4')) limit = 60;
-                        }
+                    score += s;
+                    maxScore += m;
 
-                        let isBad = false;
-                        let diff = 0;
-                        if (panelId === 'tps-p2' || panelId === 'tps-p3') {
-                            if (val > limit) { isBad = true; diff = val - limit; }
-                        } else {
-                            if (val < limit) { isBad = true; diff = limit - val; }
-                        }
-
-                        if (isBad && diff > maxOverLimit) {
-                            maxOverLimit = diff;
-                            worstItem = { ind, val, limit, name };
+                    // ถ้ามีคะแนนเต็ม และได้คะแนน 0 (หรือไม่เต็ม) แปลว่าไม่ผ่านเกณฑ์
+                    if (m > 0 && s < m) {
+                        // เก็บตัวที่ไม่ผ่านตัวแรกไว้แสดงผล
+                        if (!worstItem) {
+                            worstItem = {
+                                ind: ind,
+                                val: ind.actual !== null && ind.actual !== undefined ? ind.actual : '-',
+                                name: String(ind.name || ind.code)
+                            };
                         }
                     }
                 });
@@ -1378,11 +1366,11 @@ function upgradeAlertBanners(panelId, items) {
                     }
 
                     targetDiv.className = 'premium-alert danger';
-                    let unitStr = worstItem.ind.unit ? worstItem.ind.unit : 'วัน';
-                    if (panelId === 'tps-p2') unitStr = 'วัน';
+                    let unitStr = worstItem.ind.unit ? worstItem.ind.unit : '';
+                    let criteriaStr = worstItem.ind.criteria ? worstItem.ind.criteria : 'เกณฑ์ที่กำหนด';
 
-                    // ดึงค่าจริงจาก Array มารายงาน ป้องกันตัวเลขเพี้ยน 100%
-                    targetDiv.innerHTML = `<span class="icon">🚨</span> <div><strong>ไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน):</strong> ${title} พบค่า <b>${worstItem.val} ${unitStr}</b> (เกินเกณฑ์ที่ ${worstItem.limit} ${unitStr})</div>`;
+                    // 🔥 แสดงค่า actual ตรงๆ และใช้ criteria จาก data จริงๆ ไม่มโนตัวเลขขึ้นมาเอง
+                    targetDiv.innerHTML = `<span class="icon">🚨</span> <div><strong>ไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน):</strong> ${title} พบค่า <b>${worstItem.val} ${unitStr}</b> (เกณฑ์: ${criteriaStr})</div>`;
                 } else {
                     targetDiv.className = 'premium-alert warn';
                     targetDiv.innerHTML = `<span class="icon">⚠️</span> <div><strong>แจ้งเตือน:</strong> มีบางตัวชี้วัดไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน)</div>`;
