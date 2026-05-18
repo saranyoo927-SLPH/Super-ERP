@@ -450,194 +450,365 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 [data-tab="finance"]:hover:not(.tab-active)     {color:#14b8a6 !important;border-color:rgba(20,184,166,0.3) !important;background:rgba(20,184,166,0.08) !important;box-shadow:0 3px 10px rgba(20,184,166,0.15) !important;}
 [data-tab="unitcost"]:hover:not(.tab-active)    {color:#475569 !important;border-color:rgba(71,85,105,0.3) !important;background:rgba(71,85,105,0.08) !important;box-shadow:0 3px 10px rgba(71,85,105,0.15) !important;}
 
+/* ══════════════════════════════════════════════════════════
+   ✨ PREMIUM CARD SYSTEM — Glassmorphism + Depth + Motion
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Shared card animation keyframes ──────────────────── */
+@keyframes cardShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes subtlePulse{0%,100%{opacity:0.6}50%{opacity:1}}
+
 /* ── Stat cards (budget overview) ─────────────────────── */
 .stat-card{
-  background:linear-gradient(145deg,#fff 0%,#f8f7ff 100%) !important;
-  border:1px solid rgba(99,102,241,0.1) !important;
-  box-shadow:0 2px 12px rgba(99,102,241,0.07),0 1px 3px rgba(0,0,0,0.04) !important;
+  background:linear-gradient(160deg,#ffffff 0%,#f8fafb 40%,#f0fdf4 100%) !important;
+  border:1px solid rgba(22,163,74,0.12) !important;
+  border-radius:16px !important;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 4px 12px rgba(22,163,74,0.06),
+    0 12px 28px rgba(22,163,74,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.9) !important;
   position:relative;overflow:hidden;
+  transition:all 0.4s cubic-bezier(0.25,0.46,0.45,0.94) !important;
 }
 .stat-card::after{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,#6366f1,#8b5cf6,#a78bfa);
-  border-radius:12px 12px 0 0;
+  content:'';position:absolute;top:0;left:0;right:0;height:3.5px;
+  background:linear-gradient(90deg,#16a34a,#059669,#14b8a6,#059669);
+  background-size:200% 100%;
+  animation:cardShimmer 6s ease infinite;
+  border-radius:16px 16px 0 0;
+}
+.stat-card::before{
+  content:'';position:absolute;top:-50%;right:-50%;width:100%;height:100%;
+  background:radial-gradient(circle,rgba(22,163,74,0.04) 0%,transparent 70%);
+  pointer-events:none;
+  transition:opacity 0.4s ease;opacity:0;
 }
 .stat-card:hover{
-  box-shadow:0 10px 36px rgba(99,102,241,0.18) !important;
-  transform:translateY(-3px) !important;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.04),
+    0 8px 20px rgba(22,163,74,0.1),
+    0 20px 44px rgba(22,163,74,0.08),
+    inset 0 1px 0 rgba(255,255,255,1) !important;
+  transform:translateY(-4px) !important;
+  border-color:rgba(22,163,74,0.2) !important;
 }
+.stat-card:hover::before{opacity:1;}
 
 /* ── ERP Stat cards ───────────────────────────────────── */
 .erp-stat-card{
-  box-shadow:0 2px 14px rgba(0,0,0,0.06) !important;
-  border:1px solid rgba(255,255,255,0.9) !important;
+  border-radius:14px !important;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.03),
+    0 4px 12px rgba(0,0,0,0.04),
+    0 8px 24px rgba(0,0,0,0.03),
+    inset 0 1px 0 rgba(255,255,255,0.95) !important;
+  border:1px solid rgba(0,0,0,0.06) !important;
+  transition:all 0.35s cubic-bezier(0.25,0.46,0.45,0.94) !important;
+  position:relative;
+}
+.erp-stat-card::after{
+  content:'';position:absolute;bottom:0;left:12px;right:12px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,0,0,0.04),transparent);
 }
 .erp-stat-card:hover{
-  box-shadow:0 8px 28px rgba(0,0,0,0.1) !important;
-  transform:translateY(-2px) !important;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.04),
+    0 10px 28px rgba(22,163,74,0.1),
+    0 20px 40px rgba(0,0,0,0.04),
+    inset 0 1px 0 rgba(255,255,255,1) !important;
+  transform:translateY(-3px) !important;
 }
-.erp-stat-card.blue{background:linear-gradient(145deg,#fff 55%,#eef2ff) !important;}
-.erp-stat-card.green{background:linear-gradient(145deg,#fff 55%,#ecfdf5) !important;}
-.erp-stat-card.purple{background:linear-gradient(145deg,#fff 55%,#f5f3ff) !important;}
-.erp-stat-card.amber{background:linear-gradient(145deg,#fff 55%,#fffbeb) !important;}
-.erp-stat-card.rose{background:linear-gradient(145deg,#fff 55%,#fff1f2) !important;}
-.erp-stat-card.cyan{background:linear-gradient(145deg,#fff 55%,#ecfeff) !important;}
+.erp-stat-card.blue{background:linear-gradient(155deg,#ffffff 40%,#eef2ff 75%,#e0e7ff) !important;}
+.erp-stat-card.green{background:linear-gradient(155deg,#ffffff 40%,#ecfdf5 75%,#d1fae5) !important;}
+.erp-stat-card.purple{background:linear-gradient(155deg,#ffffff 40%,#f5f3ff 75%,#ede9fe) !important;}
+.erp-stat-card.amber{background:linear-gradient(155deg,#ffffff 40%,#fffbeb 75%,#fef3c7) !important;}
+.erp-stat-card.rose{background:linear-gradient(155deg,#ffffff 40%,#fff1f2 75%,#ffe4e6) !important;}
+.erp-stat-card.cyan{background:linear-gradient(155deg,#ffffff 40%,#ecfeff 75%,#cffafe) !important;}
 
 /* ── KPI cards (nt-kpi) ───────────────────────────────── */
 .nt-kpi{
-  background:linear-gradient(145deg,#fff,#fafbff) !important;
-  border:1px solid rgba(99,102,241,0.1) !important;
-  box-shadow:0 2px 10px rgba(0,0,0,0.04) !important;
+  background:linear-gradient(160deg,#ffffff,#fafcfe) !important;
+  border:1px solid rgba(0,0,0,0.06) !important;
+  border-radius:14px !important;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.03),
+    0 4px 10px rgba(0,0,0,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  transition:all 0.35s cubic-bezier(0.25,0.46,0.45,0.94) !important;
 }
-.nt-kpi:hover{box-shadow:0 8px 24px rgba(99,102,241,0.14) !important;}
-.nt-kpi.c-blue{background:linear-gradient(145deg,#fff 55%,#eef2ff) !important;}
-.nt-kpi.c-green{background:linear-gradient(145deg,#fff 55%,#ecfdf5) !important;}
-.nt-kpi.c-amber{background:linear-gradient(145deg,#fff 55%,#fffbeb) !important;}
-.nt-kpi.c-red{background:linear-gradient(145deg,#fff 55%,#fff1f2) !important;}
-.nt-kpi.c-cyan{background:linear-gradient(145deg,#fff 55%,#ecfeff) !important;}
-.nt-kpi.c-purple{background:linear-gradient(145deg,#fff 55%,#f5f3ff) !important;}
-.nt-kpi.c-orange{background:linear-gradient(145deg,#fff 55%,#fff7ed) !important;}
+.nt-kpi:hover{
+  box-shadow:0 8px 28px rgba(22,163,74,0.12),0 2px 6px rgba(0,0,0,0.04),inset 0 1px 0 rgba(255,255,255,1) !important;
+  transform:translateY(-2px) !important;
+}
+.nt-kpi.c-blue{background:linear-gradient(155deg,#fff 45%,#eef2ff 80%,#e0e7ff) !important;}
+.nt-kpi.c-green{background:linear-gradient(155deg,#fff 45%,#ecfdf5 80%,#d1fae5) !important;}
+.nt-kpi.c-amber{background:linear-gradient(155deg,#fff 45%,#fffbeb 80%,#fef3c7) !important;}
+.nt-kpi.c-red{background:linear-gradient(155deg,#fff 45%,#fff1f2 80%,#ffe4e6) !important;}
+.nt-kpi.c-cyan{background:linear-gradient(155deg,#fff 45%,#ecfeff 80%,#cffafe) !important;}
+.nt-kpi.c-purple{background:linear-gradient(155deg,#fff 45%,#f5f3ff 80%,#ede9fe) !important;}
+.nt-kpi.c-orange{background:linear-gradient(155deg,#fff 45%,#fff7ed 80%,#ffedd5) !important;}
 
 /* ── Billing KPI ──────────────────────────────────────── */
 .billing-kpi{
-  background:linear-gradient(145deg,#fff 60%,#f8f7ff) !important;
-  box-shadow:0 2px 14px rgba(0,0,0,0.06) !important;
-  border:1px solid rgba(99,102,241,0.09) !important;
+  background:linear-gradient(160deg,#ffffff 50%,#f0fdf4) !important;
+  border:1px solid rgba(22,163,74,0.1) !important;
+  border-radius:16px !important;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.03),
+    0 4px 14px rgba(22,163,74,0.06),
+    0 10px 24px rgba(0,0,0,0.03),
+    inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  transition:all 0.4s cubic-bezier(0.25,0.46,0.45,0.94) !important;
 }
 .billing-kpi:hover{
-  box-shadow:0 8px 28px rgba(99,102,241,0.15) !important;
-  transform:translateY(-3px) !important;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.03),
+    0 10px 28px rgba(22,163,74,0.12),
+    0 20px 44px rgba(0,0,0,0.04),
+    inset 0 1px 0 rgba(255,255,255,1) !important;
+  transform:translateY(-4px) !important;
 }
 
 /* ── Hero cards ───────────────────────────────────────── */
 .hero-card{
-  background:linear-gradient(145deg,#fff,#f8f7ff) !important;
-  border:1px solid rgba(99,102,241,0.1) !important;
-  box-shadow:0 2px 12px rgba(99,102,241,0.07) !important;
+  background:linear-gradient(160deg,#ffffff 0%,#f8fafb 50%,#f0fdf4) !important;
+  border:1px solid rgba(22,163,74,0.1) !important;
+  border-radius:20px !important;
+  box-shadow:
+    0 1px 3px rgba(0,0,0,0.04),
+    0 6px 16px rgba(22,163,74,0.06),
+    0 16px 36px rgba(0,0,0,0.03),
+    inset 0 1px 0 rgba(255,255,255,0.95) !important;
+  transition:all 0.45s cubic-bezier(0.25,0.46,0.45,0.94) !important;
+  position:relative;
+}
+.hero-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  border-radius:20px;
+  background:linear-gradient(135deg,rgba(22,163,74,0.02),transparent 60%);
+  pointer-events:none;
 }
 .hero-card:hover{
-  box-shadow:0 8px 28px rgba(99,102,241,0.14) !important;
-  transform:translateY(-3px) !important;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.04),
+    0 12px 32px rgba(22,163,74,0.12),
+    0 24px 48px rgba(0,0,0,0.04),
+    inset 0 1px 0 rgba(255,255,255,1) !important;
+  transform:translateY(-5px) !important;
+  border-color:rgba(22,163,74,0.18) !important;
 }
 .hero-card.featured{
-  background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 60%,#6d28d9 100%) !important;
-  box-shadow:0 8px 32px rgba(79,70,229,0.38) !important;
+  background:linear-gradient(135deg,#15803d 0%,#059669 35%,#0d9488 70%,#14b8a6 100%) !important;
+  box-shadow:0 8px 24px rgba(22,163,74,0.35),0 20px 48px rgba(5,150,105,0.2) !important;
   border:none !important;
+}
+.hero-card.featured:hover{
+  box-shadow:0 12px 32px rgba(22,163,74,0.4),0 28px 56px rgba(5,150,105,0.25) !important;
+  transform:translateY(-6px) !important;
 }
 
 /* ── Overview section cards (ov-sc) ───────────────────── */
 .ov-sc{
-  background:linear-gradient(145deg,#fff,#fafbff) !important;
-  box-shadow:0 2px 14px rgba(0,0,0,0.06) !important;
-  border:1px solid rgba(99,102,241,0.09) !important;
+  background:linear-gradient(160deg,#ffffff,#fafcfe) !important;
+  border:1px solid rgba(0,0,0,0.06) !important;
+  border-radius:16px !important;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.03),
+    0 4px 14px rgba(0,0,0,0.04),
+    0 8px 24px rgba(0,0,0,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  transition:all 0.35s cubic-bezier(0.25,0.46,0.45,0.94) !important;
 }
 .ov-sc:hover{
-  box-shadow:0 8px 28px rgba(99,102,241,0.14) !important;
-  transform:translateY(-2px) !important;
-  border-color:rgba(99,102,241,0.2) !important;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.03),
+    0 8px 24px rgba(22,163,74,0.1),
+    0 18px 40px rgba(0,0,0,0.04),
+    inset 0 1px 0 rgba(255,255,255,1) !important;
+  transform:translateY(-3px) !important;
+  border-color:rgba(22,163,74,0.16) !important;
 }
 
-/* ── ERP card ─────────────────────────────────────────── */
+/* ── ERP card (table wrappers) ────────────────────────── */
 .erp-card{
-  border:1px solid rgba(99,102,241,0.1) !important;
-  box-shadow:0 2px 12px rgba(0,0,0,0.05) !important;
+  border:1px solid rgba(0,0,0,0.06) !important;
+  border-radius:14px !important;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.03),
+    0 4px 12px rgba(0,0,0,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.9) !important;
   background:#fff !important;
+  transition:all 0.3s ease !important;
 }
-.erp-card:hover{border-color:rgba(99,102,241,0.25) !important;}
+.erp-card:hover{border-color:rgba(22,163,74,0.2) !important;box-shadow:0 6px 20px rgba(22,163,74,0.08),0 2px 4px rgba(0,0,0,0.03) !important;}
 
 /* ── Table cards ──────────────────────────────────────── */
 .table-card{
-  background:linear-gradient(145deg,#fff,#fafbff) !important;
-  box-shadow:0 2px 16px rgba(99,102,241,0.08) !important;
-  border:1px solid rgba(99,102,241,0.09) !important;
+  background:linear-gradient(160deg,#ffffff,#fafcfe) !important;
+  border:1px solid rgba(0,0,0,0.06) !important;
+  border-radius:16px !important;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.03),
+    0 4px 14px rgba(0,0,0,0.04),
+    0 8px 24px rgba(0,0,0,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  transition:all 0.3s ease !important;
 }
 .table-card:hover{
-  box-shadow:0 6px 24px rgba(99,102,241,0.13) !important;
+  box-shadow:0 6px 24px rgba(22,163,74,0.1),0 2px 4px rgba(0,0,0,0.03) !important;
+  border-color:rgba(22,163,74,0.14) !important;
 }
 
 /* ── Service cards ────────────────────────────────────── */
 .service-card{
-  background:linear-gradient(145deg,#fff,#fafbff) !important;
-  box-shadow:0 2px 14px rgba(99,102,241,0.08) !important;
-  border:1px solid rgba(99,102,241,0.09) !important;
+  background:linear-gradient(160deg,#ffffff,#fafcfe) !important;
+  border:1px solid rgba(0,0,0,0.06) !important;
+  border-radius:18px !important;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.03),
+    0 4px 14px rgba(22,163,74,0.05),
+    0 10px 28px rgba(0,0,0,0.03),
+    inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  transition:all 0.35s cubic-bezier(0.25,0.46,0.45,0.94) !important;
+}
+.service-card:hover{
+  box-shadow:0 8px 24px rgba(22,163,74,0.1),0 2px 4px rgba(0,0,0,0.03),inset 0 1px 0 rgba(255,255,255,1) !important;
+  transform:translateY(-3px) !important;
 }
 
 /* ── Fund cards ───────────────────────────────────────── */
 .fund-card,.pf-fund-card,.erp-fund-card{
-  box-shadow:0 2px 10px rgba(0,0,0,0.05) !important;
+  border-radius:14px !important;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.03),
+    0 3px 10px rgba(0,0,0,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.9) !important;
   border:1px solid rgba(0,0,0,0.06) !important;
+  background:linear-gradient(160deg,#ffffff,#fafcfe) !important;
+  transition:all 0.35s cubic-bezier(0.25,0.46,0.45,0.94) !important;
 }
 .fund-card:hover,.pf-fund-card:hover,.erp-fund-card:hover{
-  box-shadow:0 6px 20px rgba(99,102,241,0.14) !important;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.03),
+    0 8px 24px rgba(22,163,74,0.12),
+    0 16px 36px rgba(0,0,0,0.04),
+    inset 0 1px 0 rgba(255,255,255,1) !important;
+  transform:translateY(-4px) !important;
+  border-color:rgba(22,163,74,0.16) !important;
 }
 
 /* ── Compact cards ────────────────────────────────────── */
 .compact-card{
-  background:linear-gradient(145deg,#fff,#fafbff) !important;
-  box-shadow:0 2px 10px rgba(0,0,0,0.05) !important;
-  border:1px solid rgba(99,102,241,0.09) !important;
+  background:linear-gradient(160deg,#ffffff,#fafcfe) !important;
+  border:1px solid rgba(0,0,0,0.06) !important;
+  border-radius:14px !important;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.03),
+    0 3px 10px rgba(0,0,0,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  transition:all 0.35s cubic-bezier(0.25,0.46,0.45,0.94) !important;
+}
+.compact-card:hover{
+  box-shadow:0 6px 20px rgba(22,163,74,0.1),0 2px 4px rgba(0,0,0,0.03),inset 0 1px 0 rgba(255,255,255,1) !important;
+  transform:translateY(-3px) !important;
 }
 
-/* ── Section headings — gradient text ─────────────────── */
+/* ── Assess cards (nt-assess-card) ────────────────────── */
+.nt-assess-card{
+  border-radius:14px !important;
+  box-shadow:0 1px 2px rgba(0,0,0,0.03),0 3px 10px rgba(0,0,0,0.04),inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  border:1px solid rgba(0,0,0,0.06) !important;
+  transition:all 0.3s ease !important;
+}
+.nt-assess-card:hover{
+  box-shadow:0 6px 18px rgba(22,163,74,0.1),inset 0 1px 0 rgba(255,255,255,1) !important;
+  transform:translateY(-2px) !important;
+}
+
+/* ── Section headings ─────────────────────────────────── */
 .erp-section-head h3,.section-title{
   color:#15803d !important;
   -webkit-text-fill-color:#15803d !important;
   background:none !important;
   background-clip:unset !important;
 }
-.ov-label{color:#6366f1 !important;font-weight:700 !important;}
+.ov-label{color:#16a34a !important;font-weight:700 !important;}
 
 /* ── Progress bars — vibrant gradient ─────────────────── */
 .erp-prog-fill,.detail-progress .bar-fill,.nt-score-fill.full{
-  background:linear-gradient(90deg,#6366f1,#8b5cf6,#a78bfa) !important;
+  background:linear-gradient(90deg,#16a34a,#059669,#14b8a6) !important;
+  box-shadow:0 2px 6px rgba(22,163,74,0.3) !important;
 }
-.progress-bar{background:linear-gradient(90deg,#6366f1,#8b5cf6) !important;}
+.progress-bar{background:linear-gradient(90deg,#16a34a,#059669) !important;box-shadow:0 1px 4px rgba(22,163,74,0.25) !important;}
 
 /* ── Budget summary big cards ─────────────────────────── */
 .erp-budget-big-card{
-  background:linear-gradient(145deg,#fff,#fafbff) !important;
-  border:1px solid rgba(99,102,241,0.1) !important;
-  box-shadow:0 2px 14px rgba(0,0,0,0.05) !important;
+  background:linear-gradient(160deg,#ffffff,#f8fafb,#f0fdf4) !important;
+  border:1px solid rgba(22,163,74,0.1) !important;
+  border-radius:16px !important;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.03),
+    0 4px 14px rgba(22,163,74,0.06),
+    0 10px 24px rgba(0,0,0,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.95) !important;
+  transition:all 0.35s cubic-bezier(0.25,0.46,0.45,0.94) !important;
+}
+.erp-budget-big-card:hover{
+  box-shadow:0 8px 24px rgba(22,163,74,0.1),0 2px 4px rgba(0,0,0,0.03),inset 0 1px 0 rgba(255,255,255,1) !important;
+  transform:translateY(-3px) !important;
 }
 
-/* ── Scrollbar vibrant ────────────────────────────────── */
-::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#a5b4fc,#c4b5fd) !important;border-radius:4px !important;}
+/* ── Scrollbar refined ────────────────────────────────── */
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#86efac,#6ee7b7) !important;border-radius:4px !important;}
 ::-webkit-scrollbar-track{background:#f1f5f9 !important;}
 
-/* ── Budget badge cards ───────────────────────────────── */
+/* ── Billing KPI bottom accent ────────────────────────── */
 .billing-kpi::after{
-  background:var(--kpi-color,linear-gradient(90deg,#6366f1,#8b5cf6)) !important;
+  background:var(--kpi-color,linear-gradient(90deg,#16a34a,#059669)) !important;
+  border-radius:0 0 16px 16px !important;
 }
 
-/* ── erp-budget-summary cards ─────────────────────────── */
+/* ── Strategy items ───────────────────────────────────── */
 .erp-strat-item{
-  background:linear-gradient(145deg,#f8fafc,#f1f5ff) !important;
+  background:linear-gradient(145deg,#f8fafc 0%,#f0fdf4 100%) !important;
   border-left-width:4px !important;
+  border-radius:12px !important;
+  box-shadow:0 1px 3px rgba(0,0,0,0.03),inset 0 1px 0 rgba(255,255,255,0.8) !important;
+  transition:all 0.3s ease !important;
+}
+.erp-strat-item:hover{
+  box-shadow:0 4px 12px rgba(22,163,74,0.08) !important;
+  transform:translateX(2px) !important;
 }
 
-/* ── insight boxes ────────────────────────────────────── */
-.nt-insight.info{background:rgba(99,102,241,0.04) !important;border-color:rgba(99,102,241,0.18) !important;}
-.nt-insight.good{background:rgba(16,185,129,0.04) !important;}
-.nt-insight.warn{background:rgba(245,158,11,0.04) !important;}
-.nt-insight.danger{background:rgba(244,63,94,0.04) !important;}
+/* ── Insight boxes ────────────────────────────────────── */
+.nt-insight{border-radius:12px !important;box-shadow:0 1px 4px rgba(0,0,0,0.03) !important;}
+.nt-insight.info{background:rgba(22,163,74,0.03) !important;border-color:rgba(22,163,74,0.15) !important;}
+.nt-insight.good{background:rgba(16,185,129,0.03) !important;}
+.nt-insight.warn{background:rgba(245,158,11,0.03) !important;}
+.nt-insight.danger{background:rgba(244,63,94,0.03) !important;}
 
 /* ── AI modal glass ───────────────────────────────────── */
 .ai-modal-box{
-  box-shadow:0 32px 64px rgba(0,0,0,0.2),0 0 0 1px rgba(255,255,255,0.7) !important;
+  box-shadow:0 32px 64px rgba(0,0,0,0.18),0 0 0 1px rgba(255,255,255,0.8),0 0 80px rgba(22,163,74,0.08) !important;
   background:rgba(255,255,255,0.97) !important;
-  backdrop-filter:blur(10px) !important;
+  backdrop-filter:blur(16px) !important;
+  border-radius:20px !important;
 }
 .ai-modal-head{
-  background:linear-gradient(135deg,rgba(238,242,255,0.9),rgba(245,240,255,0.9)) !important;
-  border-bottom:1px solid rgba(99,102,241,0.12) !important;
+  background:linear-gradient(135deg,rgba(240,253,244,0.95),rgba(236,253,245,0.95)) !important;
+  border-bottom:1px solid rgba(22,163,74,0.12) !important;
 }
 .exec-summary-box{
-  background:linear-gradient(135deg,#f0f4ff,#f8f0ff,#fff0f8) !important;
+  background:linear-gradient(135deg,#f0fdf4,#ecfdf5,#f0fdfa) !important;
+  border:1px solid rgba(22,163,74,0.15) !important;
+  border-radius:14px !important;
 }
 
 /* ── Budget overview section ──────────────────────────── */
 #tab-overview .bg-white,#tab-erp-overview .bg-white{
-  background:linear-gradient(145deg,#fff,#fafbff) !important;
+  background:linear-gradient(160deg,#ffffff,#fafcfe) !important;
 }
 
 /* ============================================================
@@ -672,12 +843,10 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 /* ภาพรวม ERP tab — green */
 [data-tab="erp-overview"].tab-active{background:linear-gradient(135deg,#16a34a,#059669) !important;box-shadow:0 6px 20px rgba(22,163,74,0.45),0 2px 6px rgba(22,163,74,0.2) !important;}
 [data-tab="erp-overview"]:hover:not(.tab-active){color:#16a34a !important;border-color:rgba(22,163,74,0.3) !important;background:rgba(22,163,74,0.08) !important;box-shadow:0 3px 10px rgba(22,163,74,0.15) !important;}
-/* Stat cards — green top strip & glow */
-.stat-card{border:1px solid rgba(22,163,74,0.1) !important;box-shadow:0 2px 12px rgba(22,163,74,0.07),0 1px 3px rgba(0,0,0,0.04) !important;}
-.stat-card::after{background:linear-gradient(90deg,#16a34a,#059669,#14b8a6) !important;}
-.stat-card:hover{box-shadow:0 10px 36px rgba(22,163,74,0.18) !important;}
-/* KPI/ERP cards hover — green glow */
-.nt-kpi:hover,.erp-stat-card:hover,.billing-kpi:hover,.ov-sc:hover,.hero-card:hover,.fund-card:hover,.pf-fund-card:hover,.compact-card:hover,.table-card:hover,.service-card:hover{box-shadow:0 8px 28px rgba(22,163,74,0.14) !important;}
+/* Stat cards — green accents (shadows handled by premium card system) */
+.stat-card{border:1px solid rgba(22,163,74,0.12) !important;}
+.stat-card::after{background:linear-gradient(90deg,#16a34a,#059669,#14b8a6) !important;background-size:200% 100%;animation:cardShimmer 6s ease infinite;}
+.stat-card:hover{box-shadow:0 2px 4px rgba(0,0,0,0.04),0 8px 20px rgba(22,163,74,0.1),0 20px 44px rgba(22,163,74,0.08),inset 0 1px 0 rgba(255,255,255,1) !important;}
 /* Section title */
 .erp-section-head h3,.section-title{color:#15803d !important;-webkit-text-fill-color:#15803d !important;background:none !important;background-clip:unset !important;}
 .ov-label{color:#16a34a !important;}
