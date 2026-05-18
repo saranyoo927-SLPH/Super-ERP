@@ -481,9 +481,10 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 .stat-card::before{
   content:'';position:absolute;top:-50%;right:-50%;width:100%;height:100%;
   background:radial-gradient(circle,rgba(22,163,74,0.04) 0%,transparent 70%);
-  pointer-events:none;
+  pointer-events:none;z-index:0;
   transition:opacity 0.4s ease;opacity:0;
 }
+.stat-card>*{position:relative;z-index:1;}
 .stat-card:hover{
   box-shadow:
     0 2px 4px rgba(0,0,0,0.04),
@@ -510,7 +511,9 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 .erp-stat-card::after{
   content:'';position:absolute;bottom:0;left:12px;right:12px;height:1px;
   background:linear-gradient(90deg,transparent,rgba(0,0,0,0.04),transparent);
+  z-index:0;pointer-events:none;
 }
+.erp-stat-card>*{position:relative;z-index:1;}
 .erp-stat-card:hover{
   box-shadow:
     0 2px 4px rgba(0,0,0,0.04),
@@ -584,11 +587,12 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
   position:relative;
 }
 .hero-card::after{
-  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
-  border-radius:20px;
-  background:linear-gradient(135deg,rgba(22,163,74,0.02),transparent 60%);
-  pointer-events:none;
+  content:'';position:absolute;top:0;left:0;width:60%;height:60%;
+  border-radius:20px 0 0 0;
+  background:linear-gradient(135deg,rgba(22,163,74,0.03),transparent 50%);
+  pointer-events:none;z-index:0;
 }
+.hero-card>*{position:relative;z-index:1;}
 .hero-card:hover{
   box-shadow:
     0 2px 4px rgba(0,0,0,0.04),
@@ -810,6 +814,13 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 #tab-overview .bg-white,#tab-erp-overview .bg-white{
   background:linear-gradient(160deg,#ffffff,#fafcfe) !important;
 }
+
+/* ── Z-index protection: ::before decorative strips stay below content ── */
+.nt-kpi::before,.billing-kpi::after,.fund-card::before,.erp-fund-card::before,
+.pf-fund-card::before,.compact-card::before,.nt-assess-card::before{z-index:0 !important;pointer-events:none;}
+.nt-kpi>*,.billing-kpi>*,.fund-card>*,.erp-fund-card>*,
+.pf-fund-card>*,.compact-card>*,.nt-assess-card>*,
+.ov-sc>*,.erp-budget-big-card>*,.service-card>*{position:relative;z-index:1;}
 
 /* ============================================================
    GREEN PASTEL THEME — กระทรวงสาธารณสุข
