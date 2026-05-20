@@ -7191,29 +7191,54 @@ setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 500);
     </div>
 </div>
  <script>
-// ── Late-inject card CSS to override Tailwind CDN (must run after Tailwind injects its styles) ──
-document.addEventListener('DOMContentLoaded', function(){
-  var s = document.createElement('style');
-  s.id = 'card-override-final';
-  s.textContent = [
-    // nt-kpi card — pill badge position fix
-    '.nt-kpi{padding:10px 16px 16px 16px !important;position:relative !important;overflow:visible !important;}',
-    '.nt-pill{position:absolute !important;top:10px !important;right:10px !important;margin:0 !important;white-space:nowrap !important;z-index:2 !important;display:inline-block !important;font-size:9px !important;font-weight:600 !important;padding:2px 7px !important;border-radius:20px !important;max-width:50% !important;overflow:hidden !important;text-overflow:ellipsis !important;}',
-    '.nt-lbl{display:block !important;position:relative !important;z-index:1 !important;max-width:100% !important;padding-right:0 !important;word-break:break-word !important;overflow-wrap:break-word !important;}',
-    '.nt-val{position:relative !important;z-index:1 !important;}',
-    '.nt-foot{position:relative !important;z-index:1 !important;}',
-    '.nt-kpi::before{z-index:0 !important;pointer-events:none !important;}',
-    // stat-card — remove Tailwind bg-white/rounded/padding conflicts
-    '.stat-card{background:linear-gradient(160deg,#ffffff 0%,#f8fafb 40%,#f0fdf4 100%) !important;border-radius:16px !important;padding:16px !important;position:relative !important;overflow:hidden !important;border:1px solid rgba(22,163,74,0.12) !important;}',
-    // erp-stat-card
-    '.erp-stat-card{position:relative !important;}',
-    '.erp-stat-card::before,.erp-stat-card::after{z-index:0 !important;pointer-events:none !important;}',
-    // hero-card
-    '.hero-card{position:relative !important;overflow:hidden !important;}',
-    '.hero-card::after{z-index:0 !important;pointer-events:none !important;}'
-  ].join('\\n');
-  document.head.appendChild(s);
-});
+// ── Force card styles via direct DOM manipulation — Tailwind CANNOT override inline styles ──
+(function(){
+  function applyCardFix(){
+    // Fix all nt-kpi cards
+    document.querySelectorAll('.nt-kpi').forEach(function(card){
+      card.style.cssText += ';padding:10px 16px 16px 16px !important;position:relative !important;overflow:visible !important;';
+    });
+    // Fix all nt-pill badges
+    document.querySelectorAll('.nt-kpi .nt-pill').forEach(function(pill){
+      pill.style.cssText += ';position:absolute !important;top:10px !important;right:10px !important;margin:0 !important;white-space:nowrap !important;z-index:2 !important;display:inline-block !important;font-size:9px !important;font-weight:600 !important;padding:2px 7px !important;border-radius:20px !important;';
+    });
+    // Fix all nt-lbl labels
+    document.querySelectorAll('.nt-kpi .nt-lbl').forEach(function(lbl){
+      lbl.style.cssText += ';display:block !important;position:relative !important;z-index:1 !important;max-width:calc(100% - 90px) !important;word-break:break-word !important;';
+    });
+    // Fix nt-val and nt-foot z-index
+    document.querySelectorAll('.nt-kpi .nt-val, .nt-kpi .nt-foot').forEach(function(el){
+      el.style.cssText += ';position:relative !important;z-index:1 !important;';
+    });
+  }
+  // Run multiple times to catch dynamically rendered cards
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', applyCardFix);
+  } else {
+    applyCardFix();
+  }
+  // Re-apply after delays to catch JS-rendered content (PlanFin tab uses dynamic rendering)
+  setTimeout(applyCardFix, 500);
+  setTimeout(applyCardFix, 1500);
+  setTimeout(applyCardFix, 3000);
+  // Watch for new cards added dynamically (e.g., when switching tabs)
+  if(window.MutationObserver){
+    var observer = new MutationObserver(function(mutations){
+      var shouldApply = false;
+      mutations.forEach(function(m){
+        if(m.addedNodes.length) shouldApply = true;
+      });
+      if(shouldApply) applyCardFix();
+    });
+    if(document.body){
+      observer.observe(document.body, {childList:true, subtree:true});
+    } else {
+      document.addEventListener('DOMContentLoaded', function(){
+        observer.observe(document.body, {childList:true, subtree:true});
+      });
+    }
+  }
+})();
 </script>
  </body>
 </html>
