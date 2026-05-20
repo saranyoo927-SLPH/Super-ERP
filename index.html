@@ -229,15 +229,15 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 .sub-nav-btn:hover{border-color:#c7d2fe;color:#6366f1;background:#eef2ff;} .sub-nav-btn.active{background:#6366f1;color:#fff;border-color:#6366f1;font-weight:600;}
 .sub-panel{display:none;animation:fadeIn 0.3s ease;} .sub-panel.active{display:block;}
 .nt-kpi-row{display:grid;grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));gap:12px;margin-bottom:20px;}
-.nt-kpi{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:28px 16px 16px 16px;position:relative;overflow:hidden;transition:all 0.3s;}
-.nt-kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;} .nt-kpi:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(99,102,241,0.1);}
+.nt-kpi{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:28px 16px 16px 16px !important;position:relative !important;overflow:hidden !important;transition:all 0.3s;}
+.nt-kpi::before{content:'';position:absolute !important;top:0;left:0;right:0;height:3px;z-index:0 !important;} .nt-kpi:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(99,102,241,0.1);}
 .nt-kpi.c-blue::before{background:#6366f1}.nt-kpi.c-blue .nt-val{color:#6366f1} .nt-kpi.c-green::before{background:#10b981}.nt-kpi.c-green .nt-val{color:#10b981}
 .nt-kpi.c-amber::before{background:#f59e0b}.nt-kpi.c-amber .nt-val{color:#f59e0b} .nt-kpi.c-red::before{background:#f43f5e}.nt-kpi.c-red .nt-val{color:#f43f5e}
 .nt-kpi.c-cyan::before{background:#06b6d4}.nt-kpi.c-cyan .nt-val{color:#06b6d4} .nt-kpi.c-purple::before{background:#8b5cf6}.nt-kpi.c-purple .nt-val{color:#8b5cf6}
 .nt-kpi.c-orange::before{background:#f97316}.nt-kpi.c-orange .nt-val{color:#f97316}
-.nt-lbl{font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;max-width:calc(100% - 10px);}
-.nt-val{font-size:24px;font-weight:700;color:#1e293b;font-family:'Sarabun', sans-serif;line-height:1.1;} .nt-val small{font-size:11px;font-weight:400;color:#94a3b8;}
-.nt-foot{font-size:10px;color:#94a3b8;margin-top:4px;} .nt-pill{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;position:absolute;top:8px;right:10px;margin:0;white-space:nowrap;z-index:2;}
+.nt-lbl{font-size:10px !important;font-weight:600 !important;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px !important;display:block !important;position:relative !important;z-index:1 !important;max-width:calc(100% - 10px) !important;}
+.nt-val{font-size:24px;font-weight:700;color:#1e293b;font-family:'Sarabun', sans-serif;line-height:1.1;position:relative !important;z-index:1 !important;} .nt-val small{font-size:11px;font-weight:400;color:#94a3b8;}
+.nt-foot{font-size:10px;color:#94a3b8;margin-top:4px;position:relative !important;z-index:1 !important;} .nt-pill{display:inline-block !important;font-size:10px !important;font-weight:600 !important;padding:2px 8px !important;border-radius:20px !important;position:absolute !important;top:8px !important;right:10px !important;margin:0 !important;white-space:nowrap !important;z-index:2 !important;}
 .nt-pill.good{background:rgba(16,185,129,0.1);color:#10b981;} .nt-pill.warn{background:rgba(245,158,11,0.1);color:#f59e0b;}
 .nt-pill.bad{background:rgba(244,63,94,0.1);color:#f43f5e;} .nt-pill.info{background:rgba(99,102,241,0.1);color:#6366f1;}
 .nt-pill.gray{background:rgba(148,163,184,0.1);color:#94a3b8;} .nt-insight{border-radius:8px;padding:12px 16px;font-size:12px;line-height:1.7;margin-bottom:16px;border:1px solid;position:relative;}
@@ -463,12 +463,13 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
   background:linear-gradient(160deg,#ffffff 0%,#f8fafb 40%,#f0fdf4 100%) !important;
   border:1px solid rgba(22,163,74,0.12) !important;
   border-radius:16px !important;
+  padding:16px !important;
   box-shadow:
     0 1px 2px rgba(0,0,0,0.04),
     0 4px 12px rgba(22,163,74,0.06),
     0 12px 28px rgba(22,163,74,0.04),
     inset 0 1px 0 rgba(255,255,255,0.9) !important;
-  position:relative;overflow:hidden;
+  position:relative !important;overflow:hidden !important;
   transition:all 0.4s cubic-bezier(0.25,0.46,0.45,0.94) !important;
 }
 .stat-card::after{
@@ -961,14 +962,14 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
     <section id="tab-overview" class="tab-content hidden fade-in">
  <!-- Summary Cards -->
  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
- <div class="stat-card bg-white rounded-xl p-4 card-glow">
+ <div class="stat-card">
  <div class="flex items-center gap-2 mb-2">
  <div class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center"><i data-lucide="layers" class="w-4 h-4 text-indigo-600"></i>
  </div><span class="text-xs text-slate-400 font-medium">โครงการทั้งหมด</span>
  </div>
  <p id="totalProjects" class="text-2xl font-bold text-slate-800">0</p>
  </div>
- <div class="stat-card bg-white rounded-xl p-4 card-glow">
+ <div class="stat-card">
  <div class="flex items-center gap-2 mb-2">
  <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center"><i data-lucide="dollar-sign" class="w-4 h-4 text-emerald-600"></i>
  </div><span class="text-xs text-slate-400 font-medium">งบประมาณรวม</span>
@@ -976,7 +977,7 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
  <p id="totalBudget" class="text-2xl font-bold text-slate-800">0</p>
  <p class="text-xs text-slate-400">บาท</p>
  </div>
- <div class="stat-card bg-white rounded-xl p-4 card-glow">
+ <div class="stat-card">
  <div class="flex items-center gap-2 mb-2">
  <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="trending-up" class="w-4 h-4 text-amber-600"></i>
  </div><span class="text-xs text-slate-400 font-medium">เบิกจ่ายแล้ว</span>
@@ -984,7 +985,7 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
  <p id="totalSpent" class="text-2xl font-bold text-slate-800">0</p>
  <p class="text-xs text-slate-400">บาท</p>
  </div>
- <div class="stat-card bg-white rounded-xl p-4 card-glow">
+ <div class="stat-card">
  <div class="flex items-center gap-2 mb-2">
  <div class="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center"><i data-lucide="wallet" class="w-4 h-4 text-rose-600"></i>
  </div><span class="text-xs text-slate-400 font-medium">คงเหลือ</span>
