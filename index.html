@@ -7190,5 +7190,30 @@ setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 500);
 
     </div>
 </div>
+ <script>
+// ── Late-inject card CSS to override Tailwind CDN (must run after Tailwind injects its styles) ──
+document.addEventListener('DOMContentLoaded', function(){
+  var s = document.createElement('style');
+  s.id = 'card-override-final';
+  s.textContent = [
+    // nt-kpi card — pill badge position fix
+    '.nt-kpi{padding:28px 16px 16px 16px !important;position:relative !important;overflow:hidden !important;}',
+    '.nt-pill{position:absolute !important;top:8px !important;right:10px !important;margin:0 !important;white-space:nowrap !important;z-index:2 !important;display:inline-block !important;font-size:10px !important;font-weight:600 !important;padding:2px 8px !important;border-radius:20px !important;}',
+    '.nt-lbl{display:block !important;position:relative !important;z-index:1 !important;max-width:calc(100% - 10px) !important;}',
+    '.nt-val{position:relative !important;z-index:1 !important;}',
+    '.nt-foot{position:relative !important;z-index:1 !important;}',
+    '.nt-kpi::before{z-index:0 !important;pointer-events:none !important;}',
+    // stat-card — remove Tailwind bg-white/rounded/padding conflicts
+    '.stat-card{background:linear-gradient(160deg,#ffffff 0%,#f8fafb 40%,#f0fdf4 100%) !important;border-radius:16px !important;padding:16px !important;position:relative !important;overflow:hidden !important;border:1px solid rgba(22,163,74,0.12) !important;}',
+    // erp-stat-card
+    '.erp-stat-card{position:relative !important;}',
+    '.erp-stat-card::before,.erp-stat-card::after{z-index:0 !important;pointer-events:none !important;}',
+    // hero-card
+    '.hero-card{position:relative !important;overflow:hidden !important;}',
+    '.hero-card::after{z-index:0 !important;pointer-events:none !important;}'
+  ].join('\\n');
+  document.head.appendChild(s);
+});
+</script>
  </body>
 </html>
