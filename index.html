@@ -906,7 +906,7 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 .erp-badge.pass{background:#dcfce7 !important;color:#16a34a !important;border:1px solid #86efac !important;}
 /* tab-active indicator (fallback border for non-color tabs) */
 .tab-active{border-bottom:none !important;}
-   /* ============================================================
+/* ============================================================
    CARD DEPTH & HOVER EFFECTS PATCH
    ============================================================
    ★ เพิ่มมิติ (depth) ให้กล่องการ์ดทุกประเภท
@@ -915,7 +915,7 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
    ★ Transition นุ่มนวลด้วย cubic-bezier
    ★ ใช้ธีม Green Pastel ของ สธ.
 
-   วิธีใช้: วางก่อน </style> (หลัง GREEN PASTEL THEME section)
+   วิธีใช้: วางก่อนปิด style tag (หลัง GREEN PASTEL THEME section)
    ============================================================ */
 
 /* ── CSS Variables สำหรับ Card Depth ── */
@@ -1422,14 +1422,14 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
     transform: none !important;
   }
 }
-  /* ============================================================
+/* ============================================================
    FIX: CARD TOP STRIP OVERLAP
    ============================================================
    ปัญหา: Base CSS ใช้ ::before + Vibrant Theme เพิ่ม ::after
           ทำให้เส้นสีบน card ซ้อนกัน 2 เส้น
    แก้ไข:  ให้ใช้ ::before เส้นเดียว → ลบ ::after ที่ซ้ำออก
    
-   วิธีใช้: วางก่อน </style> (หลัง card_depth_patch)
+   วิธีใช้: วางก่อนปิด style tag (หลัง card_depth_patch)
    ============================================================ */
 
 /* ── stat-card: ลบ ::after (Vibrant Theme เพิ่มมา) ── */
