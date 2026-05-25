@@ -978,24 +978,24 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 .erp-card:focus-within{border-color:rgba(22,163,74,0.3)!important;box-shadow:0 0 0 3px rgba(22,163,74,0.08),var(--card-shadow-rest)!important}
 @media(max-width:768px){.stat-card:hover,.erp-stat-card:hover,.nt-kpi:hover,.ov-sc:hover,.hero-card:hover,.billing-kpi:hover,.fund-card:hover,.erp-fund-card:hover,.pf-fund-card:hover,.compact-card:hover,.erp-card:hover,.table-card:hover,.service-card:hover,.erp-budget-big-card:hover,.card-glow:hover{transform:translateY(-2px)!important}.erp-stat-card:hover .s-icon,.hero-card:hover .metric-icon,.compact-card:hover .compact-icon{transform:none!important}}
 @media(prefers-reduced-motion:reduce){.stat-card,.erp-stat-card,.nt-kpi,.ov-sc,.hero-card,.billing-kpi,.fund-card,.erp-fund-card,.pf-fund-card,.compact-card,.erp-card,.table-card,.service-card,.erp-budget-big-card,.card-glow,.nt-grade,.nt-insight,.nt-assess-card,.erp-strat-item{transition:none!important}.stat-card:hover,.erp-stat-card:hover,.nt-kpi:hover,.ov-sc:hover,.hero-card:hover,.billing-kpi:hover,.fund-card:hover,.erp-fund-card:hover,.pf-fund-card:hover,.compact-card:hover,.erp-card:hover,.table-card:hover,.service-card:hover,.erp-budget-big-card:hover,.card-glow:hover{transform:none!important}}
-.stat-card::after{display:none!important}
-.stat-card::before{content:''!important;position:absolute!important;top:0!important;left:0!important;right:0!important;height:3px!important;background:linear-gradient(90deg,#16a34a,#059669,#14b8a6)!important;border-radius:12px 12px 0 0!important;z-index:2!important}
-.erp-stat-card::after{display:none!important}
-.erp-stat-card::before{height:3px!important;z-index:2!important}
-.billing-kpi::before{display:none!important}
-.billing-kpi::after{height:3px!important;z-index:2!important}
-.fund-card::after{display:none!important}
-.fund-card::before{height:3px!important;z-index:2!important}
-.erp-fund-card::after{display:none!important}
-.erp-fund-card::before{height:3px!important;z-index:2!important}
-.nt-kpi::after{display:none!important}
-.nt-kpi::before{height:3px!important;z-index:2!important}
-.compact-card::after{display:none!important}
-.pf-fund-card::after{display:none!important}
-.hero-card::before,.hero-card::after{display:none!important}
-.service-card::before,.service-card::after{display:none!important}
-.table-card::before,.table-card::after{display:none!important}
-.erp-card::before,.erp-card::after{display:none!important}
+.stat-card::after{display:none!important;content:none!important}
+.stat-card::before{content:''!important;position:absolute!important;top:0!important;left:0!important;right:0!important;bottom:auto!important;width:auto!important;height:3px!important;background:linear-gradient(90deg,#16a34a,#059669,#14b8a6)!important;background-size:100% 100%!important;animation:none!important;border-radius:16px 16px 0 0!important;z-index:2!important;opacity:1!important;pointer-events:none!important}
+.erp-stat-card::after{display:none!important;content:none!important}
+.erp-stat-card::before{content:''!important;position:absolute!important;top:-1px!important;left:-1px!important;right:-1px!important;bottom:auto!important;width:auto!important;height:4px!important;border-radius:14px 14px 0 0!important;z-index:2!important;pointer-events:none!important}
+.billing-kpi::before{display:none!important;content:none!important}
+.billing-kpi::after{content:''!important;position:absolute!important;bottom:0!important;left:0!important;right:0!important;top:auto!important;height:3px!important;z-index:2!important;pointer-events:none!important}
+.fund-card::after{display:none!important;content:none!important}
+.fund-card::before{content:''!important;position:absolute!important;top:0!important;left:0!important;right:0!important;bottom:auto!important;width:auto!important;height:3px!important;z-index:2!important;pointer-events:none!important}
+.erp-fund-card::after{display:none!important;content:none!important}
+.erp-fund-card::before{content:''!important;position:absolute!important;top:0!important;left:0!important;right:0!important;bottom:auto!important;width:auto!important;height:3px!important;z-index:2!important;pointer-events:none!important}
+.nt-kpi::after{display:none!important;content:none!important}
+.nt-kpi::before{content:''!important;position:absolute!important;top:-1px!important;left:-1px!important;right:-1px!important;bottom:auto!important;width:auto!important;height:4px!important;border-radius:12px 12px 0 0!important;z-index:2!important;pointer-events:none!important}
+.compact-card::after{display:none!important;content:none!important}
+.pf-fund-card::after{display:none!important;content:none!important}
+.hero-card::before,.hero-card::after{display:none!important;content:none!important}
+.service-card::before,.service-card::after{display:none!important;content:none!important}
+.table-card::before,.table-card::after{display:none!important;content:none!important}
+.erp-card::before,.erp-card::after{display:none!important;content:none!important}
 </style>
  </head>
  <body class="h-full bg-slate-50">
