@@ -906,625 +906,96 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 .erp-badge.pass{background:#dcfce7 !important;color:#16a34a !important;border:1px solid #86efac !important;}
 /* tab-active indicator (fallback border for non-color tabs) */
 .tab-active{border-bottom:none !important;}
-/* ============================================================
-   CARD DEPTH & HOVER EFFECTS PATCH
-   ============================================================
-   ★ เพิ่มมิติ (depth) ให้กล่องการ์ดทุกประเภท
-   ★ Soft Shadow หลายชั้น (layered shadow)
-   ★ Hover Effect: ลอยขึ้น + เงาขยาย + border เรืองแสง
-   ★ Transition นุ่มนวลด้วย cubic-bezier
-   ★ ใช้ธีม Green Pastel ของ สธ.
-
-   วิธีใช้: วางก่อนปิด style tag (หลัง GREEN PASTEL THEME section)
-   ============================================================ */
-
-/* ── CSS Variables สำหรับ Card Depth ── */
-:root {
-  --card-shadow-rest:
-    0 1px 2px rgba(0,0,0,0.04),
-    0 4px 12px rgba(22,163,74,0.06),
-    0 8px 24px rgba(0,0,0,0.02);
-  --card-shadow-hover:
-    0 4px 8px rgba(0,0,0,0.06),
-    0 12px 32px rgba(22,163,74,0.12),
-    0 20px 48px rgba(0,0,0,0.04);
-  --card-shadow-active:
-    0 2px 4px rgba(0,0,0,0.08),
-    0 8px 20px rgba(22,163,74,0.15);
-  --card-transition: 
-    transform 0.35s cubic-bezier(0.34,1.56,0.64,1),
-    box-shadow 0.35s cubic-bezier(0.25,0.46,0.45,0.94),
-    border-color 0.3s ease;
-  --card-border-rest: 1px solid rgba(22,163,74,0.08);
-  --card-border-hover: 1px solid rgba(22,163,74,0.22);
-}
-
-/* ============================================================
-   1. STAT CARDS (แท็บ แผนงบประมาณ — 4 cards บนสุด)
-   ============================================================ */
-.stat-card {
-  border: var(--card-border-rest) !important;
-  box-shadow: var(--card-shadow-rest) !important;
-  transition: var(--card-transition) !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-.stat-card:hover {
-  transform: translateY(-4px) scale(1.01) !important;
-  box-shadow: var(--card-shadow-hover) !important;
-  border: var(--card-border-hover) !important;
-}
-.stat-card:active {
-  transform: translateY(-1px) scale(0.995) !important;
-  box-shadow: var(--card-shadow-active) !important;
-}
-
-/* ============================================================
-   2. ERP STAT CARDS (ภาพรวม ERP — ตัวชี้วัดหลัก 4 cards)
-   ============================================================ */
-.erp-stat-card {
-  box-shadow: var(--card-shadow-rest) !important;
-  border: var(--card-border-rest) !important;
-  transition: var(--card-transition) !important;
-}
-.erp-stat-card:hover {
-  transform: translateY(-5px) scale(1.015) !important;
-  box-shadow: var(--card-shadow-hover) !important;
-  border: var(--card-border-hover) !important;
-}
-.erp-stat-card:active {
-  transform: translateY(-1px) !important;
-  box-shadow: var(--card-shadow-active) !important;
-}
-/* เพิ่ม glow effect ตาม color ของ card */
-.erp-stat-card.blue:hover {
-  box-shadow:
-    0 4px 8px rgba(0,0,0,0.05),
-    0 12px 32px rgba(22,163,74,0.14),
-    0 0 0 3px rgba(22,163,74,0.06) !important;
-}
-.erp-stat-card.green:hover {
-  box-shadow:
-    0 4px 8px rgba(0,0,0,0.05),
-    0 12px 32px rgba(16,185,129,0.16),
-    0 0 0 3px rgba(16,185,129,0.06) !important;
-}
-.erp-stat-card.purple:hover {
-  box-shadow:
-    0 4px 8px rgba(0,0,0,0.05),
-    0 12px 32px rgba(139,92,246,0.14),
-    0 0 0 3px rgba(139,92,246,0.06) !important;
-}
-.erp-stat-card.amber:hover {
-  box-shadow:
-    0 4px 8px rgba(0,0,0,0.05),
-    0 12px 32px rgba(245,158,11,0.14),
-    0 0 0 3px rgba(245,158,11,0.06) !important;
-}
-.erp-stat-card.rose:hover {
-  box-shadow:
-    0 4px 8px rgba(0,0,0,0.05),
-    0 12px 32px rgba(244,63,94,0.14),
-    0 0 0 3px rgba(244,63,94,0.06) !important;
-}
-.erp-stat-card.cyan:hover {
-  box-shadow:
-    0 4px 8px rgba(0,0,0,0.05),
-    0 12px 32px rgba(6,182,212,0.14),
-    0 0 0 3px rgba(6,182,212,0.06) !important;
-}
-
-/* ============================================================
-   3. NT-KPI CARDS (TPS / Risk / PlanFin KPI cards)
-   ============================================================ */
-.nt-kpi {
-  box-shadow: var(--card-shadow-rest) !important;
-  border: var(--card-border-rest) !important;
-  transition: var(--card-transition) !important;
-}
-.nt-kpi:hover {
-  transform: translateY(-4px) scale(1.01) !important;
-  box-shadow: var(--card-shadow-hover) !important;
-  border: var(--card-border-hover) !important;
-}
-/* Glow ตามสี */
-.nt-kpi.c-green:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05), 0 12px 32px rgba(16,185,129,0.16), 0 0 0 3px rgba(16,185,129,0.05) !important;
-}
-.nt-kpi.c-red:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05), 0 12px 32px rgba(244,63,94,0.14), 0 0 0 3px rgba(244,63,94,0.05) !important;
-}
-.nt-kpi.c-amber:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05), 0 12px 32px rgba(245,158,11,0.14), 0 0 0 3px rgba(245,158,11,0.05) !important;
-}
-.nt-kpi.c-blue:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05), 0 12px 32px rgba(99,102,241,0.14), 0 0 0 3px rgba(99,102,241,0.05) !important;
-}
-.nt-kpi.c-cyan:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05), 0 12px 32px rgba(6,182,212,0.14), 0 0 0 3px rgba(6,182,212,0.05) !important;
-}
-.nt-kpi.c-purple:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05), 0 12px 32px rgba(139,92,246,0.14), 0 0 0 3px rgba(139,92,246,0.05) !important;
-}
-
-/* ============================================================
-   4. OV-SC CARDS (ภาพรวม ERP — PlanFin / เงินบำรุง / TPS / Risk)
-   ============================================================ */
-.ov-sc {
-  box-shadow: var(--card-shadow-rest) !important;
-  border: var(--card-border-rest) !important;
-  transition: var(--card-transition) !important;
-}
-.ov-sc:hover {
-  transform: translateY(-5px) scale(1.008) !important;
-  box-shadow: var(--card-shadow-hover) !important;
-  border: var(--card-border-hover) !important;
-}
-
-/* ============================================================
-   5. HERO CARDS (Billing tab — 4 cards ด้านบน)
-   ============================================================ */
-.hero-card {
-  box-shadow: var(--card-shadow-rest) !important;
-  transition: var(--card-transition) !important;
-}
-.hero-card:hover {
-  transform: translateY(-5px) scale(1.012) !important;
-  box-shadow: var(--card-shadow-hover) !important;
-}
-.hero-card.featured {
-  box-shadow:
-    0 4px 12px rgba(5,150,105,0.2),
-    0 12px 36px rgba(5,150,105,0.28) !important;
-}
-.hero-card.featured:hover {
-  transform: translateY(-6px) scale(1.015) !important;
-  box-shadow:
-    0 8px 20px rgba(5,150,105,0.25),
-    0 20px 48px rgba(5,150,105,0.35) !important;
-}
-
-/* ============================================================
-   6. BILLING KPI CARDS
-   ============================================================ */
-.billing-kpi {
-  box-shadow: var(--card-shadow-rest) !important;
-  border: var(--card-border-rest) !important;
-  transition: var(--card-transition) !important;
-}
-.billing-kpi:hover {
-  transform: translateY(-5px) scale(1.015) !important;
-  box-shadow: var(--card-shadow-hover) !important;
-  border: var(--card-border-hover) !important;
-}
-
-/* ============================================================
-   7. FUND CARDS (กองทุน — grid 6 ช่อง)
-   ============================================================ */
-.fund-card,
-.erp-fund-card {
-  box-shadow: var(--card-shadow-rest) !important;
-  border: var(--card-border-rest) !important;
-  transition: var(--card-transition) !important;
-}
-.fund-card:hover,
-.erp-fund-card:hover {
-  transform: translateY(-5px) scale(1.02) !important;
-  box-shadow: var(--card-shadow-hover) !important;
-  border: var(--card-border-hover) !important;
-}
-
-/* ============================================================
-   8. PF-FUND CARDS (PlanFin Revenue detail cards)
-   ============================================================ */
-.pf-fund-card {
-  box-shadow: var(--card-shadow-rest) !important;
-  border: var(--card-border-rest) !important;
-  transition: var(--card-transition) !important;
-}
-.pf-fund-card:hover {
-  transform: translateY(-4px) scale(1.01) !important;
-  box-shadow: var(--card-shadow-hover) !important;
-  border: var(--card-border-hover) !important;
-}
-
-/* ============================================================
-   9. COMPACT CARDS (กองทุนเพิ่มเติม — 9 cards)
-   ============================================================ */
-.compact-card {
-  box-shadow: var(--card-shadow-rest) !important;
-  border: var(--card-border-rest) !important;
-  transition: var(--card-transition) !important;
-}
-.compact-card:hover {
-  transform: translateY(-4px) scale(1.02) !important;
-  box-shadow: var(--card-shadow-hover) !important;
-  border: var(--card-border-hover) !important;
-}
-
-/* ============================================================
-   10. ERP CARDS (กราฟ / ตาราง containers)
-   ============================================================ */
-.erp-card {
-  box-shadow: var(--card-shadow-rest) !important;
-  border: var(--card-border-rest) !important;
-  transition: var(--card-transition) !important;
-}
-.erp-card:hover {
-  transform: translateY(-3px) !important;
-  box-shadow:
-    0 4px 8px rgba(0,0,0,0.04),
-    0 10px 28px rgba(22,163,74,0.1),
-    0 16px 40px rgba(0,0,0,0.03) !important;
-  border: var(--card-border-hover) !important;
-}
-
-/* ============================================================
-   11. TABLE CARDS
-   ============================================================ */
-.table-card {
-  box-shadow: var(--card-shadow-rest) !important;
-  border: var(--card-border-rest) !important;
-  transition: var(--card-transition) !important;
-}
-.table-card:hover {
-  transform: translateY(-3px) !important;
-  box-shadow:
-    0 4px 8px rgba(0,0,0,0.04),
-    0 10px 28px rgba(22,163,74,0.1) !important;
-  border: var(--card-border-hover) !important;
-}
-
-/* ============================================================
-   12. SERVICE CARDS (OP/IP service grid)
-   ============================================================ */
-.service-card {
-  box-shadow: var(--card-shadow-rest) !important;
-  border: var(--card-border-rest) !important;
-  transition: var(--card-transition) !important;
-}
-.service-card:hover {
-  transform: translateY(-4px) scale(1.005) !important;
-  box-shadow: var(--card-shadow-hover) !important;
-  border: var(--card-border-hover) !important;
-}
-
-/* ============================================================
-   13. INSIGHT BOXES (nt-insight)
-   ============================================================ */
-.nt-insight {
-  transition: var(--card-transition) !important;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.03) !important;
-}
-.nt-insight:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.06) !important;
-}
-
-/* ============================================================
-   14. ASSESS CARDS (PlanFin ผ่าน/ไม่ผ่าน)
-   ============================================================ */
-.nt-assess-card {
-  box-shadow: var(--card-shadow-rest) !important;
-  border: var(--card-border-rest) !important;
-  transition: var(--card-transition) !important;
-}
-.nt-assess-card:hover {
-  transform: translateY(-4px) scale(1.03) !important;
-  box-shadow: var(--card-shadow-hover) !important;
-}
-.nt-assess-card.pass:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05), 0 12px 32px rgba(16,185,129,0.16) !important;
-  border-color: rgba(16,185,129,0.3) !important;
-}
-.nt-assess-card.fail:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05), 0 12px 32px rgba(244,63,94,0.14) !important;
-  border-color: rgba(244,63,94,0.25) !important;
-}
-
-/* ============================================================
-   15. BUDGET BIG CARDS (แท็บ แผนงบประมาณ — 3 cards รวม/เบิก/เหลือ)
-   ============================================================ */
-.erp-budget-big-card {
-  box-shadow: var(--card-shadow-rest) !important;
-  transition: var(--card-transition) !important;
-}
-.erp-budget-big-card:hover {
-  transform: translateY(-5px) scale(1.015) !important;
-  box-shadow: var(--card-shadow-hover) !important;
-}
-
-/* ============================================================
-   16. STRATEGY ITEMS (erp-strat-item)
-   ============================================================ */
-.erp-strat-item {
-  transition: var(--card-transition) !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
-}
-.erp-strat-item:hover {
-  transform: translateY(-2px) translateX(4px) !important;
-  box-shadow: 0 4px 16px rgba(22,163,74,0.1) !important;
-}
-
-/* ============================================================
-   17. GRADE CARD (TPS — วงกลมคะแนน)
-   ============================================================ */
-.nt-grade {
-  box-shadow: var(--card-shadow-rest) !important;
-  transition: var(--card-transition) !important;
-}
-.nt-grade:hover {
-  transform: translateY(-3px) scale(1.02) !important;
-  box-shadow: var(--card-shadow-hover) !important;
-}
-
-/* ============================================================
-   18. CARD-GLOW (แท็บ แผนงบประมาณ)
-   ============================================================ */
-.card-glow {
-  box-shadow: var(--card-shadow-rest) !important;
-  transition: var(--card-transition) !important;
-}
-.card-glow:hover {
-  transform: translateY(-3px) !important;
-  box-shadow: var(--card-shadow-hover) !important;
-}
-
-/* ============================================================
-   19. OV-RING (วงกลมคะแนน ใน ERP Overview)
-   ============================================================ */
-.ov-ring {
-  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease !important;
-}
-.ov-sc:hover .ov-ring {
-  transform: scale(1.08) !important;
-  box-shadow: 0 4px 16px rgba(22,163,74,0.15) !important;
-}
-
-/* ============================================================
-   20. MICRO-INTERACTION: ไอคอน + ค่าตัวเลขใน cards
-   ============================================================ */
-.erp-stat-card .s-icon,
-.nt-kpi .nt-val,
-.hero-card .metric-icon,
-.compact-card .compact-icon {
-  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1) !important;
-}
-.erp-stat-card:hover .s-icon {
-  transform: scale(1.15) rotate(-5deg) !important;
-}
-.nt-kpi:hover .nt-val {
-  transform: scale(1.03) !important;
-}
-.hero-card:hover .metric-icon {
-  transform: scale(1.12) rotate(5deg) !important;
-}
-.compact-card:hover .compact-icon {
-  transform: scale(1.15) !important;
-}
-
-/* ============================================================
-   21. PILL / BADGE ขยับเล็กน้อยเมื่อ hover card
-   ============================================================ */
-.nt-pill,
-.erp-badge,
-.pill {
-  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease !important;
-}
-.nt-kpi:hover .nt-pill,
-.erp-stat-card:hover .erp-badge {
-  transform: translateY(-1px) scale(1.05) !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
-}
-
-/* ============================================================
-   22. SCORE BARS ขยาย smoothly เมื่อ hover
-   ============================================================ */
-.nt-score-fill,
-.erp-prog-fill,
-.pf-fc-bar-fill {
-  transition: width 0.8s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.3s ease !important;
-}
-.nt-score-row:hover .nt-score-fill {
-  transform: scaleY(1.2) !important;
-  border-radius: 8px !important;
-}
-.ov-brow:hover .bf {
-  transform: scaleY(1.3) !important;
-}
-
-/* ============================================================
-   23. TABLE ROW HOVER — เพิ่มมิติให้ตาราง
-   ============================================================ */
-.erp-tbl-wrap tr:hover td,
-.billing-row-table tr:hover td,
-.erp-budget-tbl tr:hover td {
-  background: rgba(22,163,74,0.03) !important;
-  transition: background 0.2s ease !important;
-}
-
-/* ============================================================
-   24. FOCUS-WITHIN — กรอบเรืองแสงเมื่อมี input ภายใน card
-   ============================================================ */
-.erp-card:focus-within {
-  border-color: rgba(22,163,74,0.3) !important;
-  box-shadow: 0 0 0 3px rgba(22,163,74,0.08), var(--card-shadow-rest) !important;
-}
-
-/* ============================================================
-   25. RESPONSIVE — ลด effect บนมือถือเพื่อ performance
-   ============================================================ */
-@media (max-width: 768px) {
-  .stat-card:hover,
-  .erp-stat-card:hover,
-  .nt-kpi:hover,
-  .ov-sc:hover,
-  .hero-card:hover,
-  .billing-kpi:hover,
-  .fund-card:hover,
-  .erp-fund-card:hover,
-  .pf-fund-card:hover,
-  .compact-card:hover,
-  .erp-card:hover,
-  .table-card:hover,
-  .service-card:hover,
-  .erp-budget-big-card:hover,
-  .card-glow:hover {
-    transform: translateY(-2px) !important;
-  }
-  .erp-stat-card:hover .s-icon,
-  .hero-card:hover .metric-icon,
-  .compact-card:hover .compact-icon {
-    transform: none !important;
-  }
-}
-
-/* ============================================================
-   26. PREFERS-REDUCED-MOTION — ปิด animation สำหรับ accessibility
-   ============================================================ */
-@media (prefers-reduced-motion: reduce) {
-  .stat-card,
-  .erp-stat-card,
-  .nt-kpi,
-  .ov-sc,
-  .hero-card,
-  .billing-kpi,
-  .fund-card,
-  .erp-fund-card,
-  .pf-fund-card,
-  .compact-card,
-  .erp-card,
-  .table-card,
-  .service-card,
-  .erp-budget-big-card,
-  .card-glow,
-  .nt-grade,
-  .nt-insight,
-  .nt-assess-card,
-  .erp-strat-item {
-    transition: none !important;
-  }
-  .stat-card:hover,
-  .erp-stat-card:hover,
-  .nt-kpi:hover,
-  .ov-sc:hover,
-  .hero-card:hover,
-  .billing-kpi:hover,
-  .fund-card:hover,
-  .erp-fund-card:hover,
-  .pf-fund-card:hover,
-  .compact-card:hover,
-  .erp-card:hover,
-  .table-card:hover,
-  .service-card:hover,
-  .erp-budget-big-card:hover,
-  .card-glow:hover {
-    transform: none !important;
-  }
-}
-/* ============================================================
-   FIX: CARD TOP STRIP OVERLAP
-   ============================================================
-   ปัญหา: Base CSS ใช้ ::before + Vibrant Theme เพิ่ม ::after
-          ทำให้เส้นสีบน card ซ้อนกัน 2 เส้น
-   แก้ไข:  ให้ใช้ ::before เส้นเดียว → ลบ ::after ที่ซ้ำออก
-   
-   วิธีใช้: วางก่อนปิด style tag (หลัง card_depth_patch)
-   ============================================================ */
-
-/* ── stat-card: ลบ ::after (Vibrant Theme เพิ่มมา) ── */
-.stat-card::after {
-  display: none !important;
-}
-/* ให้ ::before เป็นเส้นหลัก — สีเขียว สธ. */
-.stat-card::before {
-  content: '' !important;
-  position: absolute !important;
-  top: 0 !important; left: 0 !important; right: 0 !important;
-  height: 3px !important;
-  background: linear-gradient(90deg, #16a34a, #059669, #14b8a6) !important;
-  border-radius: 12px 12px 0 0 !important;
-  z-index: 2 !important;
-}
-
-/* ── erp-stat-card: ให้เหลือ ::before เส้นเดียว ── */
-.erp-stat-card::after {
-  display: none !important;
-}
-.erp-stat-card::before {
-  height: 3px !important;
-  z-index: 2 !important;
-}
-
-/* ── billing-kpi: ให้เหลือ ::after ที่ก้นเส้นเดียว ── */
-.billing-kpi::before {
-  display: none !important;
-}
-.billing-kpi::after {
-  height: 3px !important;
-  z-index: 2 !important;
-}
-
-/* ── fund-card: ให้เหลือ ::before เส้นเดียว ── */
-.fund-card::after {
-  display: none !important;
-}
-.fund-card::before {
-  height: 3px !important;
-  z-index: 2 !important;
-}
-
-/* ── erp-fund-card: ให้เหลือ ::before เส้นเดียว ── */
-.erp-fund-card::after {
-  display: none !important;
-}
-.erp-fund-card::before {
-  height: 3px !important;
-  z-index: 2 !important;
-}
-
-/* ── nt-kpi: ให้เหลือ ::before เส้นเดียว ── */
-.nt-kpi::after {
-  display: none !important;
-}
-.nt-kpi::before {
-  height: 3px !important;
-  z-index: 2 !important;
-}
-
-/* ── compact-card: ให้เหลือ ::before (left strip) เส้นเดียว ── */
-.compact-card::after {
-  display: none !important;
-}
-
-/* ── pf-fund-card: ให้เหลือ ::before (left strip) เส้นเดียว ── */
-.pf-fund-card::after {
-  display: none !important;
-}
-
-/* ── hero-card: ไม่มี pseudo-element แต่ป้องกัน ── */
-.hero-card::before,
-.hero-card::after {
-  display: none !important;
-}
-
-/* ── service-card: ป้องกัน ── */
-.service-card::before,
-.service-card::after {
-  display: none !important;
-}
-
-/* ── table-card: ป้องกัน ── */
-.table-card::before,
-.table-card::after {
-  display: none !important;
-}
-
-/* ── erp-card: ป้องกัน ── */
-.erp-card::before,
-.erp-card::after {
-  display: none !important;
-}
+/* CARD DEPTH + STRIP FIX */
+:root{--card-shadow-rest:0 1px 2px rgba(0,0,0,0.04),0 4px 12px rgba(22,163,74,0.06),0 8px 24px rgba(0,0,0,0.02);--card-shadow-hover:0 4px 8px rgba(0,0,0,0.06),0 12px 32px rgba(22,163,74,0.12),0 20px 48px rgba(0,0,0,0.04);--card-shadow-active:0 2px 4px rgba(0,0,0,0.08),0 8px 20px rgba(22,163,74,0.15);--card-transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.35s cubic-bezier(0.25,0.46,0.45,0.94),border-color 0.3s ease;--card-border-rest:1px solid rgba(22,163,74,0.08);--card-border-hover:1px solid rgba(22,163,74,0.22)}
+.stat-card{border:var(--card-border-rest)!important;box-shadow:var(--card-shadow-rest)!important;transition:var(--card-transition)!important}
+.stat-card:hover{transform:translateY(-4px) scale(1.01)!important;box-shadow:var(--card-shadow-hover)!important;border:var(--card-border-hover)!important}
+.stat-card:active{transform:translateY(-1px) scale(0.995)!important;box-shadow:var(--card-shadow-active)!important}
+.erp-stat-card{box-shadow:var(--card-shadow-rest)!important;border:var(--card-border-rest)!important;transition:var(--card-transition)!important}
+.erp-stat-card:hover{transform:translateY(-5px) scale(1.015)!important;box-shadow:var(--card-shadow-hover)!important;border:var(--card-border-hover)!important}
+.erp-stat-card:active{transform:translateY(-1px)!important;box-shadow:var(--card-shadow-active)!important}
+.erp-stat-card.blue:hover{box-shadow:0 4px 8px rgba(0,0,0,0.05),0 12px 32px rgba(22,163,74,0.14),0 0 0 3px rgba(22,163,74,0.06)!important}
+.erp-stat-card.green:hover{box-shadow:0 4px 8px rgba(0,0,0,0.05),0 12px 32px rgba(16,185,129,0.16),0 0 0 3px rgba(16,185,129,0.06)!important}
+.erp-stat-card.purple:hover{box-shadow:0 4px 8px rgba(0,0,0,0.05),0 12px 32px rgba(139,92,246,0.14),0 0 0 3px rgba(139,92,246,0.06)!important}
+.erp-stat-card.amber:hover{box-shadow:0 4px 8px rgba(0,0,0,0.05),0 12px 32px rgba(245,158,11,0.14),0 0 0 3px rgba(245,158,11,0.06)!important}
+.erp-stat-card.rose:hover{box-shadow:0 4px 8px rgba(0,0,0,0.05),0 12px 32px rgba(244,63,94,0.14),0 0 0 3px rgba(244,63,94,0.06)!important}
+.erp-stat-card.cyan:hover{box-shadow:0 4px 8px rgba(0,0,0,0.05),0 12px 32px rgba(6,182,212,0.14),0 0 0 3px rgba(6,182,212,0.06)!important}
+.nt-kpi{box-shadow:var(--card-shadow-rest)!important;border:var(--card-border-rest)!important;transition:var(--card-transition)!important}
+.nt-kpi:hover{transform:translateY(-4px) scale(1.01)!important;box-shadow:var(--card-shadow-hover)!important;border:var(--card-border-hover)!important}
+.nt-kpi.c-green:hover{box-shadow:0 4px 8px rgba(0,0,0,0.05),0 12px 32px rgba(16,185,129,0.16),0 0 0 3px rgba(16,185,129,0.05)!important}
+.nt-kpi.c-red:hover{box-shadow:0 4px 8px rgba(0,0,0,0.05),0 12px 32px rgba(244,63,94,0.14),0 0 0 3px rgba(244,63,94,0.05)!important}
+.nt-kpi.c-amber:hover{box-shadow:0 4px 8px rgba(0,0,0,0.05),0 12px 32px rgba(245,158,11,0.14),0 0 0 3px rgba(245,158,11,0.05)!important}
+.nt-kpi.c-blue:hover{box-shadow:0 4px 8px rgba(0,0,0,0.05),0 12px 32px rgba(99,102,241,0.14),0 0 0 3px rgba(99,102,241,0.05)!important}
+.nt-kpi.c-cyan:hover{box-shadow:0 4px 8px rgba(0,0,0,0.05),0 12px 32px rgba(6,182,212,0.14),0 0 0 3px rgba(6,182,212,0.05)!important}
+.nt-kpi.c-purple:hover{box-shadow:0 4px 8px rgba(0,0,0,0.05),0 12px 32px rgba(139,92,246,0.14),0 0 0 3px rgba(139,92,246,0.05)!important}
+.ov-sc{box-shadow:var(--card-shadow-rest)!important;border:var(--card-border-rest)!important;transition:var(--card-transition)!important}
+.ov-sc:hover{transform:translateY(-5px) scale(1.008)!important;box-shadow:var(--card-shadow-hover)!important;border:var(--card-border-hover)!important}
+.hero-card{box-shadow:var(--card-shadow-rest)!important;transition:var(--card-transition)!important}
+.hero-card:hover{transform:translateY(-5px) scale(1.012)!important;box-shadow:var(--card-shadow-hover)!important}
+.hero-card.featured{box-shadow:0 4px 12px rgba(5,150,105,0.2),0 12px 36px rgba(5,150,105,0.28)!important}
+.hero-card.featured:hover{transform:translateY(-6px) scale(1.015)!important;box-shadow:0 8px 20px rgba(5,150,105,0.25),0 20px 48px rgba(5,150,105,0.35)!important}
+.billing-kpi{box-shadow:var(--card-shadow-rest)!important;border:var(--card-border-rest)!important;transition:var(--card-transition)!important}
+.billing-kpi:hover{transform:translateY(-5px) scale(1.015)!important;box-shadow:var(--card-shadow-hover)!important;border:var(--card-border-hover)!important}
+.fund-card,.erp-fund-card{box-shadow:var(--card-shadow-rest)!important;border:var(--card-border-rest)!important;transition:var(--card-transition)!important}
+.fund-card:hover,.erp-fund-card:hover{transform:translateY(-5px) scale(1.02)!important;box-shadow:var(--card-shadow-hover)!important;border:var(--card-border-hover)!important}
+.pf-fund-card{box-shadow:var(--card-shadow-rest)!important;border:var(--card-border-rest)!important;transition:var(--card-transition)!important}
+.pf-fund-card:hover{transform:translateY(-4px) scale(1.01)!important;box-shadow:var(--card-shadow-hover)!important;border:var(--card-border-hover)!important}
+.compact-card{box-shadow:var(--card-shadow-rest)!important;border:var(--card-border-rest)!important;transition:var(--card-transition)!important}
+.compact-card:hover{transform:translateY(-4px) scale(1.02)!important;box-shadow:var(--card-shadow-hover)!important;border:var(--card-border-hover)!important}
+.erp-card{box-shadow:var(--card-shadow-rest)!important;border:var(--card-border-rest)!important;transition:var(--card-transition)!important}
+.erp-card:hover{transform:translateY(-3px)!important;box-shadow:0 4px 8px rgba(0,0,0,0.04),0 10px 28px rgba(22,163,74,0.1),0 16px 40px rgba(0,0,0,0.03)!important;border:var(--card-border-hover)!important}
+.table-card{box-shadow:var(--card-shadow-rest)!important;border:var(--card-border-rest)!important;transition:var(--card-transition)!important}
+.table-card:hover{transform:translateY(-3px)!important;box-shadow:0 4px 8px rgba(0,0,0,0.04),0 10px 28px rgba(22,163,74,0.1)!important;border:var(--card-border-hover)!important}
+.service-card{box-shadow:var(--card-shadow-rest)!important;border:var(--card-border-rest)!important;transition:var(--card-transition)!important}
+.service-card:hover{transform:translateY(-4px) scale(1.005)!important;box-shadow:var(--card-shadow-hover)!important;border:var(--card-border-hover)!important}
+.nt-insight{transition:var(--card-transition)!important;box-shadow:0 1px 4px rgba(0,0,0,0.03)!important}
+.nt-insight:hover{transform:translateY(-2px)!important;box-shadow:0 4px 16px rgba(0,0,0,0.06)!important}
+.nt-assess-card{box-shadow:var(--card-shadow-rest)!important;border:var(--card-border-rest)!important;transition:var(--card-transition)!important}
+.nt-assess-card:hover{transform:translateY(-4px) scale(1.03)!important;box-shadow:var(--card-shadow-hover)!important}
+.nt-assess-card.pass:hover{box-shadow:0 4px 8px rgba(0,0,0,0.05),0 12px 32px rgba(16,185,129,0.16)!important;border-color:rgba(16,185,129,0.3)!important}
+.nt-assess-card.fail:hover{box-shadow:0 4px 8px rgba(0,0,0,0.05),0 12px 32px rgba(244,63,94,0.14)!important;border-color:rgba(244,63,94,0.25)!important}
+.erp-budget-big-card{box-shadow:var(--card-shadow-rest)!important;transition:var(--card-transition)!important}
+.erp-budget-big-card:hover{transform:translateY(-5px) scale(1.015)!important;box-shadow:var(--card-shadow-hover)!important}
+.erp-strat-item{transition:var(--card-transition)!important;box-shadow:0 1px 3px rgba(0,0,0,0.03)!important}
+.erp-strat-item:hover{transform:translateY(-2px) translateX(4px)!important;box-shadow:0 4px 16px rgba(22,163,74,0.1)!important}
+.nt-grade{box-shadow:var(--card-shadow-rest)!important;transition:var(--card-transition)!important}
+.nt-grade:hover{transform:translateY(-3px) scale(1.02)!important;box-shadow:var(--card-shadow-hover)!important}
+.card-glow{box-shadow:var(--card-shadow-rest)!important;transition:var(--card-transition)!important}
+.card-glow:hover{transform:translateY(-3px)!important;box-shadow:var(--card-shadow-hover)!important}
+.ov-ring{transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.3s ease!important}
+.ov-sc:hover .ov-ring{transform:scale(1.08)!important;box-shadow:0 4px 16px rgba(22,163,74,0.15)!important}
+.erp-stat-card .s-icon,.nt-kpi .nt-val,.hero-card .metric-icon,.compact-card .compact-icon{transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1)!important}
+.erp-stat-card:hover .s-icon{transform:scale(1.15) rotate(-5deg)!important}
+.nt-kpi:hover .nt-val{transform:scale(1.03)!important}
+.hero-card:hover .metric-icon{transform:scale(1.12) rotate(5deg)!important}
+.compact-card:hover .compact-icon{transform:scale(1.15)!important}
+.nt-pill,.erp-badge,.pill{transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.3s ease!important}
+.nt-kpi:hover .nt-pill,.erp-stat-card:hover .erp-badge{transform:translateY(-1px) scale(1.05)!important;box-shadow:0 2px 8px rgba(0,0,0,0.08)!important}
+.nt-score-fill,.erp-prog-fill,.pf-fc-bar-fill{transition:width 0.8s cubic-bezier(0.25,0.46,0.45,0.94),transform 0.3s ease!important}
+.nt-score-row:hover .nt-score-fill{transform:scaleY(1.2)!important;border-radius:8px!important}
+.ov-brow:hover .bf{transform:scaleY(1.3)!important}
+.erp-tbl-wrap tr:hover td,.billing-row-table tr:hover td,.erp-budget-tbl tr:hover td{background:rgba(22,163,74,0.03)!important;transition:background 0.2s ease!important}
+.erp-card:focus-within{border-color:rgba(22,163,74,0.3)!important;box-shadow:0 0 0 3px rgba(22,163,74,0.08),var(--card-shadow-rest)!important}
+@media(max-width:768px){.stat-card:hover,.erp-stat-card:hover,.nt-kpi:hover,.ov-sc:hover,.hero-card:hover,.billing-kpi:hover,.fund-card:hover,.erp-fund-card:hover,.pf-fund-card:hover,.compact-card:hover,.erp-card:hover,.table-card:hover,.service-card:hover,.erp-budget-big-card:hover,.card-glow:hover{transform:translateY(-2px)!important}.erp-stat-card:hover .s-icon,.hero-card:hover .metric-icon,.compact-card:hover .compact-icon{transform:none!important}}
+@media(prefers-reduced-motion:reduce){.stat-card,.erp-stat-card,.nt-kpi,.ov-sc,.hero-card,.billing-kpi,.fund-card,.erp-fund-card,.pf-fund-card,.compact-card,.erp-card,.table-card,.service-card,.erp-budget-big-card,.card-glow,.nt-grade,.nt-insight,.nt-assess-card,.erp-strat-item{transition:none!important}.stat-card:hover,.erp-stat-card:hover,.nt-kpi:hover,.ov-sc:hover,.hero-card:hover,.billing-kpi:hover,.fund-card:hover,.erp-fund-card:hover,.pf-fund-card:hover,.compact-card:hover,.erp-card:hover,.table-card:hover,.service-card:hover,.erp-budget-big-card:hover,.card-glow:hover{transform:none!important}}
+.stat-card::after{display:none!important}
+.stat-card::before{content:''!important;position:absolute!important;top:0!important;left:0!important;right:0!important;height:3px!important;background:linear-gradient(90deg,#16a34a,#059669,#14b8a6)!important;border-radius:12px 12px 0 0!important;z-index:2!important}
+.erp-stat-card::after{display:none!important}
+.erp-stat-card::before{height:3px!important;z-index:2!important}
+.billing-kpi::before{display:none!important}
+.billing-kpi::after{height:3px!important;z-index:2!important}
+.fund-card::after{display:none!important}
+.fund-card::before{height:3px!important;z-index:2!important}
+.erp-fund-card::after{display:none!important}
+.erp-fund-card::before{height:3px!important;z-index:2!important}
+.nt-kpi::after{display:none!important}
+.nt-kpi::before{height:3px!important;z-index:2!important}
+.compact-card::after{display:none!important}
+.pf-fund-card::after{display:none!important}
+.hero-card::before,.hero-card::after{display:none!important}
+.service-card::before,.service-card::after{display:none!important}
+.table-card::before,.table-card::after{display:none!important}
+.erp-card::before,.erp-card::after{display:none!important}
 </style>
  </head>
  <body class="h-full bg-slate-50">
