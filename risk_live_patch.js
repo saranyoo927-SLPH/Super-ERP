@@ -180,6 +180,7 @@ function getRiskLabel(score) { var l={1:'ดีมาก',2:'ดี',3:'พอ�
 function getRiskPill(score) { if(score<=2) return '✓ ระดับ '+score; if(score<=3) return '⚠ ระดับ '+score; return '⚠ ระดับ '+score+' เสี่ยง'; }
 
 function renderRiskCharts() {
-    renderRiskChartsFromData(RISK_FALLBACK.monthly, RISK_FALLBACK.annual);
+    var fb = { monthly: RISK_FALLBACK.monthly, annual: RISK_FALLBACK.annual, latest: RISK_FALLBACK.monthly[RISK_FALLBACK.monthly.length - 1] };
+    applyRiskLiveData(fb);
     setTimeout(function() { loadRiskFromGAS().catch(function(err) { console.error('Risk error:', err); }); }, 1000);
 }
