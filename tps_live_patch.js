@@ -1320,75 +1320,69 @@ function upgradeAlertBanners(panelId, items) {
     const panel = document.getElementById(panelId);
     if (!panel) return;
 
-    // หน่วงเวลาเล็กน้อยเพื่อให้หน้าจอเดิมรันเสร็จก่อน แล้วเราค่อยเข้าไปแปลงโฉม
     setTimeout(() => {
-        const divs = panel.querySelectorAll('div');
-        divs.forEach(div => {
-            const text = div.textContent;
-            // สแกนหากล่องที่มีคำเตือนต่างๆ และเป็นกล่องระดับชั้นในสุด
-            if ((text.includes('⚠') || text.includes('ไม่ผ่าน') || text.includes('เกินเกณฑ์')) && div.children.length <= 2) {
-                
-                if (div.classList.contains('premium-alert')) return; // ข้ามถ้าทำไปแล้ว
-                
-                let targetDiv = div.closest('.alert') || div;
-                if (targetDiv.classList.contains('premium-alert')) return;
+        // คำนวณ score จาก live data
+        let score = 0, maxScore = 0, worstItem = null;
+        let details = [];
 
-                let score = 0;
-                let maxScore = 0;
-                let worstItem = null;
+        items.forEach(ind => {
+            let s = Number(ind.score) || 0;
+            let m = Number(ind.maxScore) || 0;
+            score += s;
+            maxScore += m;
 
-                // 🔥 แก้ไขตรรกะการหา worstItem ใหม่ อิงจากคะแนน (score) จริงๆ ที่ได้เทียบกับคะแนนเต็ม ป้องกันการ Hardcode เกณฑ์ผิด
-                items.forEach(ind => {
-                    let s = Number(ind.score) || 0;
-                    let m = Number(ind.maxScore) || 0;
-                    
-                    score += s;
-                    maxScore += m;
+            let val = ind.actual !== null && ind.actual !== undefined ? ind.actual : '-';
+            let unitStr = ind.unit ? ' ' + ind.unit : '';
+            let name = String(ind.name || ind.code);
+            details.push(name + ' ' + val + unitStr);
 
-                    // ถ้ามีคะแนนเต็ม และได้คะแนน 0 (หรือไม่เต็ม) แปลว่าไม่ผ่านเกณฑ์
-                    if (m > 0 && s < m) {
-                        // เก็บตัวที่ไม่ผ่านตัวแรกไว้แสดงผล
-                        if (!worstItem) {
-                            worstItem = {
-                                ind: ind,
-                                val: ind.actual !== null && ind.actual !== undefined ? ind.actual : '-',
-                                name: String(ind.name || ind.code)
-                            };
-                        }
-                    }
-                });
-
-                // วาดกล่องแจ้งเตือนใหม่สไตล์ Dribbble
-                if (score >= maxScore && maxScore > 0) {
-                    targetDiv.className = 'premium-alert success';
-                    targetDiv.innerHTML = `<span class="icon">✨</span> <div><strong>ยอดเยี่ยม!</strong> ผ่านเกณฑ์ทุกตัวชี้วัด (${score}/${maxScore} คะแนน)</div>`;
-                } else if (worstItem) {
-                    let title = worstItem.name;
-                    if (panelId === 'tps-p2') {
-                        if(title.startsWith('1.2.1') || title.includes('เจ้าหนี้')) title = 'ระยะเวลาชำระเจ้าหนี้การค้า';
-                        else if(title.startsWith('1.2.2') || title.toUpperCase().includes('UC') || title.includes('บัตรทอง')) title = 'ระยะเรียกเก็บหนี้สิทธิ UC';
-                        else if(title.startsWith('1.2.3') || title.includes('ขรก') || title.includes('ข้าราชการ')) title = 'ระยะเรียกเก็บหนี้สิทธิ OFC';
-                        else if(title.startsWith('1.2.4') || title.includes('คงคลัง') || title.includes('สินค้า')) title = 'การบริหารสินคงคลัง';
-                    } else if (panelId === 'tps-p3') {
-                        if(title.startsWith('1.3.1.3') || title.includes('LC')) title = 'LC ค่าแรงบุคลากร';
-                        else if(title.startsWith('1.3.1.4') || title.includes('ค่ายา')) title = 'MC ค่ายา';
-                        else if(title.startsWith('1.3.1.5') || title.includes('วิทย์')) title = 'MC ค่าวัสดุวิทย์ฯ';
-                        else if(title.startsWith('1.3.1.6') || title.includes('เวชภัณฑ์')) title = 'MC ค่าเวชภัณฑ์ฯ';
-                    }
-
-                    targetDiv.className = 'premium-alert danger';
-                    let unitStr = worstItem.ind.unit ? worstItem.ind.unit : '';
-                    let criteriaStr = worstItem.ind.criteria ? worstItem.ind.criteria : 'เกณฑ์ที่กำหนด';
-
-                    // 🔥 แสดงค่า actual ตรงๆ และใช้ criteria จาก data จริงๆ ไม่มโนตัวเลขขึ้นมาเอง
-                    targetDiv.innerHTML = `<span class="icon">🚨</span> <div><strong>ไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน):</strong> ${title} พบค่า <b>${worstItem.val} ${unitStr}</b> (เกณฑ์: ${criteriaStr})</div>`;
-                } else {
-                    targetDiv.className = 'premium-alert warn';
-                    targetDiv.innerHTML = `<span class="icon">⚠️</span> <div><strong>แจ้งเตือน:</strong> มีบางตัวชี้วัดไม่ผ่านเกณฑ์ (${score}/${maxScore} คะแนน)</div>`;
-                }
+            if (m > 0 && s < m && !worstItem) {
+                worstItem = { ind: ind, val: val, name: name };
             }
         });
-    }, 200);
+
+        // หากล่อง nt-insight ทั้งหมดใน panel
+        const insights = panel.querySelectorAll('.nt-insight');
+        insights.forEach(div => {
+            if (div.classList.contains('premium-alert-done')) return;
+
+            if (score >= maxScore && maxScore > 0) {
+                div.className = 'premium-alert success';
+                div.innerHTML = '<span class="icon">✅</span> <div><strong>ผ่านเต็ม ' + score + '/' + maxScore + ' คะแนน:</strong> ' + details.join(' และ') + ' อยู่ในเกณฑ์ทั้งคู่</div>';
+            } else if (worstItem) {
+                let title = worstItem.name;
+                if (panelId === 'tps-p2') {
+                    if(title.startsWith('1.2.1') || title.includes('เจ้าหนี้')) title = 'ระยะเวลาชำระเจ้าหนี้การค้า';
+                    else if(title.startsWith('1.2.2') || title.toUpperCase().includes('UC') || title.includes('บัตรทอง')) title = 'ระยะเรียกเก็บหนี้สิทธิ UC';
+                    else if(title.startsWith('1.2.3') || title.includes('ขรก') || title.includes('ข้าราชการ')) title = 'ระยะเรียกเก็บหนี้สิทธิ OFC';
+                    else if(title.startsWith('1.2.4') || title.includes('คงคลัง') || title.includes('สินค้า')) title = 'การบริหารสินคงคลัง';
+                } else if (panelId === 'tps-p3') {
+                    if(title.startsWith('1.3.1.3') || title.includes('LC')) title = 'LC ค่าแรงบุคลากร';
+                    else if(title.startsWith('1.3.1.4') || title.includes('ค่ายา')) title = 'MC ค่ายา';
+                    else if(title.startsWith('1.3.1.5') || title.includes('วิทย์')) title = 'MC ค่าวัสดุวิทย์ฯ';
+                    else if(title.startsWith('1.3.1.6') || title.includes('เวชภัณฑ์')) title = 'MC ค่าเวชภัณฑ์ฯ';
+                }
+
+                let unitStr = worstItem.ind.unit ? worstItem.ind.unit : '';
+                let criteriaStr = worstItem.ind.criteria ? worstItem.ind.criteria : 'เกณฑ์ที่กำหนด';
+                div.className = 'premium-alert danger';
+                div.innerHTML = '<span class="icon">🚨</span> <div><strong>ไม่ผ่านเกณฑ์ (' + score + '/' + maxScore + ' คะแนน):</strong> ' + title + ' พบค่า <b>' + worstItem.val + ' ' + unitStr + '</b> (เกณฑ์: ' + criteriaStr + ')</div>';
+            } else {
+                div.className = 'premium-alert warn';
+                div.innerHTML = '<span class="icon">⚠️</span> <div><strong>แจ้งเตือน:</strong> มีบางตัวชี้วัดไม่ผ่านเกณฑ์ (' + score + '/' + maxScore + ' คะแนน)</div>';
+            }
+            div.classList.add('premium-alert-done');
+        });
+
+        // หากล่อง premium-alert ที่อาจสร้างจาก JS เดิม
+        const premAlerts = panel.querySelectorAll('.premium-alert:not(.premium-alert-done)');
+        premAlerts.forEach(div => {
+            if (score >= maxScore && maxScore > 0) {
+                div.className = 'premium-alert success premium-alert-done';
+                div.innerHTML = '<span class="icon">✅</span> <div><strong>ผ่านเต็ม ' + score + '/' + maxScore + ' คะแนน:</strong> ' + details.join(' และ') + ' อยู่ในเกณฑ์ทั้งคู่</div>';
+            }
+        });
+    }, 300);
 }
 
 function updateERPOverviewTPS(totalScore, totalMax, grade, gi, catMap) {
