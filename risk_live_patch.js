@@ -164,15 +164,69 @@ function updateERPOverviewRisk(latest) {
     var riskCard = null;
     allCards.forEach(function(card) { var t = card.querySelector('.st'); if (t && t.textContent.indexOf('Risk') > -1) riskCard = card; });
     if (!riskCard) return;
+
+    var score = latest.riskScore || 3;
+    var col = score <= 2 ? '#10b981' : score <= 3 ? '#f59e0b' : '#ef4444';
+    var lbl = {1:'ดีมาก',2:'ดี',3:'ต้องระวัง',4:'เสี่ยง',5:'เสี่ยงสูง',6:'วิกฤต'};
+
+    // Period
+    var ss = riskCard.querySelector('.ss');
+    if (ss) ss.textContent = latest.month ? latest.month : 'ล่าสุด';
+
+    // Badge
     var badge = riskCard.querySelector('.sb');
-    if (badge) badge.textContent = 'ระดับ ' + latest.riskScore;
+    if (badge) { badge.textContent = 'ระดับ ' + score; badge.style.color = col; }
+
+    // Ring
     var ring = riskCard.querySelector('.ov-ring');
     if (ring) {
-        var pct = Math.round((latest.riskScore / 6) * 100);
-        var col = latest.riskScore <= 2 ? '#10b981' : latest.riskScore <= 3 ? '#f59e0b' : '#ef4444';
+        var pct = Math.round((score / 6) * 100);
         ring.style.background = 'conic-gradient(' + col + ' 0% ' + pct + '%, #f1f5f9 ' + pct + '% 100%)';
         var span = ring.querySelector('span');
-        if (span) { span.textContent = latest.riskScore; span.style.color = col; }
+        if (span) { span.textContent = score; span.style.color = col; }
+    }
+
+    // Ring label text (below ring)
+    var ringParent = ring ? ring.parentElement : null;
+    if (ringParent) {
+        var ringLabel = ringParent.querySelectorAll('div');
+        for (var rl = 0; rl < ringLabel.length; rl++) {
+            if (ringLabel[rl].textContent.indexOf('Risk') > -1 || ringLabel[rl].textContent.indexOf('/') > -1) {
+                ringLabel[rl].textContent = 'Risk ' + score + ' / 6 (' + (lbl[score] || '') + ')';
+                break;
+            }
+        }
+    }
+
+    // 4 ratio boxes (CURRENT, QUICK, CASH, NWC)
+    var sd = riskCard.querySelector('.sd');
+    if (sd) {
+        var boxes = sd.querySelectorAll('div[style*="text-align:center"][style*="border-radius:7px"]');
+        var ratioData = [
+            { label: 'CURRENT', val: (latest.currentRatio || 0).toFixed(2), bench: 'เกณฑ์ 1.5', color: latest.currentRatio >= 1.5 ? '#10b981' : '#f59e0b' },
+            { label: 'QUICK', val: (latest.quickRatio || 0).toFixed(2), bench: 'เกณฑ์ 1.0', color: latest.quickRatio >= 1.0 ? '#10b981' : '#f59e0b' },
+            { label: 'CASH', val: (latest.cashRatio || 0).toFixed(2), bench: 'เกณฑ์ 0.8', color: latest.cashRatio >= 0.8 ? '#10b981' : '#f43f5e' },
+            { label: 'NWC', val: (latest.nwc >= 0 ? '+' : '') + (latest.nwc || 0).toFixed(2) + 'M', bench: latest.nwc >= 0 ? 'บวก ✓' : 'ติดลบ ⚠', color: latest.nwc >= 0 ? '#10b981' : '#f43f5e' }
+        ];
+        for (var b = 0; b < Math.min(boxes.length, ratioData.length); b++) {
+            var valDiv = boxes[b].querySelectorAll('div');
+            if (valDiv.length >= 3) {
+                valDiv[0].textContent = ratioData[b].label;
+                valDiv[1].textContent = ratioData[b].val;
+                valDiv[1].style.color = ratioData[b].color;
+                valDiv[2].textContent = ratioData[b].bench;
+            }
+        }
+
+        // เงินบำรุงสุทธิ (last div in sd)
+        var bottomDivs = sd.querySelectorAll('div[style*="border-radius:6px"]');
+        for (var bd = 0; bd < bottomDivs.length; bd++) {
+            if (bottomDivs[bd].textContent.indexOf('เงินบำรุง') > -1 || bottomDivs[bd].textContent.indexOf('ลบ.') > -1) {
+                var nc = latest.netCash || 0;
+                bottomDivs[bd].innerHTML = 'เงินบำรุงสุทธิ <b>' + (nc >= 0 ? '+' : '') + nc.toFixed(2) + ' ลบ.</b>';
+                break;
+            }
+        }
     }
 }
 
