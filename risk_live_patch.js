@@ -163,7 +163,7 @@ function updateERPOverviewRisk(latest) {
     var allCards = document.querySelectorAll('#tab-erp-overview .ov-sc');
     var riskCard = null;
     allCards.forEach(function(card) { var t = card.querySelector('.st'); if (t && t.textContent.indexOf('Risk') > -1) riskCard = card; });
-    if (!riskCard) return;
+    if (!riskCard) { console.log('⚠ Risk: ERP Overview card not found'); return; }
 
     var score = latest.riskScore || 3;
     var col = score <= 2 ? '#10b981' : score <= 3 ? '#f59e0b' : '#ef4444';
@@ -186,7 +186,7 @@ function updateERPOverviewRisk(latest) {
         if (span) { span.textContent = score; span.style.color = col; }
     }
 
-    // Ring label text (below ring)
+    // Ring label
     var ringParent = ring ? ring.parentElement : null;
     if (ringParent) {
         var ringLabel = ringParent.querySelectorAll('div');
@@ -198,36 +198,46 @@ function updateERPOverviewRisk(latest) {
         }
     }
 
-    // 4 ratio boxes (CURRENT, QUICK, CASH, NWC)
-    var sd = riskCard.querySelector('.sd');
-    if (sd) {
-        var boxes = sd.querySelectorAll('div[style*="text-align:center"][style*="border-radius:7px"]');
-        var ratioData = [
-            { label: 'CURRENT', val: (latest.currentRatio || 0).toFixed(2), bench: 'เกณฑ์ 1.5', color: latest.currentRatio >= 1.5 ? '#10b981' : '#f59e0b' },
-            { label: 'QUICK', val: (latest.quickRatio || 0).toFixed(2), bench: 'เกณฑ์ 1.0', color: latest.quickRatio >= 1.0 ? '#10b981' : '#f59e0b' },
-            { label: 'CASH', val: (latest.cashRatio || 0).toFixed(2), bench: 'เกณฑ์ 0.8', color: latest.cashRatio >= 0.8 ? '#10b981' : '#f43f5e' },
-            { label: 'NWC', val: (latest.nwc >= 0 ? '+' : '') + (latest.nwc || 0).toFixed(2) + 'M', bench: latest.nwc >= 0 ? 'บวก ✓' : 'ติดลบ ⚠', color: latest.nwc >= 0 ? '#10b981' : '#f43f5e' }
-        ];
-        for (var b = 0; b < Math.min(boxes.length, ratioData.length); b++) {
-            var valDiv = boxes[b].querySelectorAll('div');
-            if (valDiv.length >= 3) {
-                valDiv[0].textContent = ratioData[b].label;
-                valDiv[1].textContent = ratioData[b].val;
-                valDiv[1].style.color = ratioData[b].color;
-                valDiv[2].textContent = ratioData[b].bench;
-            }
-        }
-
-        // เงินบำรุงสุทธิ (last div in sd)
-        var bottomDivs = sd.querySelectorAll('div[style*="border-radius:6px"]');
-        for (var bd = 0; bd < bottomDivs.length; bd++) {
-            if (bottomDivs[bd].textContent.indexOf('เงินบำรุง') > -1 || bottomDivs[bd].textContent.indexOf('ลบ.') > -1) {
-                var nc = latest.netCash || 0;
-                bottomDivs[bd].innerHTML = 'เงินบำรุงสุทธิ <b>' + (nc >= 0 ? '+' : '') + nc.toFixed(2) + ' ลบ.</b>';
-                break;
+    // 4 ratio boxes — หาด้วยข้อความ CURRENT/QUICK/CASH/NWC
+    var allDivs = riskCard.querySelectorAll('div');
+    var ratioMap = {
+        'CURRENT': { val: (latest.currentRatio || 0).toFixed(2), color: latest.currentRatio >= 1.5 ? '#10b981' : '#f59e0b' },
+        'QUICK': { val: (latest.quickRatio || 0).toFixed(2), color: latest.quickRatio >= 1.0 ? '#10b981' : '#f59e0b' },
+        'CASH': { val: (latest.cashRatio || 0).toFixed(2), color: latest.cashRatio >= 0.8 ? '#10b981' : '#f43f5e' },
+        'NWC': { val: (latest.nwc >= 0 ? '+' : '') + (latest.nwc || 0).toFixed(2) + 'M', color: latest.nwc >= 0 ? '#10b981' : '#f43f5e' }
+    };
+    var updated = 0;
+    for (var d = 0; d < allDivs.length; d++) {
+        var txt = allDivs[d].textContent.trim();
+        if (ratioMap[txt]) {
+            var parent = allDivs[d].parentElement;
+            if (parent) {
+                var children = parent.querySelectorAll('div');
+                for (var ch = 0; ch < children.length; ch++) {
+                    var style = children[ch].style;
+                    if (style && style.fontSize && (style.fontSize.indexOf('17') > -1 || style.fontSize.indexOf('18') > -1 || style.fontSize.indexOf('16') > -1)) {
+                        children[ch].textContent = ratioMap[txt].val;
+                        children[ch].style.color = ratioMap[txt].color;
+                        updated++;
+                        break;
+                    }
+                }
             }
         }
     }
+
+    // เงินบำรุงสุทธิ
+    for (var d2 = 0; d2 < allDivs.length; d2++) {
+        var t2 = allDivs[d2].textContent;
+        if (t2.indexOf('เงินบำรุงสุทธิ') > -1 || (t2.indexOf('ลบ.') > -1 && t2.indexOf('64') > -1)) {
+            var nc = latest.netCash || 0;
+            allDivs[d2].innerHTML = 'เงินบำรุงสุทธิ <b>' + (nc >= 0 ? '+' : '') + nc.toFixed(2) + ' ลบ.</b>';
+            updated++;
+            break;
+        }
+    }
+
+    console.log('✅ Risk ERP Overview card updated: ' + updated + ' elements, month=' + latest.month);
 }
 
 function getRiskLabel(score) { var l={1:'ดีมาก',2:'ดี',3:'พอใช้',4:'เสี่ยง',5:'เสี่ยงสูง',6:'วิกฤต'}; return 'ระดับ '+score+' = '+(l[score]||'ไม่ระบุ'); }
