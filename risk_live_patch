@@ -1,11 +1,5 @@
-// ============================================================
-// RISK SCORE LIVE DATA PATCH
-// ============================================================
-// ดึงข้อมูลจาก GAS Web App (?action=risk) แทน hardcoded
-// Fallback: GAS → gviz → hardcoded (ไม่ crash)
-// วิธีใช้: โหลดไฟล์นี้ใน Dashboard HTML ด้วย script tag
-//          แล้วลบฟังก์ชัน renderRiskCharts() เดิมออก
-// ============================================================
+// RISK SCORE LIVE DATA PATCH v2
+// อัปเดต fallback 7 เดือน (ต.ค.68-เม.ย.69) + รายปี (2562-2569)
 
 var riskLiveData = null;
 
@@ -15,7 +9,9 @@ var RISK_FALLBACK = {
         { month:'พ.ย.68', currentRatio:1.19, quickRatio:0.90, cashRatio:0.27, nwc:16.05, niDep:18.53, ebitda:20.09, netCash:-63.10, riskScore:3 },
         { month:'ธ.ค.68', currentRatio:1.09, quickRatio:0.81, cashRatio:0.26, nwc:7.53,  niDep:13.49, ebitda:14.08, netCash:-62.83, riskScore:3 },
         { month:'ม.ค.69', currentRatio:1.13, quickRatio:0.87, cashRatio:0.19, nwc:11.69, niDep:13.63, ebitda:17.61, netCash:-71.70, riskScore:3 },
-        { month:'ก.พ.69', currentRatio:1.06, quickRatio:0.79, cashRatio:0.25, nwc:5.56,  niDep:11.13, ebitda:12.25, netCash:-64.95, riskScore:3 }
+        { month:'ก.พ.69', currentRatio:1.06, quickRatio:0.79, cashRatio:0.25, nwc:5.56,  niDep:11.13, ebitda:12.25, netCash:-64.95, riskScore:3 },
+        { month:'มี.ค.69', currentRatio:1.13, quickRatio:0.84, cashRatio:0.28, nwc:10.04, niDep:14.14, ebitda:18.63, netCash:-55.72, riskScore:3 },
+        { month:'เม.ย.69', currentRatio:1.06, quickRatio:0.78, cashRatio:0.24, nwc:5.55,  niDep:16.54, ebitda:15.55, netCash:-64.71, riskScore:3 }
     ],
     annual: [
         { year:2562, currentRatio:0.74, quickRatio:0.54, cashRatio:0.31, riskScore:4 },
@@ -29,54 +25,31 @@ var RISK_FALLBACK = {
     ]
 };
 
-var RISK_COL = {
-    1:'rgba(16,185,129,0.8)',
-    2:'rgba(132,204,22,0.8)',
-    3:'rgba(245,158,11,0.8)',
-    4:'rgba(249,115,22,0.8)',
-    5:'rgba(239,68,68,0.8)',
-    6:'rgba(124,58,237,0.8)'
-};
+var RISK_COL = {1:'rgba(16,185,129,0.8)',2:'rgba(132,204,22,0.8)',3:'rgba(245,158,11,0.8)',4:'rgba(249,115,22,0.8)',5:'rgba(239,68,68,0.8)',6:'rgba(124,58,237,0.8)'};
 
-// ============================================================
-// 1. LOAD RISK DATA FROM GAS
-// ============================================================
 async function loadRiskFromGAS() {
     var gasUrl = (typeof GS_WEB_APP_URL !== 'undefined') ? GS_WEB_APP_URL : null;
-
-    // Layer 1: GAS Web App (?action=risk)
     if (gasUrl) {
         try {
-            console.log('🔄 Risk: loading from GAS Web App...');
+            console.log('🔄 Risk: loading from GAS...');
             var resp = await fetch(gasUrl + '?action=risk', { redirect: 'follow' });
             if (!resp.ok) throw new Error('HTTP ' + resp.status);
             var json = await resp.json();
-
             if (json && json.monthly && json.monthly.length > 0) {
                 riskLiveData = json;
-                console.log('✅ Risk GAS loaded:', json.monthly.length, 'months',
-                    json.annual ? ', ' + json.annual.length + ' years' : '',
-                    json.latest ? ', latest riskScore=' + json.latest.riskScore : '');
+                console.log('✅ Risk GAS loaded:', json.monthly.length, 'months');
                 applyRiskLiveData(json);
                 return;
-            } else if (json && json.error) {
-                console.warn('⚠ Risk GAS error:', json.error);
             }
-        } catch (e) {
-            console.warn('⚠ Risk GAS failed:', e.message);
-        }
+        } catch (e) { console.warn('⚠ Risk GAS failed:', e.message); }
     }
-
-    // Layer 2: gviz (public sheet fallback)
     var sheetId = '1sjKjR2XH568haiMSMnPo1k8RSYAjp3ocmvu7e5sgAB0';
     try {
         console.log('🔄 Risk: loading from gviz...');
-        var url = 'https://docs.google.com/spreadsheets/d/' + sheetId + '/gviz/tq?tqx=out:json';
-        var resp2 = await fetch(url);
+        var resp2 = await fetch('https://docs.google.com/spreadsheets/d/' + sheetId + '/gviz/tq?tqx=out:json');
         var text = await resp2.text();
         var json2 = JSON.parse(text.substring(47).slice(0, -2));
         var rows = json2.table.rows;
-
         if (rows && rows.length > 1) {
             var monthly = [];
             for (var i = 1; i < rows.length; i++) {
@@ -84,17 +57,7 @@ async function loadRiskFromGAS() {
                 if (!c || !c[0]) continue;
                 var m = String(c[0].v || '').trim();
                 if (!m) continue;
-                monthly.push({
-                    month: m,
-                    currentRatio: c[1] ? parseFloat(c[1].v) || 0 : 0,
-                    quickRatio:   c[2] ? parseFloat(c[2].v) || 0 : 0,
-                    cashRatio:    c[3] ? parseFloat(c[3].v) || 0 : 0,
-                    nwc:          c[4] ? parseFloat(c[4].v) || 0 : 0,
-                    niDep:        c[5] ? parseFloat(c[5].v) || 0 : 0,
-                    ebitda:       c[6] ? parseFloat(c[6].v) || 0 : 0,
-                    netCash:      c[7] ? parseFloat(c[7].v) || 0 : 0,
-                    riskScore:    c[11] ? parseFloat(c[11].v) || 0 : 0
-                });
+                monthly.push({ month:m, currentRatio:c[1]?parseFloat(c[1].v)||0:0, quickRatio:c[2]?parseFloat(c[2].v)||0:0, cashRatio:c[3]?parseFloat(c[3].v)||0:0, nwc:c[4]?parseFloat(c[4].v)||0:0, niDep:c[5]?parseFloat(c[5].v)||0:0, ebitda:c[6]?parseFloat(c[6].v)||0:0, netCash:c[7]?parseFloat(c[7].v)||0:0, riskScore:c[11]?parseFloat(c[11].v)||0:0 });
             }
             if (monthly.length > 0) {
                 riskLiveData = { monthly: monthly, latest: monthly[monthly.length - 1] };
@@ -103,155 +66,70 @@ async function loadRiskFromGAS() {
                 return;
             }
         }
-    } catch (e2) {
-        console.warn('⚠ Risk gviz failed:', e2.message);
-    }
-
-    // Layer 3: hardcoded
+    } catch (e2) { console.warn('⚠ Risk gviz failed:', e2.message); }
     console.log('Risk: using hardcoded fallback');
 }
 
-// ============================================================
-// 2. APPLY RISK LIVE DATA
-// ============================================================
 function applyRiskLiveData(data) {
     if (!data || !data.monthly || data.monthly.length === 0) return;
-
     var monthly = data.monthly;
     var annual = data.annual || RISK_FALLBACK.annual;
     var latest = data.latest || monthly[monthly.length - 1];
 
-    // ── KPI Cards ──
     var panel = document.getElementById('risk-ov');
     if (panel) {
         var cards = panel.querySelectorAll('.nt-kpi');
-        var cardData = [
-            {
-                label: 'Risk Score (' + latest.month + ')',
-                val: latest.riskScore + ' <small>/ 6</small>',
-                foot: getRiskLabel(latest.riskScore),
-                pill: getRiskPill(latest.riskScore),
-                color: latest.riskScore <= 2 ? 'c-green' : latest.riskScore <= 3 ? 'c-amber' : 'c-red'
-            },
-            {
-                label: 'Current Ratio (' + latest.month + ')',
-                val: (latest.currentRatio || 0).toFixed(2) + ' <small>เท่า</small>',
-                foot: 'ค่ากลาง 1.5 | ' + (latest.currentRatio >= 1.5 ? 'ผ่าน' : 'ต่ำกว่า'),
-                pill: latest.currentRatio >= 1.5 ? 'ผ่านเกณฑ์' : 'ต่ำกว่าเกณฑ์',
-                color: latest.currentRatio >= 1.5 ? 'c-green' : 'c-blue'
-            },
-            {
-                label: 'Quick Ratio (' + latest.month + ')',
-                val: (latest.quickRatio || 0).toFixed(2) + ' <small>เท่า</small>',
-                foot: 'ค่ากลาง 1.0 | ' + (latest.quickRatio >= 1.0 ? 'ผ่าน' : 'ต่ำกว่า'),
-                pill: latest.quickRatio >= 1.0 ? 'ผ่านเกณฑ์' : 'ต่ำกว่าเกณฑ์',
-                color: latest.quickRatio >= 1.0 ? 'c-green' : 'c-blue'
-            },
-            {
-                label: 'Cash Ratio (' + latest.month + ')',
-                val: (latest.cashRatio || 0).toFixed(2) + ' <small>เท่า</small>',
-                foot: 'ค่ากลาง 0.8 | ' + (latest.cashRatio >= 0.8 ? 'ผ่าน' : 'ต่ำกว่ามาก'),
-                pill: latest.cashRatio >= 0.8 ? 'ผ่านเกณฑ์' : 'ต่ำมาก',
-                color: latest.cashRatio >= 0.8 ? 'c-green' : 'c-amber'
-            },
-            {
-                label: 'NWC (' + latest.month + ')',
-                val: (latest.nwc || 0).toFixed(2) + ' <small>M\u0E3F</small>',
-                foot: (latest.nwc >= 0 ? 'เป็นบวก ✓' : 'ติดลบ ⚠'),
-                pill: latest.nwc >= 0 ? 'บวก ✓' : 'ติดลบ ⚠',
-                color: latest.nwc >= 0 ? 'c-green' : 'c-red'
-            },
-            {
-                label: 'เงินบำรุงคงเหลือสุทธิ',
-                val: (latest.netCash || 0).toFixed(2) + ' <small>M\u0E3F</small>',
-                foot: latest.month + ' | ' + (latest.netCash >= 0 ? 'เป็นบวก' : 'ติดลบ'),
-                pill: latest.netCash >= 0 ? 'บวก ✓' : 'ติดลบ ⚠',
-                color: latest.netCash >= 0 ? 'c-green' : 'c-red'
-            }
+        var cd = [
+            { label:'RISK SCORE ล่าสุด ('+latest.month+')', val:latest.riskScore+' <small>/ 6</small>', foot:getRiskLabel(latest.riskScore), pill:getRiskPill(latest.riskScore), color:latest.riskScore<=2?'c-green':latest.riskScore<=3?'c-amber':'c-red' },
+            { label:'CURRENT RATIO ('+latest.month+')', val:(latest.currentRatio||0).toFixed(2)+' <small>เท่า</small>', foot:'ค่ากลาง 1.5 | '+(latest.currentRatio>=1.5?'ผ่าน':'ต่ำกว่า'), pill:latest.currentRatio>=1.5?'ผ่านเกณฑ์':'ต่ำกว่าเกณฑ์', color:latest.currentRatio>=1.5?'c-green':'c-blue' },
+            { label:'QUICK RATIO ('+latest.month+')', val:(latest.quickRatio||0).toFixed(2)+' <small>เท่า</small>', foot:'ค่ากลาง 1.0 | '+(latest.quickRatio>=1.0?'ผ่าน':'ต่ำกว่า'), pill:latest.quickRatio>=1.0?'ผ่านเกณฑ์':'ต่ำกว่าเกณฑ์', color:latest.quickRatio>=1.0?'c-green':'c-blue' },
+            { label:'CASH RATIO ('+latest.month+')', val:(latest.cashRatio||0).toFixed(2)+' <small>เท่า</small>', foot:'ค่ากลาง 0.8 | '+(latest.cashRatio>=0.8?'ผ่าน':'ต่ำกว่ามาก'), pill:latest.cashRatio>=0.8?'ผ่านเกณฑ์':'ต่ำมาก', color:latest.cashRatio>=0.8?'c-green':'c-amber' },
+            { label:'NWC ('+latest.month+')', val:(latest.nwc||0).toFixed(2)+' <small>MB</small>', foot:(latest.nwc>=0?'เป็นบวก ✓':'ติดลบ ⚠'), pill:latest.nwc>=0?'บวก ✓':'ติดลบ ⚠', color:latest.nwc>=0?'c-green':'c-red' },
+            { label:'เงินบำรุงคงเหลือสุทธิ', val:(latest.netCash||0).toFixed(2)+' <small>MB</small>', foot:latest.month+' | '+(latest.netCash>=0?'เป็นบวก':'ติดลบ'), pill:latest.netCash>=0?'บวก ✓':'ติดลบ ⚠', color:latest.netCash>=0?'c-green':'c-red' }
         ];
-
-        cardData.forEach(function(cd, i) {
+        cd.forEach(function(d, i) {
             if (i >= cards.length) return;
             var card = cards[i];
-            var lblEl = card.querySelector('.nt-lbl');
-            var valEl = card.querySelector('.nt-val');
-            var footEl = card.querySelector('.nt-foot');
-            var pillEl = card.querySelector('.nt-pill');
-
-            if (lblEl) lblEl.textContent = cd.label;
-            if (valEl) valEl.innerHTML = cd.val;
-            if (footEl) footEl.textContent = cd.foot;
-            if (pillEl) {
-                pillEl.textContent = cd.pill;
-                var pClass = 'nt-pill ';
-                if (cd.color === 'c-green') pClass += 'good';
-                else if (cd.color === 'c-red') pClass += 'bad';
-                else pClass += 'warn';
-                pillEl.className = pClass;
-            }
-            card.className = 'nt-kpi ' + cd.color;
+            var lbl = card.querySelector('.nt-lbl'), val = card.querySelector('.nt-val'), ft = card.querySelector('.nt-foot'), pl = card.querySelector('.nt-pill');
+            if (lbl) lbl.textContent = d.label;
+            if (val) val.innerHTML = d.val;
+            if (ft) ft.textContent = d.foot;
+            if (pl) { pl.textContent = d.pill; pl.className = 'nt-pill ' + (d.color==='c-green'?'good':d.color==='c-red'?'bad':'warn'); }
+            card.className = 'nt-kpi ' + d.color;
         });
     }
 
-    // ── Insight Box ──
     var insightEl = document.querySelector('#risk-ov .nt-insight');
     if (insightEl && monthly.length > 0) {
-        var scores = monthly.map(function(m) { return m.riskScore; });
-        var months = monthly.map(function(m) { return m.month; });
-        var allSame = scores.every(function(s) { return s === scores[0]; });
-        var msg = '';
-        if (allSame) {
-            msg = '<strong>⚠ Risk Score ระดับ ' + scores[0] + ' ทุกเดือน ' + months[0] + '–' + months[months.length-1] + '</strong>';
-        } else {
-            msg = '<strong>📊 Risk Score ' + months[0] + '–' + months[months.length-1] + ':</strong> ' +
-                  monthly.map(function(m) { return m.month + '=' + m.riskScore; }).join(', ');
-        }
-        insightEl.innerHTML = msg;
+        var scores = monthly.map(function(m){return m.riskScore;}), months = monthly.map(function(m){return m.month;});
+        var allSame = scores.every(function(s){return s===scores[0];});
+        insightEl.innerHTML = allSame
+            ? '<strong>⚠ Risk Score ระดับ '+scores[0]+' ทุกเดือน '+months[0]+'–'+months[months.length-1]+'</strong>'
+            : '<strong>📊 Risk Score '+months[0]+'–'+months[months.length-1]+':</strong> '+monthly.map(function(m){return m.month+'='+m.riskScore;}).join(', ');
     }
 
-    // ── Section header ──
     var sHead = document.querySelector('#tab-risk-score .erp-section-head h3');
     if (sHead) sHead.textContent = '🏦 Risk Scoring Dashboard • รพ.เสลภูมิ (Live Data)';
 
-    // ── Re-render charts ──
     renderRiskChartsFromData(monthly, annual);
-
-    // ── ERP Overview card ──
     updateERPOverviewRisk(latest);
-
-    console.log('✅ Risk Dashboard updated: score=' + latest.riskScore + ', ' + monthly.length + ' months');
+    console.log('✅ Risk Dashboard updated: score='+latest.riskScore+', '+monthly.length+' months');
 }
 
-// ============================================================
-// 3. RENDER RISK CHARTS FROM DATA
-// ============================================================
 function renderRiskChartsFromData(monthly, annual) {
-    var labels = monthly.map(function(m) { return m.month; });
-    var scores = monthly.map(function(m) { return m.riskScore; });
-    var CR = monthly.map(function(m) { return m.currentRatio; });
-    var QR = monthly.map(function(m) { return m.quickRatio; });
-    var CASHR = monthly.map(function(m) { return m.cashRatio; });
-    var NWC = monthly.map(function(m) { return m.nwc; });
-    var NC = monthly.map(function(m) { return m.netCash; });
-    var EB = monthly.map(function(m) { return m.ebitda; });
-    var ND = monthly.map(function(m) { return m.niDep; });
-    var n = labels.length;
+    var labels=monthly.map(function(m){return m.month;}), scores=monthly.map(function(m){return m.riskScore;});
+    var CR=monthly.map(function(m){return m.currentRatio;}), QR=monthly.map(function(m){return m.quickRatio;}), CASHR=monthly.map(function(m){return m.cashRatio;});
+    var NWC=monthly.map(function(m){return m.nwc;}), NC=monthly.map(function(m){return m.netCash;}), EB=monthly.map(function(m){return m.ebitda;}), ND=monthly.map(function(m){return m.niDep;});
+    var n=labels.length;
 
-    // Monthly Risk Score
     destroyChart('risk_monthly');
     ltChart('risk_monthly','bar',{labels:labels,datasets:[{label:'Risk Score',data:scores,backgroundColor:scores.map(function(v){return RISK_COL[v]||RISK_COL[3];}),borderRadius:6}]},{leg:false,ytick:{stepSize:1,callback:function(v){return 'ระดับ '+v;}}});
 
-    // Yearly Risk Score
     if (annual && annual.length > 0) {
-        var YRS = annual.map(function(a) { return a.year; });
-        var YRISK = annual.map(function(a) { return a.riskScore; });
+        var YRS=annual.map(function(a){return a.year;}), YRISK=annual.map(function(a){return a.riskScore;});
+        var YCR=annual.map(function(a){return a.currentRatio;}), YQR=annual.map(function(a){return a.quickRatio;}), YCASHR=annual.map(function(a){return a.cashRatio;});
         destroyChart('risk_yearly');
         ltChart('risk_yearly','bar',{labels:YRS,datasets:[{label:'Risk Score',data:YRISK,backgroundColor:YRISK.map(function(v){return RISK_COL[v]||RISK_COL[3];}),borderRadius:6}]},{leg:false,ytick:{stepSize:1,callback:function(v){return 'ระดับ '+v;}}});
-
-        // Year Ratios
-        var YCR = annual.map(function(a) { return a.currentRatio; });
-        var YQR = annual.map(function(a) { return a.quickRatio; });
-        var YCASHR = annual.map(function(a) { return a.cashRatio; });
         destroyChart('risk_yrRisk');
         ltChart('risk_yrRisk','bar',{labels:YRS,datasets:[{label:'Risk Score',data:YRISK,backgroundColor:YRISK.map(function(v){return RISK_COL[v]||RISK_COL[3];}),borderRadius:6}]},{leg:false,ytick:{stepSize:1}});
         destroyChart('risk_yrRatio');
@@ -262,52 +140,32 @@ function renderRiskChartsFromData(monthly, annual) {
         ]});
     }
 
-    // Ratios
-    var benchCR = Array(n).fill(1.5);
-    var benchQR = Array(n).fill(1.0);
-    var benchCASH = Array(n).fill(0.8);
     destroyChart('risk_ratios');
     ltChart('risk_ratios','line',{labels:labels,datasets:[
         {label:'Current Ratio',data:CR,borderColor:'#6366f1',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#6366f1',fill:false,tension:0.3},
         {label:'Quick Ratio',data:QR,borderColor:'#10b981',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#10b981',fill:false,tension:0.3},
         {label:'Cash Ratio',data:CASHR,borderColor:'#f97316',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#f97316',fill:false,tension:0.3},
-        {label:'ค่ากลาง CR 1.5',data:benchCR,borderColor:'rgba(99,102,241,0.4)',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false},
-        {label:'ค่ากลาง QR 1.0',data:benchQR,borderColor:'rgba(16,185,129,0.4)',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false},
-        {label:'ค่ากลาง CashR 0.8',data:benchCASH,borderColor:'rgba(249,115,22,0.4)',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false}
+        {label:'ค่ากลาง CR 1.5',data:Array(n).fill(1.5),borderColor:'rgba(99,102,241,0.4)',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false},
+        {label:'ค่ากลาง QR 1.0',data:Array(n).fill(1.0),borderColor:'rgba(16,185,129,0.4)',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false},
+        {label:'ค่ากลาง CashR 0.8',data:Array(n).fill(0.8),borderColor:'rgba(249,115,22,0.4)',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false}
     ]});
 
-    // NWC
     destroyChart('risk_nwc');
-    ltChart('risk_nwc','bar',{labels:labels,datasets:[{label:'NWC (M฿)',data:NWC,backgroundColor:NWC.map(function(v){return v>=0?'rgba(16,185,129,0.8)':'rgba(239,68,68,0.8)';}),borderRadius:6}]},{leg:false});
-
-    // Net Cash
+    ltChart('risk_nwc','bar',{labels:labels,datasets:[{label:'NWC (MB)',data:NWC,backgroundColor:NWC.map(function(v){return v>=0?'rgba(16,185,129,0.8)':'rgba(239,68,68,0.8)';}),borderRadius:6}]},{leg:false});
     destroyChart('risk_netcash');
-    ltChart('risk_netcash','bar',{labels:labels,datasets:[{label:'เงินบำรุง (M฿)',data:NC,backgroundColor:'rgba(239,68,68,0.7)',borderRadius:6}]},{leg:false});
-
-    // EBITDA
+    ltChart('risk_netcash','bar',{labels:labels,datasets:[{label:'เงินบำรุง (MB)',data:NC,backgroundColor:'rgba(239,68,68,0.7)',borderRadius:6}]},{leg:false});
     destroyChart('risk_ebitda');
-    ltChart('risk_ebitda','bar',{labels:labels,datasets:[
-        {label:'EBITDA',data:EB,backgroundColor:'rgba(16,185,129,0.7)',borderRadius:5},
-        {label:'Ni+Dep',data:ND,backgroundColor:'rgba(99,102,241,0.6)',borderRadius:5}
-    ]});
+    ltChart('risk_ebitda','bar',{labels:labels,datasets:[{label:'EBITDA',data:EB,backgroundColor:'rgba(16,185,129,0.7)',borderRadius:5},{label:'Ni+Dep',data:ND,backgroundColor:'rgba(99,102,241,0.6)',borderRadius:5}]});
 }
 
-// ============================================================
-// 4. UPDATE ERP OVERVIEW CARD — RISK
-// ============================================================
 function updateERPOverviewRisk(latest) {
     if (!latest) return;
     var allCards = document.querySelectorAll('#tab-erp-overview .ov-sc');
     var riskCard = null;
-    allCards.forEach(function(card) {
-        var title = card.querySelector('.st');
-        if (title && title.textContent.indexOf('Risk') > -1) riskCard = card;
-    });
+    allCards.forEach(function(card) { var t = card.querySelector('.st'); if (t && t.textContent.indexOf('Risk') > -1) riskCard = card; });
     if (!riskCard) return;
-
     var badge = riskCard.querySelector('.sb');
     if (badge) badge.textContent = 'ระดับ ' + latest.riskScore;
-
     var ring = riskCard.querySelector('.ov-ring');
     if (ring) {
         var pct = Math.round((latest.riskScore / 6) * 100);
@@ -318,31 +176,10 @@ function updateERPOverviewRisk(latest) {
     }
 }
 
-// ============================================================
-// 5. HELPERS
-// ============================================================
-function getRiskLabel(score) {
-    var labels = { 1:'ดีมาก', 2:'ดี', 3:'พอใช้', 4:'เสี่ยง', 5:'เสี่ยงสูง', 6:'วิกฤต' };
-    return 'ระดับ ' + score + ' = ' + (labels[score] || 'ไม่ระบุ');
-}
+function getRiskLabel(score) { var l={1:'ดีมาก',2:'ดี',3:'พอใช้',4:'เสี่ยง',5:'เสี่ยงสูง',6:'วิกฤต'}; return 'ระดับ '+score+' = '+(l[score]||'ไม่ระบุ'); }
+function getRiskPill(score) { if(score<=2) return '✓ ระดับ '+score; if(score<=3) return '⚠ ระดับ '+score; return '⚠ ระดับ '+score+' เสี่ยง'; }
 
-function getRiskPill(score) {
-    if (score <= 2) return '✓ ระดับ ' + score;
-    if (score <= 3) return '⚠ ระดับ ' + score;
-    return '⚠ ระดับ ' + score + ' เสี่ยง';
-}
-
-// ============================================================
-// 6. MAIN — แทนที่ renderRiskCharts() เดิม
-// ============================================================
 function renderRiskCharts() {
-    // แสดง hardcoded ทันที
     renderRiskChartsFromData(RISK_FALLBACK.monthly, RISK_FALLBACK.annual);
-
-    // แล้วโหลด live data async
-    setTimeout(function() {
-        loadRiskFromGAS().catch(function(err) {
-            console.error('Risk loadRiskFromGAS error:', err);
-        });
-    }, 1000);
+    setTimeout(function() { loadRiskFromGAS().catch(function(err) { console.error('Risk error:', err); }); }, 1000);
 }
