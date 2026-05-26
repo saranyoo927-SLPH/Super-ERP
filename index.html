@@ -996,14 +996,22 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 .service-card::before,.service-card::after{display:none!important;content:none!important}
 .table-card::before,.table-card::after{display:none!important;content:none!important}
 .erp-card::before,.erp-card::after{display:none!important;content:none!important}
-/* CARD TEXT OVERLAP FIX */
-.nt-kpi{position:relative!important;overflow:visible!important;padding:10px 16px 16px 16px!important}
-.nt-kpi .nt-pill{position:absolute!important;top:10px!important;right:10px!important;margin:0!important;white-space:nowrap!important;z-index:2!important;display:inline-block!important;font-size:9px!important;font-weight:600!important;padding:2px 7px!important;border-radius:20px!important;max-width:120px!important;overflow:hidden!important;text-overflow:ellipsis!important}
-.nt-kpi .nt-lbl{display:block!important;position:relative!important;z-index:1!important;max-width:calc(100% - 90px)!important;word-break:break-word!important}
-.nt-kpi .nt-val,.nt-kpi .nt-foot{position:relative!important;z-index:1!important}
+/* CARD TEXT OVERLAP FIX + LAYOUT IMPROVEMENT */
+.nt-kpi{position:relative!important;overflow:visible!important;padding:12px 14px 14px 14px!important;min-height:130px!important}
+.nt-kpi .nt-pill{position:absolute!important;top:10px!important;right:10px!important;margin:0!important;white-space:nowrap!important;z-index:2!important;display:inline-block!important;font-size:8px!important;font-weight:700!important;padding:3px 8px!important;border-radius:20px!important;max-width:110px!important;overflow:hidden!important;text-overflow:ellipsis!important;letter-spacing:0.02em!important;line-height:1.3!important}
+.nt-kpi .nt-lbl{display:block!important;position:relative!important;z-index:1!important;max-width:calc(100% - 80px)!important;word-break:break-word!important;font-size:11px!important;font-weight:700!important;color:#475569!important;line-height:1.4!important;margin-bottom:6px!important;letter-spacing:0.01em!important;min-height:30px!important}
+.nt-kpi .nt-val{position:relative!important;z-index:1!important;font-size:1.6rem!important;font-weight:800!important;line-height:1.1!important;margin-bottom:4px!important;letter-spacing:-0.02em!important}
+.nt-kpi .nt-val small{font-size:0.75rem!important;font-weight:600!important;color:#94a3b8!important;margin-left:4px!important}
+.nt-kpi .nt-foot{position:relative!important;z-index:1!important;font-size:10px!important;color:#94a3b8!important;margin-top:auto!important;line-height:1.4!important}
+#risk-ov .nt-kpi-row{grid-template-columns:repeat(6,1fr)!important;gap:10px!important}
+#risk-ov .nt-kpi .nt-lbl{font-size:10px!important;max-width:calc(100% - 70px)!important;min-height:28px!important}
+#risk-ov .nt-kpi .nt-val{font-size:1.5rem!important}
+#risk-ov .nt-kpi .nt-pill{font-size:7.5px!important;padding:2px 6px!important;max-width:90px!important;top:8px!important;right:8px!important}
 .stat-card{position:relative!important;overflow:visible!important}
-.stat-card .nt-pill{position:absolute!important;top:10px!important;right:10px!important;z-index:2!important;white-space:nowrap!important;max-width:140px!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.stat-card .nt-pill,.stat-card .pill{position:absolute!important;top:10px!important;right:10px!important;z-index:2!important;white-space:nowrap!important;max-width:130px!important;overflow:hidden!important;text-overflow:ellipsis!important;font-size:9px!important}
 .stat-card .nt-lbl{max-width:calc(100% - 100px)!important;word-break:break-word!important}
+@media(max-width:1200px){#risk-ov .nt-kpi-row{grid-template-columns:repeat(3,1fr)!important}}
+@media(max-width:768px){#risk-ov .nt-kpi-row{grid-template-columns:repeat(2,1fr)!important}.nt-kpi .nt-lbl{font-size:11px!important;max-width:calc(100% - 80px)!important}}
 </style>
  </head>
  <body class="h-full bg-slate-50">
