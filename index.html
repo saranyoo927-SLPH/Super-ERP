@@ -996,6 +996,14 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 .service-card::before,.service-card::after{display:none!important;content:none!important}
 .table-card::before,.table-card::after{display:none!important;content:none!important}
 .erp-card::before,.erp-card::after{display:none!important;content:none!important}
+/* CARD TEXT OVERLAP FIX */
+.nt-kpi{position:relative!important;overflow:visible!important;padding:10px 16px 16px 16px!important}
+.nt-kpi .nt-pill{position:absolute!important;top:10px!important;right:10px!important;margin:0!important;white-space:nowrap!important;z-index:2!important;display:inline-block!important;font-size:9px!important;font-weight:600!important;padding:2px 7px!important;border-radius:20px!important;max-width:120px!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.nt-kpi .nt-lbl{display:block!important;position:relative!important;z-index:1!important;max-width:calc(100% - 90px)!important;word-break:break-word!important}
+.nt-kpi .nt-val,.nt-kpi .nt-foot{position:relative!important;z-index:1!important}
+.stat-card{position:relative!important;overflow:visible!important}
+.stat-card .nt-pill{position:absolute!important;top:10px!important;right:10px!important;z-index:2!important;white-space:nowrap!important;max-width:140px!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.stat-card .nt-lbl{max-width:calc(100% - 100px)!important;word-break:break-word!important}
 </style>
  </head>
  <body class="h-full bg-slate-50">
