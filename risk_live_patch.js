@@ -226,14 +226,20 @@ function updateERPOverviewRisk(latest) {
         }
     }
 
-    // เงินบำรุงสุทธิ
-    for (var d2 = 0; d2 < allDivs.length; d2++) {
-        var t2 = allDivs[d2].textContent;
-        if (t2.indexOf('เงินบำรุงสุทธิ') > -1 || (t2.indexOf('ลบ.') > -1 && t2.indexOf('64') > -1)) {
-            var nc = latest.netCash || 0;
-            allDivs[d2].innerHTML = 'เงินบำรุงสุทธิ <b>' + (nc >= 0 ? '+' : '') + nc.toFixed(2) + ' ลบ.</b>';
-            updated++;
-            break;
+    // เงินบำรุงสุทธิ — หา div ที่มี style border-radius:6px (ชั้นในสุด)
+    var nc = latest.netCash || 0;
+    var sdDiv = riskCard.querySelector('.sd');
+    if (sdDiv) {
+        var candidates = sdDiv.querySelectorAll('div[style*="border-radius"]');
+        for (var d2 = candidates.length - 1; d2 >= 0; d2--) {
+            var el = candidates[d2];
+            if (el.textContent.indexOf('เงินบำรุง') > -1 || el.textContent.indexOf('ลบ.') > -1) {
+                if (el.querySelectorAll('div').length <= 1) {
+                    el.innerHTML = 'เงินบำรุงสุทธิ <b>' + (nc >= 0 ? '+' : '') + nc.toFixed(2) + ' ลบ.</b>';
+                    updated++;
+                    break;
+                }
+            }
         }
     }
 
