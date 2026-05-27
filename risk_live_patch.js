@@ -168,82 +168,62 @@ function updateERPOverviewRisk(latest) {
     var score = latest.riskScore || 3;
     var col = score <= 2 ? '#10b981' : score <= 3 ? '#f59e0b' : '#ef4444';
     var lbl = {1:'ดีมาก',2:'ดี',3:'ต้องระวัง',4:'เสี่ยง',5:'เสี่ยงสูง',6:'วิกฤต'};
+    var nc = latest.netCash || 0;
+    var updated = 0;
 
-    // Period
+    // 1. Period (.ss)
     var ss = riskCard.querySelector('.ss');
-    if (ss) ss.textContent = latest.month ? latest.month : 'ล่าสุด';
+    if (ss) { ss.textContent = latest.month || 'ล่าสุด'; updated++; }
 
-    // Badge
+    // 2. Badge (.sb)
     var badge = riskCard.querySelector('.sb');
-    if (badge) { badge.textContent = 'ระดับ ' + score; badge.style.color = col; }
+    if (badge) { badge.textContent = 'ระดับ ' + score; badge.style.color = col; updated++; }
 
-    // Ring
+    // 3. Ring (.ov-ring)
     var ring = riskCard.querySelector('.ov-ring');
     if (ring) {
         var pct = Math.round((score / 6) * 100);
         ring.style.background = 'conic-gradient(' + col + ' 0% ' + pct + '%, #f1f5f9 ' + pct + '% 100%)';
         var span = ring.querySelector('span');
         if (span) { span.textContent = score; span.style.color = col; }
+        updated++;
     }
 
-    // Ring label
-    var ringParent = ring ? ring.parentElement : null;
-    if (ringParent) {
-        var ringLabel = ringParent.querySelectorAll('div');
-        for (var rl = 0; rl < ringLabel.length; rl++) {
-            if (ringLabel[rl].textContent.indexOf('Risk') > -1 || ringLabel[rl].textContent.indexOf('/') > -1) {
-                ringLabel[rl].textContent = 'Risk ' + score + ' / 6 (' + (lbl[score] || '') + ')';
-                break;
-            }
-        }
+    // 4. Ring label (div after .ov-ring with "Risk" text)
+    if (ring && ring.nextElementSibling) {
+        ring.nextElementSibling.textContent = 'Risk ' + score + ' / 6 (' + (lbl[score] || '') + ')';
+        updated++;
     }
 
-    // 4 ratio boxes — หาด้วยข้อความ CURRENT/QUICK/CASH/NWC
-    var allDivs = riskCard.querySelectorAll('div');
-    var ratioMap = {
-        'CURRENT': { val: (latest.currentRatio || 0).toFixed(2), color: latest.currentRatio >= 1.5 ? '#10b981' : '#f59e0b' },
-        'QUICK': { val: (latest.quickRatio || 0).toFixed(2), color: latest.quickRatio >= 1.0 ? '#10b981' : '#f59e0b' },
-        'CASH': { val: (latest.cashRatio || 0).toFixed(2), color: latest.cashRatio >= 0.8 ? '#10b981' : '#f43f5e' },
-        'NWC': { val: (latest.nwc >= 0 ? '+' : '') + (latest.nwc || 0).toFixed(2) + 'M', color: latest.nwc >= 0 ? '#10b981' : '#f43f5e' }
-    };
-    var updated = 0;
-    for (var d = 0; d < allDivs.length; d++) {
-        var txt = allDivs[d].textContent.trim();
-        if (ratioMap[txt]) {
-            var parent = allDivs[d].parentElement;
-            if (parent) {
-                var children = parent.querySelectorAll('div');
-                for (var ch = 0; ch < children.length; ch++) {
-                    var style = children[ch].style;
-                    if (style && style.fontSize && (style.fontSize.indexOf('17') > -1 || style.fontSize.indexOf('18') > -1 || style.fontSize.indexOf('16') > -1)) {
-                        children[ch].textContent = ratioMap[txt].val;
-                        children[ch].style.color = ratioMap[txt].color;
-                        updated++;
-                        break;
-                    }
-                }
-            }
-        }
+    // 5. Rebuild .sd content entirely — ป้องกัน innerHTML ทับผิด element
+    var sd = riskCard.querySelector('.sd');
+    if (sd) {
+        sd.innerHTML = '' +
+        '<div style="text-align:center;margin-bottom:10px">' +
+            '<div class="ov-ring" style="width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;background:conic-gradient(' + col + ' 0% ' + Math.round(score/6*100) + '%, #f1f5f9 ' + Math.round(score/6*100) + '% 100%)">' +
+                '<span style="font-size:22px;font-weight:800;color:' + col + '">' + score + '</span>' +
+            '</div>' +
+            '<div style="font-size:11px;color:#64748b;margin-top:4px">Risk ' + score + ' / 6 (' + (lbl[score] || '') + ')</div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px">' +
+            buildRatioBox('CURRENT', (latest.currentRatio||0).toFixed(2), 'เกณฑ์ 1.5', latest.currentRatio >= 1.5 ? '#10b981' : '#f59e0b') +
+            buildRatioBox('QUICK', (latest.quickRatio||0).toFixed(2), 'เกณฑ์ 1.0', latest.quickRatio >= 1.0 ? '#10b981' : '#f59e0b') +
+            buildRatioBox('CASH', (latest.cashRatio||0).toFixed(2), 'เกณฑ์ 0.8', latest.cashRatio >= 0.8 ? '#10b981' : '#f43f5e') +
+            buildRatioBox('NWC', (latest.nwc >= 0 ? '+' : '') + (latest.nwc||0).toFixed(2) + 'M', latest.nwc >= 0 ? 'บวก ✓' : 'ติดลบ ⚠', latest.nwc >= 0 ? '#10b981' : '#f43f5e') +
+        '</div>' +
+        '<div style="font-size:10px;color:' + (nc >= 0 ? '#166534' : '#9f1239') + ';background:' + (nc >= 0 ? 'rgba(16,185,129,.04)' : 'rgba(244,63,94,.04)') + ';padding:5px 10px;border-radius:6px;text-align:center;border:1px solid ' + (nc >= 0 ? 'rgba(16,185,129,.1)' : 'rgba(244,63,94,.1)') + '">เงินบำรุงสุทธิ <b>' + (nc >= 0 ? '+' : '') + nc.toFixed(2) + ' ลบ.</b></div>';
+        updated += 6;
     }
 
-    // เงินบำรุงสุทธิ — หา div ที่มี style border-radius:6px (ชั้นในสุด)
-    var nc = latest.netCash || 0;
-    var sdDiv = riskCard.querySelector('.sd');
-    if (sdDiv) {
-        var candidates = sdDiv.querySelectorAll('div[style*="border-radius"]');
-        for (var d2 = candidates.length - 1; d2 >= 0; d2--) {
-            var el = candidates[d2];
-            if (el.textContent.indexOf('เงินบำรุง') > -1 || el.textContent.indexOf('ลบ.') > -1) {
-                if (el.querySelectorAll('div').length <= 1) {
-                    el.innerHTML = 'เงินบำรุงสุทธิ <b>' + (nc >= 0 ? '+' : '') + nc.toFixed(2) + ' ลบ.</b>';
-                    updated++;
-                    break;
-                }
-            }
-        }
-    }
+    console.log('✅ Risk ERP Overview card updated: ' + updated + ' elements, month=' + (latest.month || ''));
+}
 
-    console.log('✅ Risk ERP Overview card updated: ' + updated + ' elements, month=' + latest.month);
+function buildRatioBox(label, val, bench, color) {
+    return '<div style="padding:7px 4px;background:#f8fafc;border-radius:7px;text-align:center;border:1px solid #f1f5f9">' +
+        '<div style="font-size:8px;color:#94a3b8;font-weight:700">' + label + '</div>' +
+        '<div style="font-size:17px;font-weight:800;color:' + color + '">' + val + '</div>' +
+        '<div style="font-size:8px;color:#94a3b8">' + bench + '</div>' +
+    '</div>';
 }
 
 function getRiskLabel(score) { var l={1:'ดีมาก',2:'ดี',3:'พอใช้',4:'เสี่ยง',5:'เสี่ยงสูง',6:'วิกฤต'}; return 'ระดับ '+score+' = '+(l[score]||'ไม่ระบุ'); }
