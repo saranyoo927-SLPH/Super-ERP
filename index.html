@@ -7263,7 +7263,7 @@ setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 500);
 <script src="tps_live_patch.js"></script>
 <script src="risk_live_patch.js"></script>
 <script src="unitcost_update.js"></script>
-  <!-- ============================================================
+<!-- ============================================================
      SELAPHUM SMART ERP — ปุ่มสร้างรายงานสรุปการเรียกเก็บ (Word + กราฟ)
      ติดตั้ง: วางทั้งก้อนนี้ก่อน </body> ใน index.html แล้ว commit → deploy
      ปุ่ม "สร้างรายงานสรุป SMT (พร้อมกราฟ)" จะโผล่ข้างปุ่มสร้างรายงานผู้บริหารเดิม
@@ -7283,9 +7283,18 @@ setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 500);
   const KTP_LABEL={S04:"DMHT/Metabolic (S04)",S03:"FPG (S03)",P51:"HPV DNA (P51)",B68:"Hep C (B68)",B67:"Hep B (B67)",B39:"Fit Test (B39)",C30:"เก็บตัวอย่าง (C30)",B11:"วัคซีน (B11)",V11:"ฉีดวัคซีนไข้หวัดใหญ่ (V11)",B21:"CBC (B21)",I01:"ยาเสริมธาตุเหล็ก (I01)",L43:"LBC (L43)"};
   const FSHORT={"กองทุนผู้ป่วยนอก":"OP ผู้ป่วยนอก","กองทุนผู้ป่วยใน":"IP ผู้ป่วยใน","กองทุนสร้างเสริมสุขภาพและป้องกันโรค":"PP สร้างเสริมสุขภาพ","งบค่าบริการทางการแพทย์ที่เบิกจ่ายในลักษณะงบลงทุน":"งบลงทุน","กองทุน CENTRAL REIMBURSE":"Central Reimburse","กองทุนไตวายเรื้อรัง":"ไตวาย HD","สวัสดิการรักษาพยาบาลของพนักงานส่วนท้องถิ่น":"LGO อปท."};
 
-  const DOCX_URLS=["https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js","https://unpkg.com/docx@8.5.0/build/index.js","https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/index.js"];
-  function loadSeq(urls){return new Promise((res,rej)=>{let i=0;(function n(){if(i>=urls.length)return rej(new Error("โหลด docx ไม่ได้"));const s=document.createElement("script");s.src=urls[i++];s.onload=res;s.onerror=n;document.head.appendChild(s);})();});}
-  async function ensureDocx(){if(window.docx&&window.docx.Packer)return;await loadSeq(DOCX_URLS);if(!(window.docx&&window.docx.Packer))throw new Error("docx ไม่พร้อมใช้งาน");}
+  // โหลด docx ผ่าน ESM dynamic import (เสถียรกว่า script-tag) — pin 9.6.1 ให้ตรง ImageRun API
+  const DOCX_URLS=["https://esm.sh/docx@9.6.1","https://cdn.jsdelivr.net/npm/docx@9.6.1/+esm"];
+  async function ensureDocx(){
+    if(window.docx&&window.docx.Packer)return;
+    let mod=null,lastErr;
+    for(const u of DOCX_URLS){
+      try{mod=await import(u);if(mod&&!mod.Packer&&mod.default&&mod.default.Packer)mod=mod.default;if(mod&&mod.Packer)break;mod=null;}
+      catch(e){lastErr=e;mod=null;}
+    }
+    if(!mod||!mod.Packer)throw new Error("โหลด docx ไม่ได้"+(lastErr?(": "+lastErr.message):""));
+    window.docx=mod;
+  }
 
   let HIDDEN;
   function hidden(){if(!HIDDEN){HIDDEN=document.createElement("div");HIDDEN.style.cssText="position:fixed;left:-99999px;top:0;";document.body.appendChild(HIDDEN);}return HIDDEN;}
