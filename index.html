@@ -1023,7 +1023,7 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 @media(max-width:768px){#tab-unitcost #ucKpiRow{grid-template-columns:1fr!important}}
 </style>
  </head>
- <body class="h-full bg-slate-50">
+ < class="h-full bg-slate-50">
   <div id="app" class="h-full w-full overflow-auto">
    <!-- Header -->
    <header id="header" class="bg-white border-b border-slate-200 sticky top-0 z-30">
@@ -1160,7 +1160,7 @@ tr[data-project-id]{cursor:pointer;} tr[data-project-id]:hover{background:#eef2f
 <th class="px-4 py-3 text-center">สถานะ</th>
 </tr>
 </thead>
-<tbody id="projectTableBody" class="divide-y divide-slate-100"></tbody>
+<t id="projectTable" class="divide-y divide-slate-100"></tbody>
 </table>
  </div>
  <div id="projectPagination" class="p-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500"></div>
@@ -7263,5 +7263,246 @@ setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 500);
 <script src="tps_live_patch.js"></script>
 <script src="risk_live_patch.js"></script>
 <script src="unitcost_update.js"></script>
+  <!-- ============================================================
+     SELAPHUM SMART ERP — ปุ่มสร้างรายงานสรุปการเรียกเก็บ (Word + กราฟ)
+     ติดตั้ง: วางทั้งก้อนนี้ก่อน </body> ใน index.html แล้ว commit → deploy
+     ปุ่ม "สร้างรายงานสรุป SMT (พร้อมกราฟ)" จะโผล่ข้างปุ่มสร้างรายงานผู้บริหารเดิม
+     ใช้ nhsoBilling + Chart.js v4 (มีอยู่แล้ว) + docx (โหลดจาก CDN อัตโนมัติ)
+     คำนวณ 12 หมวด + แก้ 2 จุดบั๊กข้อมูล (LGO, กองทุนอื่นๆ) + ฝังกราฟ 6 แผนภูมิ
+     ============================================================ -->
+<script>
+(function () {
+  "use strict";
+  const NAVY="#12335b",TEAL="#2ca6a4",SKY="#4c9be8",AMBER="#e6a532",GREEN="#4caf7d",PURPLE="#7d6bb0",ROSE="#d76a6a",GREY="#9aa7b4";
+  const PAL=[NAVY,TEAL,SKY,AMBER,GREEN,PURPLE,ROSE,GREY];
+  const f0=n=>Number(n||0).toLocaleString("th-TH",{maximumFractionDigits:0});
+  const f2=n=>Number(n||0).toLocaleString("th-TH",{minimumFractionDigits:2,maximumFractionDigits:2});
+  const M=n=>(Number(n||0)/1e6).toFixed(2)+"M";
+  const sum=(a,k)=>a.reduce((s,x)=>s+(Number(x[k])||0),0);
+  const MMAP={"ต.ค.":"ตุลาคม","พ.ย.":"พฤศจิกายน","ธ.ค.":"ธันวาคม","ม.ค.":"มกราคม","ก.พ.":"กุมภาพันธ์","มี.ค.":"มีนาคม","เม.ย.":"เมษายน","พ.ค.":"พฤษภาคม","มิ.ย.":"มิถุนายน","ก.ค.":"กรกฎาคม","ส.ค.":"สิงหาคม","ก.ย.":"กันยายน"};
+  const KTP_LABEL={S04:"DMHT/Metabolic (S04)",S03:"FPG (S03)",P51:"HPV DNA (P51)",B68:"Hep C (B68)",B67:"Hep B (B67)",B39:"Fit Test (B39)",C30:"เก็บตัวอย่าง (C30)",B11:"วัคซีน (B11)",V11:"ฉีดวัคซีนไข้หวัดใหญ่ (V11)",B21:"CBC (B21)",I01:"ยาเสริมธาตุเหล็ก (I01)",L43:"LBC (L43)"};
+  const FSHORT={"กองทุนผู้ป่วยนอก":"OP ผู้ป่วยนอก","กองทุนผู้ป่วยใน":"IP ผู้ป่วยใน","กองทุนสร้างเสริมสุขภาพและป้องกันโรค":"PP สร้างเสริมสุขภาพ","งบค่าบริการทางการแพทย์ที่เบิกจ่ายในลักษณะงบลงทุน":"งบลงทุน","กองทุน CENTRAL REIMBURSE":"Central Reimburse","กองทุนไตวายเรื้อรัง":"ไตวาย HD","สวัสดิการรักษาพยาบาลของพนักงานส่วนท้องถิ่น":"LGO อปท."};
+
+  const DOCX_URLS=["https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js","https://unpkg.com/docx@8.5.0/build/index.js","https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/index.js"];
+  function loadSeq(urls){return new Promise((res,rej)=>{let i=0;(function n(){if(i>=urls.length)return rej(new Error("โหลด docx ไม่ได้"));const s=document.createElement("script");s.src=urls[i++];s.onload=res;s.onerror=n;document.head.appendChild(s);})();});}
+  async function ensureDocx(){if(window.docx&&window.docx.Packer)return;await loadSeq(DOCX_URLS);if(!(window.docx&&window.docx.Packer))throw new Error("docx ไม่พร้อมใช้งาน");}
+
+  let HIDDEN;
+  function hidden(){if(!HIDDEN){HIDDEN=document.createElement("div");HIDDEN.style.cssText="position:fixed;left:-99999px;top:0;";document.body.appendChild(HIDDEN);}return HIDDEN;}
+  function renderChart(w,h,cfg){return new Promise(resolve=>{
+    const c=document.createElement("canvas");c.width=w;c.height=h;hidden().appendChild(c);
+    cfg.options=cfg.options||{};cfg.options.responsive=false;cfg.options.maintainAspectRatio=false;cfg.options.devicePixelRatio=1;
+    let done=false;const finish=()=>{if(done)return;done=true;try{resolve(c.toDataURL("image/png"));}catch(e){resolve(null);}};
+    cfg.options.animation={duration:0,onComplete:finish};
+    try{new Chart(c,cfg);}catch(e){resolve(null);return;}
+    setTimeout(finish,500);
+  });}
+  function u8(dataURL){const b=atob(dataURL.split(",")[1]);const a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
+  function vlabels(fmt){return{id:"vl",afterDatasetsDraw(ch){const ctx=ch.ctx;ctx.save();ctx.font="600 13px sans-serif";ctx.fillStyle=NAVY;const horiz=ch.options.indexAxis==="y";ch.data.datasets.forEach((ds,di)=>{if(ds.type==="line")return;ch.getDatasetMeta(di).data.forEach((el,i)=>{const t=fmt(ds.data[i]);if(horiz){ctx.textAlign="left";ctx.textBaseline="middle";ctx.fillText(t,el.x+6,el.y);}else{ctx.textAlign="center";ctx.textBaseline="bottom";ctx.fillText(t,el.x,el.y-4);}});});ctx.restore();}};}
+  function centerText(lines){return{id:"ct",afterDraw(ch){const a=ch.chartArea;if(!a)return;const ctx=ch.ctx,x=(a.left+a.right)/2,y=(a.top+a.bottom)/2;ctx.save();ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=NAVY;lines.forEach((ln,i)=>{ctx.font=(i===1?"bold 30px":"18px")+" sans-serif";ctx.fillText(ln,x,y+(i-1)*30);});ctx.restore();}};}
+
+  function agg(d){
+    const fund=n=>(d.pivot.funds.find(x=>x.name===n)||{amount:0}).amount;
+    const op=fund("กองทุนผู้ป่วยนอก"),ip=fund("กองทุนผู้ป่วยใน"),pp=fund("กองทุนสร้างเสริมสุขภาพและป้องกันโรค"),three=op+ip+pp;
+    const oS=d.op.summary,oM=d.op.months,ucepOp=sum(oM,"ucepOpComp"),ucepIp=sum(oM,"ucepIpComp");
+    const opSub=oS.totalOpae+oS.totalEr+ucepOp+ucepIp+oS.totalAmbul+oS.totalWalkin+oS.totalTtm+oS.totalPc+oS.totalPros;
+    const iS=d.ip.summary,aS=d.anc.summary,aM=d.anc.months,cnt=k=>sum(aM,k),kS=d.ktpClaim.summary;
+    const lgoTrue=sum(d.lgo.months.filter(m=>m.month!=="รวม"),"total");
+    const oF=d.otherFunds.summary,otherTrue=oF.totalSso+oF.totalPrb+oF.totalBkk+oF.totalBmta;
+    const last=(d.ip.months[d.ip.months.length-1].month||"").trim().split(/\s+/);
+    const monthLabel=(MMAP[last[0]]||last[0]||"")+" 25"+(last[1]||"");
+    return {d,op,ip,pp,three,oS,ucepOp,ucepIp,opSub,iS,aS,cnt,kS,lgoTrue,oF,otherTrue,monthLabel};
+  }
+
+  async function buildCharts(A){
+    const d=A.d,iS=A.iS;
+    const fs=[...d.pivot.funds].sort((a,b)=>b.amount-a.amount);
+    const top=fs.slice(0,7),rest=fs.slice(7).reduce((s,x)=>s+x.amount,0);
+    const dl=top.map(x=>FSHORT[x.name]||x.name).concat(["อื่นๆ"]),dv=top.map(x=>x.amount).concat([rest]),tot=dv.reduce((s,x)=>s+x,0);
+    const cfg1={type:"doughnut",
+      data:{labels:dl.map((l,i)=>l+"  "+M(dv[i])+" ("+(dv[i]/tot*100).toFixed(1)+"%)"),datasets:[{data:dv,backgroundColor:PAL,borderColor:"#fff",borderWidth:2}]},
+      options:{cutout:"58%",plugins:{legend:{position:"right",labels:{font:{size:15},boxWidth:14}},title:{display:true,text:"สัดส่วนการเรียกเก็บตามกองทุน (สะสม)",color:NAVY,font:{size:19,weight:"bold"}}}},
+      plugins:[centerText(["รวม",M(tot),"บาท"])]};
+    const c1=await renderChart(1100,620,cfg1);
+
+    const bm=d.smt.byMonth;
+    const cfg2={type:"bar",
+      data:{labels:bm.map(m=>m.month),datasets:[{data:bm.map(m=>m.net/1e6),backgroundColor:bm.map((m,i)=>i===bm.length-1?AMBER:TEAL),borderColor:"#fff",borderWidth:1}]},
+      options:{plugins:{legend:{display:false},title:{display:true,text:"ยอดเรียกเก็บรายเดือน (Net) — ล้านบาท",color:NAVY,font:{size:18,weight:"bold"}}},scales:{y:{grid:{color:"#eee"}},x:{ticks:{font:{size:14}}}}},
+      plugins:[vlabels(v=>Number(v).toFixed(1))]};
+    const c2=await renderChart(1200,560,cfg2);
+
+    const opItems=[["UCEP ภาครัฐ IP",A.ucepIp],["อวัยวะเทียม/อุปกรณ์",A.oS.totalPros],["OPAE ฉุกเฉิน",A.oS.totalOpae],["แพทย์แผนไทย",A.oS.totalTtm],["ER คุณภาพ",A.oS.totalEr],["UCEP ภาครัฐ OP",A.ucepOp],["Palliative Care",A.oS.totalPc],["ค่าพาหนะส่งต่อ",A.oS.totalAmbul],["Walkin",A.oS.totalWalkin]].sort((a,b)=>a[1]-b[1]);
+    const cfg3={type:"bar",
+      data:{labels:opItems.map(x=>x[0]),datasets:[{data:opItems.map(x=>x[1]),backgroundColor:opItems.map((x,i)=>i===opItems.length-1?NAVY:SKY),borderColor:"#fff",borderWidth:1}]},
+      options:{indexAxis:"y",plugins:{legend:{display:false},title:{display:true,text:"กองทุนย่อย OP จำแนกรายรายการ (สะสม)",color:NAVY,font:{size:18,weight:"bold"}}},scales:{x:{grid:{color:"#eee"}},y:{ticks:{font:{size:14}}}},layout:{padding:{right:150}}},
+      plugins:[vlabels(f0)]};
+    const c3=await renderChart(1200,560,cfg3);
+
+    const im=d.ip.months;
+    const cfg4={type:"bar",
+      data:{labels:im.map(m=>m.month),datasets:[
+        {type:"bar",label:"ค่าชดเชย (ล้านบาท)",data:im.map(m=>m.compAfterCut/1e6),backgroundColor:NAVY,yAxisID:"y",borderColor:"#fff",borderWidth:1},
+        {type:"line",label:"จำนวน Admit (ราย)",data:im.map(m=>m.totalCases),borderColor:AMBER,backgroundColor:AMBER,yAxisID:"y1",tension:0.3,pointRadius:4,borderWidth:3}]},
+      options:{plugins:{legend:{position:"top",labels:{font:{size:14}}},title:{display:true,text:"ผู้ป่วยใน (IP): ค่าชดเชย & จำนวน Admit รายเดือน",color:NAVY,font:{size:18,weight:"bold"}}},
+        scales:{y:{position:"left",title:{display:true,text:"ล้านบาท"},grid:{color:"#eee"}},y1:{position:"right",title:{display:true,text:"ราย"},grid:{drawOnChartArea:false}},x:{ticks:{font:{size:13}}}}}};
+    const c4=await renderChart(1200,560,cfg4);
+
+    const cfg5={type:"doughnut",
+      data:{labels:["ผ่าน "+f0(iS.totalPassed)+" ("+(iS.totalPassed/iS.totalCases*100).toFixed(2)+"%)","ไม่ผ่าน "+f0(iS.totalNotPassed)+" ("+(iS.totalNotPassed/iS.totalCases*100).toFixed(2)+"%)"],datasets:[{data:[iS.totalPassed,iS.totalNotPassed],backgroundColor:[GREEN,ROSE],borderColor:"#fff",borderWidth:2}]},
+      options:{cutout:"58%",plugins:{legend:{position:"bottom",labels:{font:{size:15}}},title:{display:true,text:"การตรวจสอบเวชระเบียน IP",color:NAVY,font:{size:18,weight:"bold"}}}},
+      plugins:[centerText([f0(iS.totalCases),"ราย",""])]};
+    const c5=await renderChart(760,620,cfg5);
+
+    const ki=[...d.ktpClaim.items].sort((a,b)=>a.comp-b.comp);
+    const cfg6={type:"bar",
+      data:{labels:ki.map(x=>KTP_LABEL[x.code]||x.name),datasets:[{data:ki.map(x=>x.comp),backgroundColor:ki.map((x,i)=>i===ki.length-1?NAVY:TEAL),borderColor:"#fff",borderWidth:1}]},
+      options:{indexAxis:"y",plugins:{legend:{display:false},title:{display:true,text:"KTP-Claim บริการคัดกรอง จำแนกรายรายการ (สะสม)",color:NAVY,font:{size:18,weight:"bold"}}},scales:{x:{grid:{color:"#eee"}},y:{ticks:{font:{size:13}}}},layout:{padding:{right:170}}},
+      plugins:[vlabels(f0)]};
+    const c6=await renderChart(1200,620,cfg6);
+
+    return [c1,c2,c3,c4,c5,c6].map(x=>x?u8(x):null);
+  }
+
+  function buildDoc(A,imgs){
+    const D=window.docx,{Document,Paragraph,TextRun,ImageRun,AlignmentType,BorderStyle}=D;
+    const FONT="TH Sarabun New",B=28,H=32,T=40,SUB=30;
+    const run=(t,o={})=>new TextRun({text:t,bold:!!o.b,size:o.sz||B,color:o.color||"000000",font:FONT});
+    const P=(c,o={})=>new Paragraph({alignment:o.align,spacing:{before:o.sb||0,after:o.sa==null?40:o.sa},children:Array.isArray(c)?c:[c]});
+    const bul=(l,v)=>new Paragraph({spacing:{after:20},indent:{left:360,hanging:180},children:[run("• "+l+": "),run(v,{b:true})]});
+    const bp=(t)=>new Paragraph({spacing:{after:20},indent:{left:360,hanging:180},children:[run("• "),run(t)]});
+    const head=t=>new Paragraph({spacing:{before:200,after:60},border:{bottom:{style:BorderStyle.SINGLE,size:4,color:"2ca6a4"}},children:[run(t,{b:true,sz:H,color:"12335b"})]});
+    const sub=t=>new Paragraph({spacing:{before:60,after:40},children:[run(t,{b:true})]});
+    const note=t=>new Paragraph({spacing:{after:20},indent:{left:360},children:[run(t,{sz:26,color:"555555"})]});
+    const cap=t=>new Paragraph({alignment:AlignmentType.CENTER,spacing:{after:120},children:[run(t,{sz:24,color:"777777"})]});
+    const imgP=(bytes,w,r)=>bytes?new Paragraph({alignment:AlignmentType.CENTER,spacing:{before:80,after:100},children:[new ImageRun({data:bytes,type:"png",transformation:{width:w,height:Math.round(w*r)}})]}):note("(ไม่สามารถสร้างกราฟได้)");
+    const d=A.d,oS=A.oS,iS=A.iS,aS=A.aS,cnt=A.cnt,kS=A.kS,oF=A.oF,K=[];
+
+    K.push(P(run("รายงานสรุปการเรียกเก็บชดเชยค่าบริการทางการแพทย์",{b:true,sz:T,color:"12335b"}),{align:AlignmentType.CENTER,sa:20}));
+    K.push(P(run("โรงพยาบาลเสลภูมิ จังหวัดร้อยเอ็ด",{b:true,sz:SUB}),{align:AlignmentType.CENTER,sa:20}));
+    K.push(P(run("ประจำเดือน"+A.monthLabel+" (ข้อมูลสะสมปีงบประมาณ 2569)"),{align:AlignmentType.CENTER,sa:80}));
+
+    K.push(head("1. ภาพรวมการเรียกเก็บ เดือน"+A.monthLabel));
+    K.push(bul("ยอดคงเหลือรวม",f2(d.pivot.totalAmount)+" บาท"));
+    K.push(sub("สัดส่วนกองทุนหลัก"));
+    K.push(bul("OP ผู้ป่วยนอก",M(A.op)));
+    K.push(bul("IP ผู้ป่วยใน",M(A.ip)+" ("+(A.ip/A.three*100).toFixed(2)+"%)"));
+    K.push(bul("PP สร้างเสริมสุขภาพ",M(A.pp)+" ("+(A.pp/A.three*100).toFixed(2)+"%)"));
+    K.push(imgP(imgs[0],520,620/1100));K.push(cap("แผนภูมิ 1 : สัดส่วนการเรียกเก็บตามกองทุน"));
+    K.push(imgP(imgs[1],580,560/1200));K.push(cap("แผนภูมิ 2 : ยอดเรียกเก็บรายเดือน (Net)"));
+
+    K.push(head("2. กองทุนผู้ป่วยนอก (OP)"));
+    K.push(bul("2.1 ยอดรวม OP (SMT)",M(A.op)+" ("+f2(A.op)+" บาท)"));
+    K.push(sub("2.2 กองทุนย่อย OP (สะสม รวม "+f2(A.opSub)+" บาท)"));
+    K.push(bul("OPAE อุบัติเหตุฉุกเฉิน",f2(oS.totalOpae)+" บาท"));
+    K.push(bul("ER คุณภาพ",f2(oS.totalEr)+" บาท"));
+    K.push(bul("UCEP ภาครัฐ OP",f2(A.ucepOp)+" บาท"));
+    K.push(bul("UCEP ภาครัฐ IP",f2(A.ucepIp)+" บาท"));
+    K.push(bul("ค่าพาหนะส่งต่อ",f2(oS.totalAmbul)+" บาท"));
+    K.push(bul("Walkin รับบริการ",f2(oS.totalWalkin)+" บาท"));
+    K.push(bul("แพทย์แผนไทย/สมุนไพร",f2(oS.totalTtm)+" บาท"));
+    K.push(bul("Palliative Care (PC)",f2(oS.totalPc)+" บาท"));
+    K.push(bul("อวัยวะเทียม/อุปกรณ์",f2(oS.totalPros)+" บาท"));
+    K.push(imgP(imgs[2],560,560/1200));K.push(cap("แผนภูมิ 3 : กองทุนย่อย OP จำแนกรายรายการ"));
+
+    K.push(head("3. กองทุนผู้ป่วยใน (IP)"));
+    K.push(bul("ผู้ป่วย Admit ทั้งหมด",f0(iS.totalCases)+" ราย"));
+    K.push(bul("ผ่านการตรวจสอบ",f0(iS.totalPassed)+" ราย ("+(iS.totalPassed/iS.totalCases*100).toFixed(2)+"%)"));
+    K.push(bul("ไม่ผ่านการตรวจสอบ",f0(iS.totalNotPassed)+" ราย ("+(iS.totalNotPassed/iS.totalCases*100).toFixed(2)+"%)"));
+    K.push(bul("ค่าชดเชยรวม (หลังหักต้นทุนแรงงาน)",f2(iS.totalCompAfter)+" บาท"));
+    K.push(note("(ก่อนหัก "+f2(iS.totalCompBefore)+" บาท)"));
+    K.push(bul("AdjRW รวม",Number(iS.totalAdjRW).toLocaleString("th-TH",{maximumFractionDigits:4})));
+    K.push(imgP(imgs[3],580,560/1200));K.push(cap("แผนภูมิ 4 : ค่าชดเชยและจำนวน Admit รายเดือน"));
+    K.push(imgP(imgs[4],300,620/760));K.push(cap("แผนภูมิ 5 : ผลการตรวจสอบเวชระเบียน IP"));
+
+    K.push(head("4. บริการหญิงตั้งครรภ์ (สะสม)"));
+    K.push(bul("ยอดรวม",f2(aS.totalAll)+" บาท"));
+    K.push(bul("ฝากครรภ์ (ANC)",f0(aS.totalAnc)+" บาท ("+f0(cnt("ancCnt"))+" ครั้ง)"));
+    K.push(bul("วางแผนครอบครัว",f0(aS.totalFamily)+" บาท ("+f0(cnt("familyCnt"))+" ครั้ง)"));
+    K.push(bul("ตรวจหลังคลอด (PNC)",f0(aS.totalPostnatal)+" บาท ("+f0(cnt("postnatalCnt"))+" ครั้ง)"));
+    K.push(bul("ยาเสริมธาตุเหล็ก",f0(aS.totalIron)+" บาท ("+f0(cnt("ironCnt"))+" ครั้ง)"));
+    K.push(bul("LAB (ANC + ก่อนคลอด)",f0(aS.totalLab+aS.totalLabPre)+" บาท ("+f0(cnt("labCnt")+cnt("labPreCnt"))+" ครั้ง)"));
+    K.push(bul("อัลตราซาวด์",f0(aS.totalScan)+" บาท ("+f0(cnt("scanCnt"))+" ครั้ง)"));
+    K.push(bul("ทันตกรรม",f0(aS.totalDental)+" บาท ("+f0(cnt("dentalCnt"))+" ครั้ง)"));
+    K.push(bul("ทดสอบการตั้งครรภ์ (PRT)",f0(aS.totalPrt)+" บาท ("+f0(cnt("prtCnt"))+" ครั้ง)"));
+
+    K.push(head("5. KTP-Claim บริการคัดกรอง (สะสม)"));
+    K.push(bul("ยอดรวม",f0(kS.totalComp)+" บาท ("+f0(kS.totalCount)+" ครั้ง)"));
+    [...d.ktpClaim.items].sort((a,b)=>b.comp-a.comp).forEach(it=>K.push(bul(KTP_LABEL[it.code]||it.name,f0(it.comp)+" บาท ("+f0(it.count)+" ครั้ง)")));
+    K.push(imgP(imgs[5],560,620/1200));K.push(cap("แผนภูมิ 6 : KTP-Claim จำแนกรายรายการ"));
+
+    K.push(head("6. Telemedicine"));
+    K.push(bul("จำนวนครั้งรวม (สะสม)",f0(d.telemed.summary.totalCount)+" ครั้ง"));
+    K.push(bul("ค่าชดเชยรวม",f2(d.telemed.summary.totalComp)+" บาท"));
+
+    K.push(head("7. กองทุนไตวายเรื้อรัง (HD)"));
+    K.push(bul("ยอดรวม (สะสม)",f2(d.kidney.summary.totalComp)+" บาท"));
+
+    K.push(head("8. HC-Drug (ยาราคาแพงและรายการชดเชยกลาง)"));
+    K.push(bul("ยอดรวม",f2(d.hcDrug.summary.totalAll)+" บาท"));
+    K.push(note("(Stroke "+d.hcDrug.summary.totalStrokeCnt+" ราย "+f2(d.hcDrug.summary.totalStrokeComp)+" บาท, STEMI "+d.hcDrug.summary.totalStemiCnt+" ราย "+f2(d.hcDrug.summary.totalStemiComp)+" บาท)"));
+
+    K.push(head("9. KTP-Claim: บริการคัดกรองและประเมินปัจจัยเสี่ยง"));
+    K.push(bul("ยอดรวม",f2(kS.totalComp)+" บาท"));
+    K.push(note("(รายละเอียดรายรหัสตามข้อ 5)"));
+
+    K.push(head("10. กองทุน OFC (จ่ายตรงข้าราชการ)"));
+    K.push(bul("ยอดรวม (สะสม)",f2(d.ofc.summary.totalAll)+" บาท"));
+
+    K.push(head("11. กองทุน LGO (สวัสดิการ อปท.)"));
+    K.push(bul("ยอดรวม (สะสม)",f2(A.lgoTrue)+" บาท"));
+
+    K.push(head("12. กองทุนอื่นๆ (สะสม)"));
+    K.push(bul("ยอดรวม",f2(A.otherTrue)+" บาท"));
+    K.push(bul("ประกันสังคม",f2(oF.totalSso)+" บาท"));
+    K.push(bul("พรบ.",f2(oF.totalPrb)+" บาท"));
+    K.push(bul("กทม.",f2(oF.totalBkk)+" บาท"));
+    K.push(bul("ขสมก.",f2(oF.totalBmta)+" บาท"));
+
+    K.push(new Paragraph({border:{top:{style:BorderStyle.SINGLE,size:6,color:"888888"}},spacing:{before:200,after:80}}));
+    K.push(P(run("หมายเหตุการตรวจสอบความถูกต้องของข้อมูล",{b:true})));
+    K.push(bp("ข้อ 11 (LGO): ตัดแถว \"รวม\" ที่นับซ้ำออก ใช้ผลบวกรายเดือนที่ถูกต้อง"));
+    K.push(bp("ข้อ 12 (กองทุนอื่นๆ): ใช้ผลบวกราย กองทุน (แก้แถวเดือนที่บั๊ก) แทน summary รวม"));
+    K.push(bp("ตัวเลขและกราฟดึงสดจากแท็บการเรียกเก็บ (NHSO Billing) ตรวจสอบการรวมยอดครบทุกหมวด"));
+
+    return new Document({styles:{default:{document:{run:{font:FONT,size:B}}}},sections:[{properties:{page:{margin:{top:1000,bottom:1000,left:1100,right:1100}}},children:K}]});
+  }
+
+  async function generate(btn){
+    const old=btn.innerHTML;
+    try{
+      if(typeof Chart==="undefined"){alert("ไม่พบ Chart.js บนหน้านี้");return;}
+      btn.disabled=true;btn.innerHTML="⏳ กำลังเตรียมข้อมูล...";
+      if(typeof nhsoBilling==="undefined"||!nhsoBilling){if(typeof loadNHSOBilling==="function"){await loadNHSOBilling();}}
+      if(typeof nhsoBilling==="undefined"||!nhsoBilling){alert("ยังไม่มีข้อมูล NHSO Billing — กรุณาเปิดแท็บการเรียกเก็บให้โหลดข้อมูลก่อน");return;}
+      const A=agg(nhsoBilling);
+      btn.innerHTML="⏳ กำลังสร้างกราฟ...";const imgs=await buildCharts(A);
+      btn.innerHTML="⏳ กำลังสร้างไฟล์ Word...";await ensureDocx();
+      const doc=buildDoc(A,imgs),blob=await window.docx.Packer.toBlob(doc);
+      const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+      a.download="รายงานสรุปการเรียกเก็บ_"+A.monthLabel.replace(/\s/g,"")+"_รพเสลภูมิ.docx";
+      document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+      if(HIDDEN)HIDDEN.innerHTML="";
+    }catch(e){console.error(e);alert("เกิดข้อผิดพลาด: "+((e&&e.message)||e));}
+    finally{btn.disabled=false;btn.innerHTML=old;}
+  }
+
+  function injectButton(){
+    if(document.getElementById("btnGenSMTReport"))return true;
+    const btn=document.createElement("button");btn.id="btnGenSMTReport";btn.type="button";
+    btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg> สร้างรายงานสรุป SMT (พร้อมกราฟ)';
+    btn.style.cssText="background:linear-gradient(135deg,#12335b 0%,#2ca6a4 100%);color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:0.88rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:10px;box-shadow:0 4px 16px rgba(18,51,91,0.35);transition:all .25s;font-family:inherit;letter-spacing:0.01em;margin-left:10px;";
+    btn.onmouseover=function(){this.style.transform="translateY(-2px) scale(1.02)";};
+    btn.onmouseout=function(){this.style.transform="";};
+    btn.onclick=function(){generate(btn);};
+    const ref=document.getElementById("btnGenReport");
+    if(ref&&ref.parentNode){ref.parentNode.insertBefore(btn,ref.nextSibling);return true;}
+    const tab=document.getElementById("tab-erp-billing");if(tab){tab.insertBefore(btn,tab.firstChild);return true;}
+    return false;
+  }
+  function boot(){let n=0;const t=setInterval(()=>{if(injectButton()||++n>20)clearInterval(t);},400);}
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
+})();
+</script>
 </body>
 </html>
