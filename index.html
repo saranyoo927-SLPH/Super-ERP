@@ -7311,8 +7311,15 @@ setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 500);
   function centerText(lines){return{id:"ct",afterDraw(ch){const a=ch.chartArea;if(!a)return;const ctx=ch.ctx,x=(a.left+a.right)/2,y=(a.top+a.bottom)/2;ctx.save();ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=NAVY;lines.forEach((ln,i)=>{ctx.font=(i===1?"bold 30px":"18px")+" sans-serif";ctx.fillText(ln,x,y+(i-1)*30);});ctx.restore();}};}
 
   function agg(d){
-    const fund=n=>(d.pivot.funds.find(x=>x.name===n)||{amount:0}).amount;
-    const op=fund("กองทุนผู้ป่วยนอก"),ip=fund("กองทุนผู้ป่วยใน"),pp=fund("กองทุนสร้างเสริมสุขภาพและป้องกันโรค"),three=op+ip+pp;
+    // Section 1 อ้างอิงฟิลด์เดียวกับที่แดชบอร์ดใช้: SMT byFund(remain) + summary.totalNet
+    const byFund=(d.smt&&d.smt.byFund)||[];
+    const bfRemain=code=>{const f=byFund.find(x=>x.code===code);return f?(f.remain||f.totalNet||0):0;};
+    const totalRemain=byFund.reduce((s,x)=>s+(x.remain||0),0);
+    const smtNet=(d.smt&&d.smt.summary&&d.smt.summary.totalNet)||0;
+    const totalRecords=(d.smt&&d.smt.summary&&d.smt.summary.totalRecords)||0;
+    const fundCount=((d.pivot&&d.pivot.funds)||[]).length;
+    const totalNode=(d.pivot&&d.pivot.totalAmount)||0;
+    const opRemain=bfRemain("OP"),ipRemain=bfRemain("IP"),ppRemain=bfRemain("PP");
     const oS=d.op.summary,oM=d.op.months,ucepOp=sum(oM,"ucepOpComp"),ucepIp=sum(oM,"ucepIpComp");
     const opSub=oS.totalOpae+oS.totalEr+ucepOp+ucepIp+oS.totalAmbul+oS.totalWalkin+oS.totalTtm+oS.totalPc+oS.totalPros;
     const iS=d.ip.summary,aS=d.anc.summary,aM=d.anc.months,cnt=k=>sum(aM,k),kS=d.ktpClaim.summary;
@@ -7320,18 +7327,19 @@ setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 500);
     const oF=d.otherFunds.summary,otherTrue=oF.totalSso+oF.totalPrb+oF.totalBkk+oF.totalBmta;
     const last=(d.ip.months[d.ip.months.length-1].month||"").trim().split(/\s+/);
     const monthLabel=(MMAP[last[0]]||last[0]||"")+" 25"+(last[1]||"");
-    return {d,op,ip,pp,three,oS,ucepOp,ucepIp,opSub,iS,aS,cnt,kS,lgoTrue,oF,otherTrue,monthLabel};
+    return {d,byFund,totalRemain,smtNet,totalRecords,fundCount,totalNode,opRemain,ipRemain,ppRemain,oS,ucepOp,ucepIp,opSub,iS,aS,cnt,kS,lgoTrue,oF,otherTrue,monthLabel};
   }
 
   async function buildCharts(A){
     const d=A.d,iS=A.iS;
-    const fs=[...d.pivot.funds].sort((a,b)=>b.amount-a.amount);
-    const top=fs.slice(0,7),rest=fs.slice(7).reduce((s,x)=>s+x.amount,0);
-    const dl=top.map(x=>FSHORT[x.name]||x.name).concat(["อื่นๆ"]),dv=top.map(x=>x.amount).concat([rest]),tot=dv.reduce((s,x)=>s+x,0);
+    const CODE_LABEL={OP:"OP ผู้ป่วยนอก",IP:"IP ผู้ป่วยใน",PP:"PP สร้างเสริมสุขภาพ",CR:"Central Reimburse",HD:"ไตวาย HD",INVS:"งบลงทุน",LGO:"LGO อปท.",TTM:"แพทย์แผนไทย",RH:"ฟื้นฟูสมรรถภาพ",DMHT:"DM/HT",PH:"ปฐมภูมิเพิ่มเติม",HIV:"เอดส์"};
+    const bf=[...A.byFund].filter(x=>(x.remain||0)>0).sort((a,b)=>(b.remain||0)-(a.remain||0));
+    const top=bf.slice(0,7),rest=bf.slice(7).reduce((s,x)=>s+(x.remain||0),0);
+    const dl=top.map(x=>CODE_LABEL[x.code]||x.code).concat(["อื่นๆ"]),dv=top.map(x=>x.remain).concat([rest]),tot=A.totalRemain||dv.reduce((s,x)=>s+x,0);
     const cfg1={type:"doughnut",
       data:{labels:dl.map((l,i)=>l+"  "+M(dv[i])+" ("+(dv[i]/tot*100).toFixed(1)+"%)"),datasets:[{data:dv,backgroundColor:PAL,borderColor:"#fff",borderWidth:2}]},
-      options:{cutout:"58%",plugins:{legend:{position:"right",labels:{font:{size:15},boxWidth:14}},title:{display:true,text:"สัดส่วนการเรียกเก็บตามกองทุน (สะสม)",color:NAVY,font:{size:19,weight:"bold"}}}},
-      plugins:[centerText(["รวม",M(tot),"บาท"])]};
+      options:{cutout:"58%",plugins:{legend:{position:"right",labels:{font:{size:15},boxWidth:14}},title:{display:true,text:"สัดส่วนกองทุน (SMT คงเหลือ)",color:NAVY,font:{size:19,weight:"bold"}}}},
+      plugins:[centerText(["รวมคงเหลือ",M(tot),"บาท"])]};
     const c1=await renderChart(1100,620,cfg1);
 
     const bm=d.smt.byMonth;
@@ -7392,16 +7400,19 @@ setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 500);
     K.push(P(run("ประจำเดือน"+A.monthLabel+" (ข้อมูลสะสมปีงบประมาณ 2569)"),{align:AlignmentType.CENTER,sa:80}));
 
     K.push(head("1. ภาพรวมการเรียกเก็บ เดือน"+A.monthLabel));
-    K.push(bul("ยอดคงเหลือรวม",f2(d.pivot.totalAmount)+" บาท"));
-    K.push(sub("สัดส่วนกองทุนหลัก"));
-    K.push(bul("OP ผู้ป่วยนอก",M(A.op)));
-    K.push(bul("IP ผู้ป่วยใน",M(A.ip)+" ("+(A.ip/A.three*100).toFixed(2)+"%)"));
-    K.push(bul("PP สร้างเสริมสุขภาพ",M(A.pp)+" ("+(A.pp/A.three*100).toFixed(2)+"%)"));
-    K.push(imgP(imgs[0],520,620/1100));K.push(cap("แผนภูมิ 1 : สัดส่วนการเรียกเก็บตามกองทุน"));
+    K.push(bul("ยอดคงเหลือรวม (SMT โอนเข้าบัญชี)",f2(A.smtNet)+" บาท"));
+    K.push(bul("จำนวนประเภทกองทุน",f0(A.fundCount)+" กองทุน"));
+    K.push(bul("จำนวนรายการโอน",f0(A.totalRecords)+" รายการ"));
+    K.push(bul("ยอดรวมกองทุน",M(A.totalNode)+" ("+f2(A.totalNode)+" บาท)"));
+    K.push(sub("สัดส่วนกองทุนหลัก (ตาม SMT byFund คงเหลือ)"));
+    K.push(bul("OP ผู้ป่วยนอก",M(A.opRemain)+" ("+(A.opRemain/A.totalRemain*100).toFixed(2)+"%)"));
+    K.push(bul("IP ผู้ป่วยใน",M(A.ipRemain)+" ("+(A.ipRemain/A.totalRemain*100).toFixed(2)+"%)"));
+    K.push(bul("PP สร้างเสริมสุขภาพ",M(A.ppRemain)+" ("+(A.ppRemain/A.totalRemain*100).toFixed(2)+"%)"));
+    K.push(imgP(imgs[0],520,620/1100));K.push(cap("แผนภูมิ 1 : สัดส่วนกองทุน (SMT คงเหลือ)"));
     K.push(imgP(imgs[1],580,560/1200));K.push(cap("แผนภูมิ 2 : ยอดเรียกเก็บรายเดือน (Net)"));
 
     K.push(head("2. กองทุนผู้ป่วยนอก (OP)"));
-    K.push(bul("2.1 ยอดรวม OP (SMT)",M(A.op)+" ("+f2(A.op)+" บาท)"));
+    K.push(bul("2.1 ยอดรวม OP (SMT คงเหลือ)",M(A.opRemain)+" ("+f2(A.opRemain)+" บาท)"));
     K.push(sub("2.2 กองทุนย่อย OP (สะสม รวม "+f2(A.opSub)+" บาท)"));
     K.push(bul("OPAE อุบัติเหตุฉุกเฉิน",f2(oS.totalOpae)+" บาท"));
     K.push(bul("ER คุณภาพ",f2(oS.totalEr)+" บาท"));
@@ -7513,5 +7524,3 @@ setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 500);
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
 })();
 </script>
-</body>
-</html>
